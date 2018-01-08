@@ -26,7 +26,7 @@ public class HotssanService {
     public String getWebhook() {
         LOGGER.info("@#$@#$@#$ telegram call");
 
-        String sendMessage = getBaseUrl() + "/sendmessage?chat_id=226524024&text=시끄러워임마";
+        String sendMessage = getBaseUrl() + "/sendmessage?chat_id=226524024&text=시끄러워알았다고";
 
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(sendMessage);
