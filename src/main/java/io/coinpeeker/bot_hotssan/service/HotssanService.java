@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.api.objects.Update;
 
 import java.io.IOException;
 
@@ -23,21 +24,51 @@ public class HotssanService {
     @Value("${property.hotssan_id}")
     private String apiKey;
 
-    public String getWebhook() {
-        LOGGER.info("@#$@#$@#$ telegram call");
+    public void commandHandler(Update update) {
 
-        String sendMessage = getBaseUrl() + "/sendmessage?chat_id=226524024&text=시끄러워알았다고";
+        // validation check
+        if (update == null) {
+            LOGGER.error("#$#$#$ update object is null");
+            return ;
+        }
+
+        long chatId = update.getMessage().getChatId();
+        String text = update.getMessage().getText();
+
+        String sendMessage = getBaseUrl()
+                + "/sendmessage?chat_id="
+                + String.valueOf(chatId)
+                + "&text=대답:"
+                + text;
 
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(sendMessage);
 
         try {
             CloseableHttpResponse response = httpClient.execute(httpGet);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    public boolean setNgrok(String url) {
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+
+        String deleteUrl = getBaseUrl() + "/deleteWebhook";
+        String setUrl = getBaseUrl() + "/setWebhook?url=" + url + "/webhook";
+
+        HttpGet deleteGet = new HttpGet(deleteUrl);
+        HttpGet setMethod = new HttpGet(setUrl);
+
+        try {
+            CloseableHttpResponse response = httpClient.execute(deleteGet);
+            CloseableHttpResponse response2 = httpClient.execute(setMethod);
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+            return false;
         }
 
-        return "telegram_bot web_hook";
+        return true;
     }
 
     private String getBaseUrl() {

@@ -2,9 +2,8 @@ package io.coinpeeker.bot_hotssan.controller;
 
 import io.coinpeeker.bot_hotssan.service.HotssanService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.telegram.telegrambots.api.objects.Update;
 
 @RestController
 public class HotssanController {
@@ -13,7 +12,14 @@ public class HotssanController {
     private HotssanService hotssanService;
 
     @PostMapping("/webhook")
-    public String webHook() {
-        return hotssanService.getWebhook();
+    public void webHook(@RequestBody Update update) {
+        hotssanService.commandHandler(update);
     }
+
+    @GetMapping("/ngrok")
+    public boolean setNgrok(@RequestParam String url) {
+        return hotssanService.setNgrok(url);
+    }
+
+
 }
