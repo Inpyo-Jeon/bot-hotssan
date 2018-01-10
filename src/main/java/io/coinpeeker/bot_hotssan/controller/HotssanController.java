@@ -21,5 +21,9 @@ public class HotssanController {
         return hotssanService.setNgrok(url);
     }
 
+    @PostMapping("/getUSDExchangeRate")
+    public String getUSDExchangeRate() { return hotssanService.getUSDExchangeRate(); }
+
+
 
 }
