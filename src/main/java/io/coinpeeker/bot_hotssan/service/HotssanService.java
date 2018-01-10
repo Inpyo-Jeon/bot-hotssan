@@ -38,7 +38,7 @@ public class HotssanService {
         String sendMessage = getBaseUrl()
                 + "/sendmessage?chat_id="
                 + String.valueOf(chatId)
-                + "&text=대답:"
+                + "&text=dev_대답:"
                 + text;
 
         CloseableHttpClient httpClient = HttpClients.createDefault();
