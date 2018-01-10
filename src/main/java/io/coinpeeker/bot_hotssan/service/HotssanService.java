@@ -44,7 +44,7 @@ public class HotssanService {
                 + String.valueOf(chatId)
                 + "&text=대답:"
                 + text
-                + "환율 : " + getUSDExchangeRate();
+                + "환율:" + getUSDExchangeRate();
 
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(sendMessage);
