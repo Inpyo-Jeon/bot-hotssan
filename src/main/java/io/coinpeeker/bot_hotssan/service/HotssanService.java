@@ -73,7 +73,24 @@ public class HotssanService implements HotssanUpdateHandler{
         return true;
     }
 
+    public void sendBootMessage() {
+        long chatId = 226524024;
+        String sendMessage = CommonConstant.URL_TELEGRAM_BASE + apiKey
+                + "/sendmessage?chat_id="
+                + String.valueOf(chatId)
+                + "&text=bot을시작합니다.";
 
+        LOGGER.info("#$#$#$ sendBoot : {}", sendMessage);
+
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(sendMessage);
+
+        try {
+            CloseableHttpResponse response = httpClient.execute(httpGet);
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
 
     @Override
     public void updateHandler(Update update) {
