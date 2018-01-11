@@ -1,25 +1,16 @@
 package io.coinpeeker.bot_hotssan.service;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
-import io.coinpeeker.bot_hotssan.common.CommonUtils;
 import io.coinpeeker.bot_hotssan.module.HotssanUpdateHandler;
-import io.coinpeeker.bot_hotssan.util.CustomHttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.client.AsyncClientHttpRequest;
-import org.springframework.http.client.AsyncClientHttpRequestExecution;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
 
 import java.io.IOException;
@@ -71,25 +62,6 @@ public class HotssanService implements HotssanUpdateHandler{
             return false;
         }
         return true;
-    }
-
-    public void sendBootMessage() {
-        long chatId = 226524024;
-        String sendMessage = CommonConstant.URL_TELEGRAM_BASE + apiKey
-                + "/sendmessage?chat_id="
-                + String.valueOf(chatId)
-                + "&text=bot을시작합니다.";
-
-        LOGGER.info("#$#$#$ sendBoot : {}", sendMessage);
-
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        HttpGet httpGet = new HttpGet(sendMessage);
-
-        try {
-            CloseableHttpResponse response = httpClient.execute(httpGet);
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
     }
 
     @Override
