@@ -1,5 +1,7 @@
 package io.coinpeeker.bot_hotssan.common;
 
+import org.springframework.beans.factory.annotation.Value;
+
 public class CommonConstant {
 
     public static final String URL_TELEGRAM_BASE = "https://api.telegram.org/bot";
