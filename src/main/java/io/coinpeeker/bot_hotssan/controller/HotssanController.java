@@ -13,17 +13,11 @@ public class HotssanController {
 
     @PostMapping("/webhook")
     public void webHook(@RequestBody Update update) {
-        hotssanService.commandHandler(update);
+        hotssanService.updateHandler(update);
     }
 
-    @GetMapping("/ngrok")
-    public boolean setNgrok(@RequestParam String url) {
-        return hotssanService.setNgrok(url);
+    @GetMapping("/setWebhook")
+    public boolean setWebhook(@RequestParam String url) {
+        return hotssanService.setWebhook(url);
     }
-
-    @PostMapping("/getUSDExchangeRate")
-    public String getUSDExchangeRate() { return hotssanService.getUSDExchangeRate(); }
-
-
-
 }
