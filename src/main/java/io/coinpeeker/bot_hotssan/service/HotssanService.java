@@ -1,11 +1,11 @@
 package io.coinpeeker.bot_hotssan.service;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
-import io.coinpeeker.bot_hotssan.external.ApiClient;
-import io.coinpeeker.bot_hotssan.external.CoinrailApiClientImpl;
 import io.coinpeeker.bot_hotssan.module.HotssanUpdateHandler;
 import io.coinpeeker.bot_hotssan.utils.AuthUtils;
+import io.coinpeeker.bot_hotssan.utils.Commander;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
+import io.coinpeeker.bot_hotssan.utils.MessageUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
@@ -34,6 +34,12 @@ public class HotssanService implements HotssanUpdateHandler{
 
     @Autowired
     private HttpUtils httpUtils;
+
+    @Autowired
+    private MessageUtils messageUtils;
+
+    @Autowired
+    private Commander commander;
 
     @Override
     public void deleteWebhook() {
@@ -72,26 +78,17 @@ public class HotssanService implements HotssanUpdateHandler{
             return ;
         }
 
+        String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
         long chatId = update.getMessage().getChatId();
-
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(chatId);
+        String instruction = update.getMessage().getText();
+        StringBuilder message = new StringBuilder();
 
         if (!AuthUtils.isAuthenticated(chatId)) {
-            sendMessage.setText("등록되지 않은 사용자입니다.");
+            message.append("등록되지 않은 사용자입니다.");
         } else {
-            sendMessage.setText("정상 등록된 사용자입니다.");
+            message.append(commander.execute(instruction));
         }
 
-        List<NameValuePair> params = new ArrayList<>();
-        params.add(new BasicNameValuePair("chat_id", sendMessage.getChatId()));
-        params.add(new BasicNameValuePair("text", sendMessage.getText()));
-
-        String sendMessageUrl = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-        try {
-            httpUtils.post(sendMessageUrl, params);
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
+        messageUtils.sendMessage(url, chatId, message.toString());
     }
 }
