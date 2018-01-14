@@ -37,7 +37,6 @@ public class ApplicationStartup implements ApplicationListener<ContextRefreshedE
             chatId = -300048567L;
         }
 
-        LOGGER.info("#$#$#$ 새로운 build : {}, chatId : {}", url, chatId);
         messageUtils.sendMessage(url, chatId, "새로운 Build 가 감지되었습니다.");
     }
 }

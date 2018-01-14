@@ -1,6 +1,5 @@
 package io.coinpeeker.bot_hotssan.utils;
 
-import com.google.common.collect.Lists;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -16,13 +15,13 @@ public class AuthUtils {
             , 341972666L // 본재
             , 345295244L // 현민
             , 395791342L // 호준
+            , 458814507L // 인표
             , -286833798L // 쇼미더머니로컬
             , -294606763L // 쇼미더데브
             , -300048567L // 쇼미더리얼
     );
 
     public boolean isAuthenticated(Long userId) {
-
         return userList.contains(userId);
     }
 }
