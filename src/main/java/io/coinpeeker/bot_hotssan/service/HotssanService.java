@@ -33,6 +33,9 @@ public class HotssanService implements HotssanUpdateHandler{
     private ExchangeService exchangeService;
 
     @Autowired
+    private AuthUtils authUtils;
+
+    @Autowired
     private HttpUtils httpUtils;
 
     @Autowired
@@ -83,8 +86,9 @@ public class HotssanService implements HotssanUpdateHandler{
         String instruction = update.getMessage().getText();
         StringBuilder message = new StringBuilder();
 
-        if (!AuthUtils.isAuthenticated(chatId)) {
-            message.append("등록되지 않은 사용자입니다.");
+        if (!authUtils.isAuthenticated(chatId)) {
+            message.append("등록되지 않은 사용자입니다.\n");
+            message.append(chatId);
         } else {
             message.append(commander.execute(instruction));
         }
