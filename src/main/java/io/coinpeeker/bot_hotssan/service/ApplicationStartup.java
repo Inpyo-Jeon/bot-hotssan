@@ -2,6 +2,7 @@ package io.coinpeeker.bot_hotssan.service;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
@@ -17,10 +18,21 @@ public class ApplicationStartup implements ApplicationListener<ContextRefreshedE
     @Value("${property.hotssan_id}")
     private String apiKey;
 
+    @Value("${property.env")
+    private String env;
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
 
         String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-        messageUtils.sendMessage(url, -286833798L, "새로운 Build 가 감지되었습니다.");
+
+        long chatId = 0L;
+        if (StringUtils.equals(env, "dev")) {
+            chatId = -294606763L;
+        } else if (StringUtils.equals(env, "real")) {
+            chatId = 0L;
+        }
+
+        messageUtils.sendMessage(url, chatId, "새로운 Build 가 감지되었습니다.");
     }
 }
