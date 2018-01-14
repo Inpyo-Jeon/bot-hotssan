@@ -3,6 +3,8 @@ package io.coinpeeker.bot_hotssan.service;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
@@ -11,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ApplicationStartup implements ApplicationListener<ContextRefreshedEvent> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HotssanService.class);
 
     @Autowired
     private MessageUtils messageUtils;
@@ -33,6 +37,7 @@ public class ApplicationStartup implements ApplicationListener<ContextRefreshedE
             chatId = -300048567L;
         }
 
+        LOGGER.info("#$#$#$ 새로운 build : {}, chatId : {}", url, chatId);
         messageUtils.sendMessage(url, chatId, "새로운 Build 가 감지되었습니다.");
     }
 }
