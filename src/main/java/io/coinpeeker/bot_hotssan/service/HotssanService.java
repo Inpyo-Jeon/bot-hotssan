@@ -1,19 +1,24 @@
 package io.coinpeeker.bot_hotssan.service;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
+import io.coinpeeker.bot_hotssan.external.ApiClient;
+import io.coinpeeker.bot_hotssan.external.CoinrailApiClientImpl;
 import io.coinpeeker.bot_hotssan.module.HotssanUpdateHandler;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import io.coinpeeker.bot_hotssan.utils.AuthUtils;
+import io.coinpeeker.bot_hotssan.utils.HttpUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
@@ -27,15 +32,14 @@ public class HotssanService implements HotssanUpdateHandler{
     @Autowired
     private ExchangeService exchangeService;
 
+    @Autowired
+    private HttpUtils httpUtils;
+
     @Override
     public void deleteWebhook() {
-        String deleteWebhookUrl = CommonConstant.URL_TELEGRAM_BASE + apiKey + "/deleteWebhook";
-        LOGGER.info("@#$@#$@#$ delete : {}", deleteWebhookUrl);
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        HttpGet httpGet = new HttpGet(deleteWebhookUrl);
-
+        String deleteWebhookUrl = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_DELETE_WEBHOOK;
         try {
-            CloseableHttpResponse response = httpClient.execute(httpGet);
+            httpUtils.get(deleteWebhookUrl);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -43,20 +47,15 @@ public class HotssanService implements HotssanUpdateHandler{
 
     @Override
     public boolean setWebhook(String url) {
-
         deleteWebhook();
 
-        String setWebhookUrl = CommonConstant.URL_TELEGRAM_BASE + apiKey
-                + "/setWebhook?url="
-                + url
-                + "/webhook";
+        String setWebhookUrl = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SET_WEBHOOK;
 
-        LOGGER.info("@#$@#$@#$ set : {}", setWebhookUrl);
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        HttpGet httpGet = new HttpGet(setWebhookUrl);
+        List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair("url", url + "/webhook"));
 
         try {
-            CloseableHttpResponse response = httpClient.execute(httpGet);
+            httpUtils.post(setWebhookUrl, params);
         } catch (IOException ioException) {
             ioException.printStackTrace();
             return false;
@@ -74,28 +73,25 @@ public class HotssanService implements HotssanUpdateHandler{
         }
 
         long chatId = update.getMessage().getChatId();
-        String text = update.getMessage().getText();
 
-        String sendMessage = CommonConstant.URL_TELEGRAM_BASE + apiKey
-                + "/sendmessage?chat_id="
-                + String.valueOf(chatId)
-                + "&text=대답:"
-                + text
-                + "환율:"
-                + exchangeService.getUSDExchangeRate();
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
 
-        LOGGER.info("@#$@#$@#$ {}", sendMessage);
+        if (!AuthUtils.isAuthenticated(chatId)) {
+            sendMessage.setText("등록되지 않은 사용자입니다.");
+        } else {
+            sendMessage.setText("정상 등록된 사용자입니다.");
+        }
 
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        HttpGet httpGet = new HttpGet(sendMessage);
+        List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair("chat_id", sendMessage.getChatId()));
+        params.add(new BasicNameValuePair("text", sendMessage.getText()));
 
+        String sendMessageUrl = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
         try {
-            CloseableHttpResponse response = httpClient.execute(httpGet);
+            httpUtils.post(sendMessageUrl, params);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
     }
-
-
-
 }

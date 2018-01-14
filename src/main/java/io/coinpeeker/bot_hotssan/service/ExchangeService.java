@@ -1,7 +1,7 @@
 package io.coinpeeker.bot_hotssan.service;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
-import io.coinpeeker.bot_hotssan.util.CustomHttpClient;
+import io.coinpeeker.bot_hotssan.utils.CustomHttpClient;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

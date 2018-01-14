@@ -1,4 +1,4 @@
-package io.coinpeeker.bot_hotssan.util;
+package io.coinpeeker.bot_hotssan.utils;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
