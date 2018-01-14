@@ -30,7 +30,7 @@ public class ApplicationStartup implements ApplicationListener<ContextRefreshedE
         if (StringUtils.equals(env, "dev")) {
             chatId = -294606763L;
         } else if (StringUtils.equals(env, "real")) {
-            chatId = 0L;
+            chatId = -300048567L;
         }
 
         messageUtils.sendMessage(url, chatId, "새로운 Build 가 감지되었습니다.");

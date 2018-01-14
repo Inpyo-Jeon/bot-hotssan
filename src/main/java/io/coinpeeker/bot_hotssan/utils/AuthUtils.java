@@ -18,8 +18,8 @@ public class AuthUtils {
             , 395791342L // 호준
             , -286833798L // 쇼미더머니로컬
             , -294606763L // 쇼미더데브
+            , -300048567L // 쇼미더리얼
     );
-
 
     public boolean isAuthenticated(Long userId) {
 
