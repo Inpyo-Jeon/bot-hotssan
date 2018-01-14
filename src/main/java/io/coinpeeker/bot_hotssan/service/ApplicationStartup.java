@@ -22,7 +22,7 @@ public class ApplicationStartup implements ApplicationListener<ContextRefreshedE
     @Value("${property.hotssan_id}")
     private String apiKey;
 
-    @Value("${property.env")
+    @Value("${property.env}")
     private String env;
 
     @Override
