@@ -8,15 +8,21 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static io.coinpeeker.bot_hotssan.common.CommonConstant.API_UPBIT_URL;
 
+@Component
 public class UpbitApiClientImpl implements ApiClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpbitApiClientImpl.class);
+
+    @Autowired
+    private HttpUtils httpUtils;
 
     @Override
     public String lastPrice(String symbol) throws URISyntaxException {
@@ -29,7 +35,6 @@ public class UpbitApiClientImpl implements ApiClient {
         urlInfo.addParameter("code", code);
         urlInfo.addParameter("count", count);
 
-        HttpUtils httpUtils = new HttpUtils();
         try {
             HttpResponse result = httpUtils.get(urlInfo.toString());
             JSONArray jsonArray = new JSONArray(EntityUtils.toString(result.getEntity(), "UTF-8"));
@@ -38,7 +43,6 @@ public class UpbitApiClientImpl implements ApiClient {
 
             LOGGER.info(String.valueOf(price));
             return String.valueOf(price);
-
 
         } catch (IOException e) {
             e.printStackTrace();

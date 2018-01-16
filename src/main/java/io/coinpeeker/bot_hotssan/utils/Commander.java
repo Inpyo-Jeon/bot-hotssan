@@ -2,6 +2,7 @@ package io.coinpeeker.bot_hotssan.utils;
 
 import io.coinpeeker.bot_hotssan.external.CoinContainer;
 import io.coinpeeker.bot_hotssan.service.ExchangeService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -10,6 +11,9 @@ import java.util.regex.Pattern;
 
 @Component
 public class Commander {
+
+    @Autowired
+    private CoinContainer coinContainer;
 
     public String execute(String instruction) {
         StringBuilder result = new StringBuilder();
@@ -24,17 +28,9 @@ public class Commander {
             Matcher matcher = p.matcher(instruction);
             String replaceInstruction = matcher.replaceAll("");
 
-            CoinContainer coinContainer = new CoinContainer();
             result.append(coinContainer.execute(replaceInstruction.toUpperCase()));
-
-            ExchangeService e = new ExchangeService();
-            try {
-                e.getUSDExchangeRate();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-
         }
+
         return result.toString();
     }
 }
