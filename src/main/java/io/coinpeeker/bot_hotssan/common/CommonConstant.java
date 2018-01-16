@@ -8,5 +8,7 @@ public class CommonConstant {
     public static final String METHOD_TELEGRAM_DELETE_WEBHOOK = "/deleteWebhook";
     public static final String METHOD_TELEGRAM_SENDMESSAGE = "/sendmessage";
 
-    public static final String HANA_BANK_URL     = "http://fx.kebhana.com/fxportal/jsp/RS/DEPLOY_EXRATE/fxrate_B_v2.html";
+    public static final String HANA_BANK_URL = "http://fx.kebhana.com/fxportal/jsp/RS/DEPLOY_EXRATE/fxrate_B_v2.html";
+
+    public static final String API_UPBIT_URL = "https://crix-api-endpoint.upbit.com/v1/crix/candles/minutes/1";
 }
