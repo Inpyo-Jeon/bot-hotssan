@@ -44,10 +44,9 @@ public class UpbitApiClientImpl implements ApiClient {
             LOGGER.info(String.valueOf(price));
             return String.valueOf(price);
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            return "-";
         }
-
-    return "";
     }
 }

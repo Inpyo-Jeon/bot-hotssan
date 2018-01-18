@@ -21,16 +21,56 @@ public class Commander {
         result.append("입력한 명령어 : ");
         result.append(instruction);
 
-        // TODO : 관장하는 클래스 구성
-        // btc(비트코인) 일 때만 시세확인
-        if("/btc".equals(instruction)){
-            Pattern p = Pattern.compile("[^a-z]");
-            Matcher matcher = p.matcher(instruction);
-            String replaceInstruction = matcher.replaceAll("");
+        Pattern pattern = Pattern.compile("(^/)([a-z]|[A-Z])*$");
+        Matcher matcher = pattern.matcher(instruction);
 
-            result.append(coinContainer.execute(replaceInstruction.toUpperCase()));
+        if(matcher.find()){
+            result.append(analyzeCommand(instruction));
+        } else {
+            result.append("명령어 구성이 잘못되었습니다.");
         }
 
         return result.toString();
+    }
+
+
+
+
+
+    // 입력된 명령어 분석하는 메서드
+    // TODO : 클래스 내의 정규식들 다시 한 번 확인
+    public String analyzeCommand(String instruction){
+
+        Pattern p                   = Pattern.compile("^/");
+        Matcher matcher             = p.matcher(instruction);
+        String  replaceInstruction  = matcher.replaceAll("").toUpperCase();
+        String  result              = "";
+
+
+        try{
+            GeneralInstruction.valueOf(replaceInstruction);
+            // 공통 명령어
+            // ex) result = 공통명령어 클래스 결과값
+        } catch(IllegalArgumentException e){
+            try{
+                result = coinContainer.execute(CoinInstruction.valueOf(replaceInstruction).toString());
+            } catch (IllegalArgumentException errorFindInstruction){
+                result = "정의되어있지 않은 명령어입니다.";
+            }
+        }
+        return result;
+    }
+
+
+
+
+
+
+    enum GeneralInstruction{
+        PP, DD
+    }
+
+    enum CoinInstruction{
+        DENT, BTC
     }
 }
