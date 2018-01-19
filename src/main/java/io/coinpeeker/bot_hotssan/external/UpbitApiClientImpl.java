@@ -2,16 +2,14 @@ package io.coinpeeker.bot_hotssan.external;
 
 import io.coinpeeker.bot_hotssan.utils.CommonUtils;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static io.coinpeeker.bot_hotssan.common.CommonConstant.API_UPBIT_URL;
@@ -35,16 +33,11 @@ public class UpbitApiClientImpl implements ApiClient {
         urlInfo.addParameter("count", count);
 
         try {
-            HttpResponse result = httpUtils.get(urlInfo.toString());
-            JSONArray jsonArray = new JSONArray(EntityUtils.toString(result.getEntity(), "UTF-8"));
-            JSONObject jsonObject = new JSONObject(jsonArray.get(0).toString());
+            JSONObject jsonObject = httpUtils.getResponseByArray(urlInfo.toString());
             price = jsonObject.getInt("tradePrice");
 
-            LOGGER.info(symbol + " : " + String.valueOf(price));
-
             return CommonUtils.convertKRW(price);
-
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
             return "-";
         }

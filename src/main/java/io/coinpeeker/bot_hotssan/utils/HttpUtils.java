@@ -7,6 +7,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -50,5 +53,34 @@ public class HttpUtils {
         CloseableHttpResponse response = httpClient.execute(httpPost);
 
         return response;
+    }
+
+    /**
+     * API 호출결과를 JSONObject 로 리턴받는 메소드, apiResponse 의 최상단이 Array 인 경우
+     *
+     * @param url
+     * @return
+     * @throws IOException
+     */
+    public JSONObject getResponseByArray(String url) throws IOException {
+        CloseableHttpResponse httpResponse = get(url);
+        JSONArray jsonArray = new JSONArray(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
+        JSONObject jsonObject = new JSONObject(jsonArray.get(0).toString());
+
+        return jsonObject;
+    }
+
+    /**
+     * API 호출결과를 JSONObject 로 리턴받는 메소드, apiResponse 의 최상단이 Object 인 경우
+     *
+     * @param url
+     * @return
+     * @throws IOException
+     */
+    public JSONObject getResponseByObject(String url) throws IOException {
+        CloseableHttpResponse httpResponse = get(url);
+        JSONObject jsonObject = new JSONObject(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
+
+        return jsonObject;
     }
 }

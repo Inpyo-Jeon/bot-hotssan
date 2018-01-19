@@ -1,9 +1,13 @@
 package io.coinpeeker.bot_hotssan.utils;
 
+import io.coinpeeker.bot_hotssan.external.ApiClient;
 import io.coinpeeker.bot_hotssan.external.CoinContainer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,21 +17,52 @@ public class Commander {
     @Autowired
     private CoinContainer coinContainer;
 
+    @Qualifier("upbitApiClientImpl")
+    @Autowired
+    ApiClient upbitApiClient;
+
+    @Qualifier("coinrailApiClientImpl")
+    @Autowired
+    ApiClient coinrailApiClient;
+
+    @Qualifier("exchangeApiClientImpl")
+    @Autowired
+    ApiClient exchangeApiClient;
+
+
     public String execute(String instruction) {
         StringBuilder result = new StringBuilder();
 
-        result.append("입력한 명령어 : ");
-        result.append(instruction);
-
-        Pattern pattern = Pattern.compile("(^/)([a-z]|[A-Z])*$");
-        Matcher matcher = pattern.matcher(instruction);
-
-        if(matcher.find()){
-            result.append(analyzeCommand(instruction));
-        } else {
-            result.append("명령어 구성이 잘못되었습니다.");
-
+        try {
+            result.append(upbitApiClient.lastPrice("btc"));
+            result.append("\n");
+            result.append(coinrailApiClient.lastPrice(""));
+            result.append("\n");
+            result.append(exchangeApiClient.lastPrice(""));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
+
+        return result.toString();
+    }
+
+//    public String execute(String instruction) {
+//        StringBuilder result = new StringBuilder();
+//
+//        result.append("입력한 명령어 : ");
+//        result.append(instruction);
+//
+//        Pattern pattern = Pattern.compile("(^/)([a-z]|[A-Z])*$");
+//        Matcher matcher = pattern.matcher(instruction);
+//
+//        if(matcher.find()){
+//            result.append(analyzeCommand(instruction));
+//        } else {
+//            result.append("명령어 구성이 잘못되었습니다.");
+//
+//        }
 
 //        Pattern pattern = Pattern.compile("(^/)([ㄱ-ㅎ|ㅏ-ㅣ|가-힣])*$");
 //        Matcher matcher = pattern.matcher(instruction);
@@ -37,8 +72,8 @@ public class Commander {
 //            result.append("명령어 구성이 잘못되었습니다.");
 //
 //        }
-        return result.toString();
-    }
+//        return result.toString();
+//    }
 
 
 
