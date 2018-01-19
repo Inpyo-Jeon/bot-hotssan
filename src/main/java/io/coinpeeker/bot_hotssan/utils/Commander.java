@@ -1,11 +1,9 @@
 package io.coinpeeker.bot_hotssan.utils;
 
 import io.coinpeeker.bot_hotssan.external.CoinContainer;
-import io.coinpeeker.bot_hotssan.service.ExchangeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

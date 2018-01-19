@@ -15,6 +15,13 @@ public class MessageUtils {
     @Autowired
     private HttpUtils httpUtils;
 
+    /**
+     * post 방식으로 간단하게 단문의 문장을 전송하는 메소드
+     *
+     * @param url
+     * @param chatId
+     * @param text
+     */
     public void sendMessage(String url, long chatId, String text) {
         List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("chat_id", String.valueOf(chatId)));

@@ -29,9 +29,6 @@ public class HotssanService implements HotssanUpdateHandler{
     private String apiKey;
 
     @Autowired
-    private ExchangeService exchangeService;
-
-    @Autowired
     private AuthUtils authUtils;
 
     @Autowired
@@ -86,7 +83,7 @@ public class HotssanService implements HotssanUpdateHandler{
         StringBuilder message = new StringBuilder();
 
         if (!authUtils.isAuthenticated(chatId)) {
-            message.append("등록되지 않은 사용자입니다.\n");
+            message.append("등록되지 않은 사용자입니다.\n사용자 아이디 등록을 요청하세요 : ");
             message.append(chatId);
         } else {
             message.append(commander.execute(instruction));

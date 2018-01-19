@@ -19,6 +19,13 @@ public class HttpUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpUtils.class);
 
+    /**
+     * HttpGet
+     *
+     * @param url
+     * @return
+     * @throws IOException
+     */
     public CloseableHttpResponse get(String url) throws IOException {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(url);
@@ -27,6 +34,14 @@ public class HttpUtils {
         return response;
     }
 
+    /**
+     * HttpPost
+     *
+     * @param url
+     * @param params
+     * @return
+     * @throws IOException
+     */
     public CloseableHttpResponse post(String url, List<NameValuePair> params) throws IOException {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(url);

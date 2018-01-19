@@ -1,6 +1,6 @@
 package io.coinpeeker.bot_hotssan.external;
 
-import io.coinpeeker.bot_hotssan.utils.CurrencyFormat;
+import io.coinpeeker.bot_hotssan.utils.CommonUtils;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.utils.URIBuilder;
@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static io.coinpeeker.bot_hotssan.common.CommonConstant.API_UPBIT_URL;
@@ -25,14 +24,11 @@ public class UpbitApiClientImpl implements ApiClient {
     @Autowired
     private HttpUtils httpUtils;
 
-    @Autowired
-    private CurrencyFormat currencyFormat;
-
     @Override
     public String lastPrice(String symbol) throws URISyntaxException {
-        String  code        = "CRIX.UPBIT.KRW-" + symbol;
-        String  count       = "1";
-        int     price       = 0;
+        String code = "CRIX.UPBIT.KRW-" + symbol;
+        String count = "1";
+        int price = 0;
 
         URIBuilder urlInfo = new URIBuilder(API_UPBIT_URL);
         urlInfo.addParameter("code", code);
@@ -46,7 +42,7 @@ public class UpbitApiClientImpl implements ApiClient {
 
             LOGGER.info(symbol + " : " + String.valueOf(price));
 
-            return currencyFormat.replaceKRWUnit(price);
+            return CommonUtils.convertKRW(price);
 
         } catch (Exception e) {
             e.printStackTrace();
