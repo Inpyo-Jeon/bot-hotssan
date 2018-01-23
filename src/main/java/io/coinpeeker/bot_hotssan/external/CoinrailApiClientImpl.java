@@ -18,32 +18,31 @@ public class CoinrailApiClientImpl implements ApiClient {
     @Autowired
     private HttpUtils httpUtils;
 
-    public String lastPrice(String key) {
+    @Override
+    public CoinPrice getCoinPrice(String key) {
+        CoinPrice coinPrice = new CoinPrice(key, "코인레일");
 
-        String url = "https://api.coinrail.co.kr/public/last/order?currency=dent-btc";
+//        coinPrice.setKrw("1000 원");
+        coinPrice.setSatoshi(getLastSatoshi(key));
+//        coinPrice.setUsd("0.23 USD");
 
-        String price = "";
+        return coinPrice;
+    }
+
+    private String getLastSatoshi(String key) {
+
+        String url = "https://api.coinrail.co.kr/public/last/order?currency=" + key + "-btc";
+
+        String price = null;
         try {
             JSONObject jsonObject = httpUtils.getResponseByObject(url);
 
             price = jsonObject.getString("last_price");
-        } catch (IOException e) {
+        } catch (Exception e) {
+            LOGGER.info("#$#$#$ key : {}", key);
             e.printStackTrace();
         }
 
         return price;
     }
-
-    @Override
-    public CoinPrice getCoinPrice(String key) {
-        CoinPrice coinPrice = new CoinPrice(key, "코인레일");
-
-        coinPrice.setKrw("1000 원");
-        coinPrice.setSatoshi("0.00000004");
-        coinPrice.setUsd("0.23 USD");
-
-        return coinPrice;
-    }
-
-
 }

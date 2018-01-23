@@ -28,26 +28,13 @@ public class Commander {
         StringBuilder result = new StringBuilder();
         String coinSymbol = instruction.replace("/", "").toUpperCase();
 
-
         if(EnumUtils.isValidEnum(CoinType.class, coinSymbol)){
             CoinPrice coinPrice = coinrailApiClient.getCoinPrice(coinSymbol);
-            result.append("### ");
-            result.append(coinPrice.getKey());
-            result.append(" ###");
-            result.append("\n거래소명 : ");
-            result.append(coinPrice.getExchangeName());
-            result.append("\nkrw : ");
-            result.append(coinPrice.getKrw());
-            result.append("\nusd : ");
-            result.append(coinPrice.getUsd());
-            result.append("\n사토시 : ");
-            result.append(coinPrice.getSatoshi());
+            result.append(coinPrice.toString());
         } else {
             result.append("등록 되어있지 않은 명령어 혹은 심볼입니다.");
         }
-
-
-
+        
         return result.toString();
     }
 }

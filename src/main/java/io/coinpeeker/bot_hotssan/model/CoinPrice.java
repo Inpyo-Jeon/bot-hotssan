@@ -13,35 +13,43 @@ public class CoinPrice {
         this.exchangeName = exchangeName;
     }
 
-    public String getKey() {
-        return key;
-    }
-
-    public String getExchangeName() {
-        return exchangeName;
-    }
-
-    public String getKrw() {
-        return krw;
-    }
-
     public void setKrw(String krw) {
         this.krw = krw;
-    }
-
-    public String getUsd() {
-        return usd;
     }
 
     public void setUsd(String usd) {
         this.usd = usd;
     }
 
-    public String getSatoshi() {
-        return satoshi;
-    }
-
     public void setSatoshi(String satoshi) {
         this.satoshi = satoshi;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("[");
+        sb.append(this.exchangeName);
+        sb.append(" ==> ");
+        sb.append(this.key);
+        sb.append("]");
+
+        if (this.satoshi != null) {
+            sb.append("\n사토시 : ");
+            sb.append(this.satoshi);
+        }
+
+        if (this.krw != null) {
+            sb.append("\n원화 : ");
+            sb.append(this.krw);
+        }
+
+        if (this.usd != null) {
+            sb.append("\n달러 : ");
+            sb.append(this.usd);
+        }
+
+        return sb.toString();
     }
 }
