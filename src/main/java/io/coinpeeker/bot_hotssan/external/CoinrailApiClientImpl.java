@@ -1,5 +1,6 @@
 package io.coinpeeker.bot_hotssan.external;
 
+import io.coinpeeker.bot_hotssan.model.CoinPrice;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -17,7 +18,6 @@ public class CoinrailApiClientImpl implements ApiClient {
     @Autowired
     private HttpUtils httpUtils;
 
-    @Override
     public String lastPrice(String key) {
 
         String url = "https://api.coinrail.co.kr/public/last/order?currency=dent-btc";
@@ -33,4 +33,17 @@ public class CoinrailApiClientImpl implements ApiClient {
 
         return price;
     }
+
+    @Override
+    public CoinPrice getCoinPrice(String key) {
+        CoinPrice coinPrice = new CoinPrice(key, "코인레일");
+
+        coinPrice.setKrw("1000 원");
+        coinPrice.setSatoshi("0.00000004");
+        coinPrice.setUsd("0.23 USD");
+
+        return coinPrice;
+    }
+
+
 }

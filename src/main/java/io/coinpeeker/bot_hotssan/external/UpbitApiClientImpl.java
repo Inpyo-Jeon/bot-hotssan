@@ -1,5 +1,6 @@
 package io.coinpeeker.bot_hotssan.external;
 
+import io.coinpeeker.bot_hotssan.model.CoinPrice;
 import io.coinpeeker.bot_hotssan.utils.CommonUtils;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.apache.http.client.utils.URIBuilder;
@@ -22,7 +23,6 @@ public class UpbitApiClientImpl implements ApiClient {
     @Autowired
     private HttpUtils httpUtils;
 
-    @Override
     public String lastPrice(String symbol) throws URISyntaxException {
         String code = "CRIX.UPBIT.KRW-" + symbol;
         String count = "1";
@@ -41,5 +41,10 @@ public class UpbitApiClientImpl implements ApiClient {
             e.printStackTrace();
             return "-";
         }
+    }
+
+    @Override
+    public CoinPrice getCoinPrice(String key) {
+        return null;
     }
 }

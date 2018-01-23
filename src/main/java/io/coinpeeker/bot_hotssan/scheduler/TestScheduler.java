@@ -13,8 +13,8 @@ public class TestScheduler {
     /**
      * Application 시작후 10초 딜레이 후에 시작, 딜레이는 60초 기준
      */
-    @Scheduled(initialDelay = 10000, fixedDelay = 60000)
-    public void test() {
-        LOGGER.info("#$#$#$ scheduled test !!!");
-    }
+//    @Scheduled(initialDelay = 10000, fixedDelay = 60000)
+//    public void test() {
+//        LOGGER.info("#$#$#$ scheduled test !!!");
+//    }
 }
