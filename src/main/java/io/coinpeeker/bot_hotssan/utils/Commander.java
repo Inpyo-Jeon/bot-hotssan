@@ -25,18 +25,9 @@ public class Commander {
     public String execute(String instruction) {
         StringBuilder result = new StringBuilder();
 
-        CoinPrice coinPrice = coinrailApiClient.getCoinPrice("trx");
-        result.append("### ");
-        result.append(coinPrice.getKey());
-        result.append(" ###");
-        result.append("\n거래소명 : ");
-        result.append(coinPrice.getExchangeName());
-        result.append("\nkrw : ");
-        result.append(coinPrice.getKrw());
-        result.append("\nusd : ");
-        result.append(coinPrice.getUsd());
-        result.append("\n사토시 : ");
-        result.append(coinPrice.getSatoshi());
+        CoinPrice coinPrice = coinrailApiClient.getCoinPrice(instruction);
+
+        result.append(coinPrice.toString());
 
         return result.toString();
     }
