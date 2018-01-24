@@ -45,6 +45,8 @@ public class UpbitApiClientImpl implements ApiClient {
 
     @Override
     public CoinPrice getCoinPrice(String key) {
-        return null;
+        CoinPrice coinPrice = new CoinPrice(key, "업비트");
+
+        return coinPrice;
     }
 }

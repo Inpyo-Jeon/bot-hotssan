@@ -41,6 +41,7 @@ public class CoinrailApiClientImpl implements ApiClient {
         } catch (Exception e) {
             LOGGER.info("#$#$#$ key : {}", key);
             e.printStackTrace();
+            return "에러";
         }
 
         return price;
