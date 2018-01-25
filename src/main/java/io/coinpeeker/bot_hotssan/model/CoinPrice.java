@@ -1,6 +1,12 @@
 package io.coinpeeker.bot_hotssan.model;
 
+import io.coinpeeker.bot_hotssan.utils.CommonUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+
 public class CoinPrice {
+
+    @Autowired
+    CommonUtils commonUtils;
 
     private String key;
     private String exchangeName;
@@ -42,12 +48,12 @@ public class CoinPrice {
 
         if (this.krw != null) {
             sb.append("\n원화 : ");
-            sb.append(this.krw);
+            sb.append(CommonUtils.convertKRW(Double.valueOf(this.krw)));
         }
 
         if (this.usd != null) {
             sb.append("\n달러 : ");
-            sb.append(this.usd);
+            sb.append(CommonUtils.convertUSD(Double.valueOf(this.usd)));
         }
 
         return sb.toString();

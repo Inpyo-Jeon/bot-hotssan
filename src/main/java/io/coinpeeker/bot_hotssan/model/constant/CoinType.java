@@ -12,7 +12,8 @@ public enum CoinType {
     ,NEO("네오")
     ,XGOX("곡스")
     ,BCH("비트코인캐시")
-    ,XRP("리플");
+    ,XRP("리플")
+    ,SPC("스페이스체인");
 
 
     private String desc;

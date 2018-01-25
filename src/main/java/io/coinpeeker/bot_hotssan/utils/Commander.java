@@ -30,46 +30,46 @@ public class Commander {
     @Qualifier("bithumbApiClientImpl")
     ApiClient bithumbApiClient;
 
-    @Qualifier("bittrexApiClientImpl")
     @Autowired
+    @Qualifier("bittrexApiClientImpl")
     ApiClient bittrexApiClient;
 
-    @Qualifier("coinnestApiClientImpl")
     @Autowired
+    @Qualifier("coinnestApiClientImpl")
     ApiClient coinnestApiClient;
 
-    @Qualifier("coinoneApiClientImpl")
     @Autowired
+    @Qualifier("coinoneApiClientImpl")
     ApiClient coinoneApiClient;
 
-    @Qualifier("coinrailApiClientImpl")
     @Autowired
+    @Qualifier("coinrailApiClientImpl")
     ApiClient coinrailApiClient;
 
-    @Qualifier("cryptopiaApiClientImpl")
     @Autowired
+    @Qualifier("cryptopiaApiClientImpl")
     ApiClient crytopiaApiClient;
 
-    @Qualifier("exxApiClientImpl")
     @Autowired
+    @Qualifier("exxApiClientImpl")
     ApiClient exxApiClient;
 
-    @Qualifier("kucoinApiClientImpl")
     @Autowired
+    @Qualifier("kucoinApiClientImpl")
     ApiClient kucoinApiClient;
 
-    @Qualifier("upbitApiClientImpl")
     @Autowired
+    @Qualifier("upbitApiClientImpl")
     ApiClient upbitApiClient;
 
-    @Qualifier("exchangeApiClientImpl")
     @Autowired
+    @Qualifier("exchangeApiClientImpl")
     ApiClient exchangeApiClient;
 
 
     private Map<CoinType, List<ApiClient>> tradeInfoMap = Maps.newHashMap();
 
-    private void init2() {
+    private void init() {
         if (CollectionUtils.isEmpty(tradeInfoMap)) {
             tradeInfoMap.put(CoinType.valueOf("BTC"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinnestApiClient, coinoneApiClient, coinrailApiClient, crytopiaApiClient, exxApiClient, kucoinApiClient, upbitApiClient));
             tradeInfoMap.put(CoinType.valueOf("ETH"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinnestApiClient, coinoneApiClient, coinrailApiClient, crytopiaApiClient, exxApiClient, kucoinApiClient, upbitApiClient));
@@ -82,12 +82,13 @@ public class Commander {
             tradeInfoMap.put(CoinType.valueOf("XGOX"), Arrays.asList(crytopiaApiClient));
             tradeInfoMap.put(CoinType.valueOf("BCH"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinnestApiClient, coinoneApiClient, coinrailApiClient, crytopiaApiClient, exxApiClient, kucoinApiClient, upbitApiClient));
             tradeInfoMap.put(CoinType.valueOf("XRP"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinoneApiClient, coinrailApiClient, upbitApiClient));
+            tradeInfoMap.put(CoinType.valueOf("SPC"), Arrays.asList(exxApiClient));
         }
     }
 
 
     public String execute(String instruction) {
-        init2();
+        init();
 
         StringBuilder result = new StringBuilder();
         String coinSymbol = instruction.replace("/", "").toUpperCase();
