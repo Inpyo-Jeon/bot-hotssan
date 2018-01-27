@@ -30,13 +30,17 @@ public class ApplicationStartup implements ApplicationListener<ContextRefreshedE
 
         String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
 
-        long chatId = 0L;
-        if (StringUtils.equals(env, "dev")) {
-            chatId = -294606763L;
-        } else if (StringUtils.equals(env, "real")) {
-            chatId = -300048567L;
-        }
+        switch (env) {
+            case "dev":
+                messageUtils.sendMessage(url, -294606763L, "새로운 Build 가 감지되었습니다.");
+                break;
+            case "real":
+                // 쇼미더머니 리얼
+                messageUtils.sendMessage(url, -300048567L, "새로운 Build 가 감지되었습니다.");
 
-        messageUtils.sendMessage(url, chatId, "새로운 Build 가 감지되었습니다.");
+                // 인표친구들
+                messageUtils.sendMessage(url, -277619118L, "새로운 Build 가 감지되었습니다.");
+                break;
+        }
     }
 }
