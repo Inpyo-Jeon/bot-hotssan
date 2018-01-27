@@ -19,6 +19,7 @@ public class AuthUtils {
             , -286833798L // 쇼미더머니로컬
             , -294606763L // 쇼미더데브
             , -300048567L // 쇼미더리얼
+            , -277619118L // 인표친구들그룹
     );
 
     public boolean isAuthenticated(Long userId) {
