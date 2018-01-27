@@ -62,10 +62,10 @@ public class ExxApiClient implements ApiClient {
 
         try {
             String currency = "btc_usdt";
-            URIBuilder urlInfo = new URIBuilder(API_EXX_URL);
-            urlInfo.addParameter("currency", currency);
+            URIBuilder uriInfo = new URIBuilder(API_EXX_URL);
+            uriInfo.addParameter("currency", currency);
 
-            JSONObject jsonObject = httpUtils.getResponseByObject(urlInfo.toString());
+            JSONObject jsonObject = httpUtils.getResponseByObject(uriInfo.toString());
             price = jsonObject.getJSONObject("ticker").getDouble("last");
         } catch (Exception e) {
             e.printStackTrace();

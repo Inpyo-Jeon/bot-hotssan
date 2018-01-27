@@ -61,9 +61,9 @@ public class BinanceApiClient implements ApiClient {
 
         try {
             String symbol = "BTCUSDT";
-            URIBuilder urlInfo = new URIBuilder(API_BINANCE_URL);
-            urlInfo.addParameter("symbol", symbol);
-            JSONObject jsonObject = httpUtils.getResponseByObject(urlInfo.toString());
+            URIBuilder uriInfo = new URIBuilder(API_BINANCE_URL);
+            uriInfo.addParameter("symbol", symbol);
+            JSONObject jsonObject = httpUtils.getResponseByObject(uriInfo.toString());
             price = jsonObject.getDouble("price");
         } catch (Exception e) {
             e.printStackTrace();
