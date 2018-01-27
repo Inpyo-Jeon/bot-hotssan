@@ -28,8 +28,8 @@ public class CoinrailApiClient implements ApiClient {
         try {
             coinPrice.setKrw(String.valueOf(getKrw(key)));
         } catch (JSONException e) {
-            Double satoshi = getLastSatoshi(key);
-            Double krw = getKrw("btc") * satoshi;
+            double satoshi = getLastSatoshi(key);
+            double krw = getKrw("btc") * satoshi;
             coinPrice.setSatoshi(String.valueOf(satoshi));
             coinPrice.setKrw(String.valueOf(krw));
         }
@@ -38,8 +38,8 @@ public class CoinrailApiClient implements ApiClient {
         return coinPrice;
     }
 
-    private Double getLastSatoshi(String key) {
-        Double price = 0.0;
+    private double getLastSatoshi(String key) {
+        double price = 0.0;
 
         if ("BTC".equals(key)) {
             price = 1.0000000;
@@ -60,8 +60,8 @@ public class CoinrailApiClient implements ApiClient {
         return price;
     }
 
-    private Double getKrw(String key) {
-        Double price = 0.0;
+    private double getKrw(String key) {
+        double price = 0.0;
         try {
             String currency = key + "-krw";
             URIBuilder uriInfo = new URIBuilder(API_COINRAIL_URL);

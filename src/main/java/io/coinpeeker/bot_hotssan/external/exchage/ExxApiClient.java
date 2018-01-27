@@ -24,19 +24,18 @@ public class ExxApiClient implements ApiClient {
     public CoinPrice getCoinPrice(String key, double krwRate) {
         CoinPrice coinPrice = new CoinPrice(key, "EXX");
 
-        Double satoshi = getLastSatoshi(key);
-        Double usdt = getLastUsdt();
-        Double usd = usdt * satoshi;
-        Double krw = krwRate * usd;
+        double satoshi = getLastSatoshi(key);
+        double usdtPerBit = getLastUsdt("BTC") * satoshi;
+        double krw = krwRate * usdtPerBit;
 
         coinPrice.setSatoshi(String.valueOf(satoshi));
-        coinPrice.setUsd(String.valueOf(usd));
+        coinPrice.setUsd(String.valueOf(usdtPerBit));
         coinPrice.setKrw(String.valueOf(krw));
         return coinPrice;
     }
 
-    private Double getLastSatoshi(String key) {
-        Double price = 0.0;
+    private double getLastSatoshi(String key) {
+        double price = 0.0;
 
         if ("BTC".equals(key)) {
             price = 1.00000000;
@@ -57,11 +56,11 @@ public class ExxApiClient implements ApiClient {
     }
 
 
-    private Double getLastUsdt() {
-        Double price = 0.0;
+    private double getLastUsdt(String key) {
+        double price = 0.0;
 
         try {
-            String currency = "btc_usdt";
+            String currency = key + "_usdt";
             URIBuilder uriInfo = new URIBuilder(API_EXX_URL);
             uriInfo.addParameter("currency", currency);
 

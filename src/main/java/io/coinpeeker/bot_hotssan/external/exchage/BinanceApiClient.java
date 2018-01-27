@@ -24,19 +24,18 @@ public class BinanceApiClient implements ApiClient {
     public CoinPrice getCoinPrice(String key, double krwRate) {
         CoinPrice coinPrice = new CoinPrice(key, "바이낸스");
 
-        Double satoshi = getLastSatoshi(key);
-        Double usdt = getLastUsdt();
-        Double usd = usdt * satoshi;
-        Double krw = krwRate * usd;
+        double satoshi = getLastSatoshi(key);
+        double usdtPerBit = getLastUsdt("BTC") * satoshi;
+        double krw = krwRate * usdtPerBit;
 
         coinPrice.setSatoshi(String.valueOf(satoshi));
-        coinPrice.setUsd(String.valueOf(usd));
+        coinPrice.setUsd(String.valueOf(usdtPerBit));
         coinPrice.setKrw(String.valueOf(krw));
         return coinPrice;
     }
 
-    private Double getLastSatoshi(String key) {
-        Double price = 0.0;
+    private double getLastSatoshi(String key) {
+        double price = 0.0;
 
         if ("BTC".equals(key)) {
             price = 1.0000000;
@@ -56,11 +55,11 @@ public class BinanceApiClient implements ApiClient {
         return price;
     }
 
-    private Double getLastUsdt() {
-        Double price = 0.0;
+    private double getLastUsdt(String key) {
+        double price = 0.0;
 
         try {
-            String symbol = "BTCUSDT";
+            String symbol = key+"USDT";
             URIBuilder uriInfo = new URIBuilder(API_BINANCE_URL);
             uriInfo.addParameter("symbol", symbol);
             JSONObject jsonObject = httpUtils.getResponseByObject(uriInfo.toString());

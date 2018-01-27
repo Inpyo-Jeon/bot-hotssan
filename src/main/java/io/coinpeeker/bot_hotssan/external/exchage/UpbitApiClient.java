@@ -24,14 +24,14 @@ public class UpbitApiClient implements ApiClient {
     public CoinPrice getCoinPrice(String key, double krwRate) {
         CoinPrice coinPrice = new CoinPrice(key, "업비트");
 
-        Double krw = getLastKrw(key);
+        double krw = getLastKrw(key);
 
         coinPrice.setKrw(String.valueOf(krw));
 
         return coinPrice;
     }
 
-    private Double getLastKrw(String key) {
+    private double getLastKrw(String key) {
         String code = "CRIX.UPBIT.KRW-" + key;
         String count = "1";
         double price = 0.0;

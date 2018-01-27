@@ -37,8 +37,6 @@ public class CoinPrice {
 
         sb.append("[");
         sb.append(this.exchangeName);
-        sb.append(" ==> ");
-        sb.append(this.key);
         sb.append("]");
 
         if (this.satoshi != null) {

@@ -9,6 +9,8 @@ import io.coinpeeker.bot_hotssan.model.CoinPrice;
 import io.coinpeeker.bot_hotssan.model.constant.CoinType;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,10 @@ public class Commander {
     @Autowired
     @Qualifier("binanceApiClient")
     ApiClient binanceApiClient;
+
+    @Autowired
+    @Qualifier("bitfinexApiClient")
+    ApiClient bitfinexApiClient;
 
     @Autowired
     @Qualifier("bithumbApiClient")
@@ -77,17 +83,19 @@ public class Commander {
 
     private void init() {
         if (CollectionUtils.isEmpty(tradeInfoMap)) {
-            tradeInfoMap.put(CoinType.valueOf("BTC"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinnestApiClient, coinoneApiClient, coinrailApiClient, crytopiaApiClient, exxApiClient, kucoinApiClient, upbitApiClient));
-            tradeInfoMap.put(CoinType.valueOf("ETH"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinnestApiClient, coinoneApiClient, coinrailApiClient, crytopiaApiClient, exxApiClient, kucoinApiClient, upbitApiClient));
-            tradeInfoMap.put(CoinType.valueOf("ETC"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinnestApiClient, coinoneApiClient, crytopiaApiClient, exxApiClient, kucoinApiClient, upbitApiClient));
+            tradeInfoMap.put(CoinType.valueOf("ADA"), Arrays.asList(upbitApiClient, coinnestApiClient, bittrexApiClient, binanceApiClient));
+            tradeInfoMap.put(CoinType.valueOf("BTC"), Arrays.asList(binanceApiClient, bitfinexApiClient, bithumbApiClient, bittrexApiClient, coinnestApiClient, coinoneApiClient, coinrailApiClient, crytopiaApiClient, exxApiClient, kucoinApiClient, upbitApiClient));
             tradeInfoMap.put(CoinType.valueOf("DENT"), Arrays.asList(coinrailApiClient, kucoinApiClient));
+            tradeInfoMap.put(CoinType.valueOf("ETC"), Arrays.asList(binanceApiClient, bitfinexApiClient, bithumbApiClient, bittrexApiClient, coinnestApiClient, coinoneApiClient, crytopiaApiClient, exxApiClient, kucoinApiClient, upbitApiClient));
+            tradeInfoMap.put(CoinType.valueOf("ETH"), Arrays.asList(binanceApiClient, bitfinexApiClient, bithumbApiClient, bittrexApiClient, coinnestApiClient, coinoneApiClient, coinrailApiClient, crytopiaApiClient, exxApiClient, kucoinApiClient, upbitApiClient));
             tradeInfoMap.put(CoinType.valueOf("MED"), Arrays.asList(coinrailApiClient));
-            tradeInfoMap.put(CoinType.valueOf("TRX"), Arrays.asList(binanceApiClient, coinnestApiClient, coinrailApiClient));
+            tradeInfoMap.put(CoinType.valueOf("NEO"), Arrays.asList(binanceApiClient, bitfinexApiClient, bittrexApiClient, coinnestApiClient, coinrailApiClient, crytopiaApiClient, kucoinApiClient, upbitApiClient));
             tradeInfoMap.put(CoinType.valueOf("QTUM"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinnestApiClient, coinoneApiClient, coinrailApiClient, crytopiaApiClient, exxApiClient, kucoinApiClient, upbitApiClient));
-            tradeInfoMap.put(CoinType.valueOf("NEO"), Arrays.asList(binanceApiClient, bittrexApiClient, coinnestApiClient, coinrailApiClient, crytopiaApiClient, kucoinApiClient, upbitApiClient));
-            tradeInfoMap.put(CoinType.valueOf("XGOX"), Arrays.asList(crytopiaApiClient));
-            tradeInfoMap.put(CoinType.valueOf("XRP"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinoneApiClient, coinrailApiClient, upbitApiClient));
             tradeInfoMap.put(CoinType.valueOf("SPC"), Arrays.asList(exxApiClient));
+            tradeInfoMap.put(CoinType.valueOf("TRX"), Arrays.asList(binanceApiClient, bitfinexApiClient, coinnestApiClient, coinrailApiClient));
+            tradeInfoMap.put(CoinType.valueOf("TSL"), Arrays.asList(coinnestApiClient, coinrailApiClient));
+            tradeInfoMap.put(CoinType.valueOf("XGOX"), Arrays.asList(crytopiaApiClient));
+            tradeInfoMap.put(CoinType.valueOf("XRP"), Arrays.asList(binanceApiClient, bitfinexApiClient, bithumbApiClient, bittrexApiClient, coinoneApiClient, coinrailApiClient, upbitApiClient));
         }
     }
 
@@ -110,11 +118,14 @@ public class Commander {
         if (EnumUtils.isValidEnum(CoinType.class, coinSymbol)) {
             List<CoinPrice> responseList = getCoinPriceList(coinSymbol, tradeInfoMap.get(CoinType.valueOf(coinSymbol)));
 
+            result.append("-- ").append(coinSymbol).append(" --\n");
             for (CoinPrice coinPrice : responseList) {
                 result.append(coinPrice.toString());
                 result.append("\n\n");
             }
 
+        } else if ("LIST".equals(coinSymbol)) {
+            result.append(getCoinList());
         } else {
             result.append("등록 되어있지 않은 명령어 혹은 심볼입니다.");
         }
@@ -138,4 +149,19 @@ public class Commander {
 
         return resultList;
     }
+
+    private String getCoinList() {
+        StringBuilder sb = new StringBuilder();
+
+        for (CoinType item : CoinType.values()) {
+            sb.append(item.getSymbol());
+            sb.append(" : ");
+            sb.append(item.getDesc());
+            sb.append("\n");
+        }
+
+        return sb.toString();
+    }
+
+
 }

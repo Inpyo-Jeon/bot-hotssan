@@ -1,6 +1,9 @@
 package io.coinpeeker.bot_hotssan.utils;
 
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -30,8 +33,20 @@ public class HttpUtils {
      * @throws IOException
      */
     public CloseableHttpResponse get(String url) throws IOException {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+        RequestConfig globalConfig = RequestConfig.custom()
+                .setCookieSpec(CookieSpecs.DEFAULT)
+                .build();
+
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setDefaultRequestConfig(globalConfig)
+                .build();
+
+        RequestConfig localConfig = RequestConfig.copy(globalConfig)
+                .setCookieSpec(CookieSpecs.STANDARD)
+                .build();
+
         HttpGet httpGet = new HttpGet(url);
+        httpGet.setConfig(localConfig);
 
         CloseableHttpResponse response = httpClient.execute(httpGet);
         return response;
