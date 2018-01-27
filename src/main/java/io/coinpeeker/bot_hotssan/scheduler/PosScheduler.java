@@ -39,6 +39,10 @@ public class PosScheduler {
      */
     @Scheduled(initialDelay = 5000, fixedDelay = 1000 * 60 * 10)
     public void checkLastBalanceForXgox() {
+        /** env validation check.**/
+        if (!StringUtils.equals("real", env)) {
+            return;
+        }
 
         try {
 
@@ -60,10 +64,8 @@ public class PosScheduler {
                 sb.append("\nGap => ");
                 sb.append(lastBalance - XGOX_LAST_BALANCE);
 
-                if (StringUtils.equals("real", env)) {
-                    String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                    messageUtils.sendMessage(url, -300048567L, sb.toString());
-                }
+                String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
+                messageUtils.sendMessage(url, -300048567L, sb.toString());
 
                 XGOX_LAST_BALANCE = lastBalance;
             }
