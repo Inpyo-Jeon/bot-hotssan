@@ -24,18 +24,17 @@ public class BittrexApiClient implements ApiClient {
     public CoinPrice getCoinPrice(String key, double krwRate) {
         CoinPrice coinPrice = new CoinPrice(key, "비트렉스");
 
-        Double satoshi = getLastSatoshi(key);
-        Double usdt = getLastUsdt();
-        Double usd = usdt * satoshi;
-        Double krw = krwRate * usd;
+        double satoshi = getLastSatoshi(key);
+        double usdtPerBit = getLastUsdt("BTC") * satoshi;
+        double krw = krwRate * usdtPerBit;
 
         coinPrice.setSatoshi(String.valueOf(satoshi));
-        coinPrice.setUsd(String.valueOf(usd));
+        coinPrice.setUsd(String.valueOf(usdtPerBit));
         coinPrice.setKrw(String.valueOf(krw));
         return coinPrice;
     }
 
-    private Double getLastSatoshi(String key) {
+    private double getLastSatoshi(String key) {
         Double price = 0.0;
 
         if ("BTC".equals(key)) {
@@ -56,12 +55,12 @@ public class BittrexApiClient implements ApiClient {
         return price;
     }
 
-    private Double getLastUsdt() {
+    private double getLastUsdt(String key) {
 
-        Double price = 0.0;
+        double price = 0.0;
 
         try {
-            String market = "usdt-btc";
+            String market = "usdt-" + key;
 
             URIBuilder uriInfo = new URIBuilder(API_BITTREX_URL);
             uriInfo.addParameter("market", market);

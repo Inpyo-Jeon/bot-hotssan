@@ -9,6 +9,8 @@ import io.coinpeeker.bot_hotssan.model.CoinPrice;
 import io.coinpeeker.bot_hotssan.model.constant.CoinType;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,10 @@ public class Commander {
     @Autowired
     @Qualifier("binanceApiClient")
     ApiClient binanceApiClient;
+
+    @Autowired
+    @Qualifier("bitfinexApiClient")
+    ApiClient bitfinexApiClient;
 
     @Autowired
     @Qualifier("bithumbApiClient")
@@ -77,6 +83,7 @@ public class Commander {
 
     private void init() {
         if (CollectionUtils.isEmpty(tradeInfoMap)) {
+<<<<<<< HEAD
             // BTC - 빗썸, 비트렉스, 코인원, 업비트
             tradeInfoMap.put(CoinType.valueOf("BTC"), Arrays.asList(bithumbApiClient, bittrexApiClient, coinoneApiClient, upbitApiClient));
 
@@ -109,6 +116,12 @@ public class Commander {
 
             // SPC - EXX
             tradeInfoMap.put(CoinType.valueOf("SPC"), Arrays.asList(exxApiClient));
+
+            // ADA - 업비트, 코인네스트, 비트렉스
+            tradeInfoMap.put(CoinType.valueOf("ADA"), Arrays.asList(upbitApiClient, coinnestApiClient));
+
+            // TSL - 코인네스트, 코인레일
+            tradeInfoMap.put(CoinType.valueOf("TSL"), Arrays.asList(coinnestApiClient, coinrailApiClient));
         }
     }
 
@@ -131,11 +144,14 @@ public class Commander {
         if (EnumUtils.isValidEnum(CoinType.class, coinSymbol)) {
             List<CoinPrice> responseList = getCoinPriceList(coinSymbol, tradeInfoMap.get(CoinType.valueOf(coinSymbol)));
 
+            result.append("-- ").append(coinSymbol).append(" --\n");
             for (CoinPrice coinPrice : responseList) {
                 result.append(coinPrice.toString());
                 result.append("\n\n");
             }
 
+        } else if ("LIST".equals(coinSymbol)) {
+            result.append(getCoinList());
         } else {
             result.append("등록 되어있지 않은 명령어 혹은 심볼입니다.");
         }
@@ -159,4 +175,19 @@ public class Commander {
 
         return resultList;
     }
+
+    private String getCoinList() {
+        StringBuilder sb = new StringBuilder();
+
+        for (CoinType item : CoinType.values()) {
+            sb.append(item.getSymbol());
+            sb.append(" : ");
+            sb.append(item.getDesc());
+            sb.append("\n");
+        }
+
+        return sb.toString();
+    }
+
+
 }

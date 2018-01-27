@@ -10,19 +10,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static io.coinpeeker.bot_hotssan.common.CommonConstant.API_KUCOIN_URL;
+import static io.coinpeeker.bot_hotssan.common.CommonConstant.API_BITFINEX_URL;
 
 @Component
-public class KucoinApiClient implements ApiClient {
+public class BitfinexApiClient implements ApiClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KucoinApiClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BitfinexApiClient.class);
 
     @Autowired
     private HttpUtils httpUtils;
 
     @Override
     public CoinPrice getCoinPrice(String key, double krwRate) {
-        CoinPrice coinPrice = new CoinPrice(key, "쿠코인");
+        CoinPrice coinPrice = new CoinPrice(key, "비트파이넥스");
 
         double satoshi = getLastSatoshi(key);
         double usdtPerBit = getLastUsdt("BTC") * satoshi;
@@ -35,26 +35,23 @@ public class KucoinApiClient implements ApiClient {
         return coinPrice;
     }
 
-
     private double getLastSatoshi(String key) {
-        double price = 0.0;
+        Double price = 0.0;
 
         if ("BTC".equals(key)) {
             price = 1.00000000;
         } else {
-
             try {
-                String symbol = key + "-BTC";
-                URIBuilder uriInfo = new URIBuilder(API_KUCOIN_URL);
-                uriInfo.addParameter("symbol", symbol);
+                String symbol = "/v1/pubticker/" + key + "btc";
+                URIBuilder uriBuilder = new URIBuilder(API_BITFINEX_URL);
+                uriBuilder.setPath(symbol);
 
-                JSONObject jsonObject = httpUtils.getResponseByObject(uriInfo.toString());
-                price = jsonObject.getJSONObject("data").getDouble("lastDealPrice");
+                JSONObject jsonObject = httpUtils.getResponseByObject(uriBuilder.toString());
+                price = jsonObject.getDouble("last_price");
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
         return price;
     }
 
@@ -62,12 +59,12 @@ public class KucoinApiClient implements ApiClient {
         double price = 0.0;
 
         try {
-            String symbol = key + "-USDT";
-            URIBuilder uriInfo = new URIBuilder(API_KUCOIN_URL);
-            uriInfo.addParameter("symbol", symbol);
 
+            String symbol = "/v1/pubticker/" + key + "usd";
+            URIBuilder uriInfo = new URIBuilder(API_BITFINEX_URL);
+            uriInfo.setPath(symbol);
             JSONObject jsonObject = httpUtils.getResponseByObject(uriInfo.toString());
-            price = jsonObject.getJSONObject("data").getDouble("lastDealPrice");
+            price = jsonObject.getDouble("last_price");
 
         } catch (Exception e) {
             e.printStackTrace();

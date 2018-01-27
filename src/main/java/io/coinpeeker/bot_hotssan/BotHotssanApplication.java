@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class BotHotssanApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(BotHotssanApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(BotHotssanApplication.class, args);
+    }
 }

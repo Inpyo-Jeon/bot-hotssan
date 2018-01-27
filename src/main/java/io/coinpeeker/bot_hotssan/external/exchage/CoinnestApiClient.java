@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static io.coinpeeker.bot_hotssan.common.CommonConstant.API_COINNEST_URL;
-import static io.coinpeeker.bot_hotssan.common.CommonConstant.API_UPBIT_URL;
 
 @Component
 public class CoinnestApiClient implements ApiClient {
@@ -25,15 +24,19 @@ public class CoinnestApiClient implements ApiClient {
     public CoinPrice getCoinPrice(String key, double krwRate) {
         CoinPrice coinPrice = new CoinPrice(key, "코인네스트");
 
-        Double krw = getLastKrw(key);
+        double krw = getLastKrw(key);
 
         coinPrice.setKrw(String.valueOf(krw));
 
         return coinPrice;
     }
 
-    private Double getLastKrw(String symbol) {
+    private double getLastKrw(String symbol) {
         double price = 0;
+
+        if (symbol.equals("TRX")) {
+            symbol = "TRON";
+        }
 
         try {
             URIBuilder uriInfo = new URIBuilder(API_COINNEST_URL);

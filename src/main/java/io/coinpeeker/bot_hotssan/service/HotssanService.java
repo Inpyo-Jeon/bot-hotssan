@@ -21,7 +21,7 @@ import java.util.List;
 
 
 @Service
-public class HotssanService implements HotssanUpdateHandler{
+public class HotssanService implements HotssanUpdateHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HotssanService.class);
 
@@ -74,7 +74,7 @@ public class HotssanService implements HotssanUpdateHandler{
         // validation check
         if (update == null) {
             LOGGER.error("#$#$#$ update object is null");
-            return ;
+            return;
         }
 
         String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
