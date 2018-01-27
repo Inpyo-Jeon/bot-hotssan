@@ -31,17 +31,17 @@ public class UpbitApiClient implements ApiClient {
         return coinPrice;
     }
 
-    public Double getLastKrw(String symbol) {
-        String code = "CRIX.UPBIT.KRW-" + symbol;
+    private Double getLastKrw(String key) {
+        String code = "CRIX.UPBIT.KRW-" + key;
         String count = "1";
-        double price = 0;
+        double price = 0.0;
 
         try {
-            URIBuilder urlInfo = new URIBuilder(API_UPBIT_URL);
-            urlInfo.addParameter("code", code);
-            urlInfo.addParameter("count", count);
+            URIBuilder uriInfo = new URIBuilder(API_UPBIT_URL);
+            uriInfo.addParameter("code", code);
+            uriInfo.addParameter("count", count);
 
-            JSONObject jsonObject = httpUtils.getResponseByArray(urlInfo.toString());
+            JSONObject jsonObject = httpUtils.getResponseByArray(uriInfo.toString());
             price = jsonObject.getDouble("tradePrice");
 
         } catch (Exception e) {

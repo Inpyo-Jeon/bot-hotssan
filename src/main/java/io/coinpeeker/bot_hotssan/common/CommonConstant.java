@@ -16,5 +16,8 @@ public class CommonConstant {
     public static final String API_EXX_URL = "https://api.exx.com/data/v1/ticker";
     public static final String API_COINRAIL_URL = "https://api.coinrail.co.kr/public/last/order";
     public static final String API_KUCOIN_URL = "https://api.kucoin.com/v1/open/tick";
-    public static final String API_CRYPTOPIA_URL = "https://www.cryptopia.co.nz/api/GetMarket";
+    public static final String API_CRYPTOPIA_URL = "https://www.cryptopia.co.nz";
+    public static final String API_COINNEST_URL = "https://api.coinnest.co.kr/api/pub/ticker";
+    public static final String API_BITHUMB_URL = "https://api.bithumb.com";
+    public static final String API_COINONE_URL = "https://api.coinone.co.kr/ticker";
 }
