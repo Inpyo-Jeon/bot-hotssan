@@ -43,17 +43,17 @@ public class CoinPrice {
 
         if (this.satoshi != null) {
             sb.append("\n사토시 : ");
-            sb.append(this.satoshi);
-        }
-
-        if (this.krw != null) {
-            sb.append("\n원화 : ");
-            sb.append(CommonUtils.convertKRW(Double.valueOf(this.krw)));
+            sb.append(CommonUtils.convertSatoshi(this.satoshi));
         }
 
         if (this.usd != null) {
             sb.append("\n달러 : ");
-            sb.append(CommonUtils.convertUSD(Double.valueOf(this.usd)));
+            sb.append(CommonUtils.convertUSD(this.usd));
+        }
+
+        if (this.krw != null) {
+            sb.append("\n원화 : ");
+            sb.append(CommonUtils.convertKRW(this.krw));
         }
 
         return sb.toString();

@@ -2,13 +2,15 @@ package io.coinpeeker.bot_hotssan.external;
 
 import io.coinpeeker.bot_hotssan.model.CoinPrice;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
+import org.apache.http.client.utils.URIBuilder;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
+import static io.coinpeeker.bot_hotssan.common.CommonConstant.API_COINRAIL_URL;
 
 @Component
 public class CoinrailApiClientImpl implements ApiClient {
@@ -19,31 +21,60 @@ public class CoinrailApiClientImpl implements ApiClient {
     private HttpUtils httpUtils;
 
     @Override
-    public CoinPrice getCoinPrice(String key) {
+    public CoinPrice getCoinPrice(String key, double krwRate) {
         CoinPrice coinPrice = new CoinPrice(key, "코인레일");
 
-//        coinPrice.setKrw("1000 원");
-        coinPrice.setSatoshi(getLastSatoshi(key));
-//        coinPrice.setUsd("0.23 USD");
+        try {
+            coinPrice.setKrw(String.valueOf(getKrw(key)));
+        } catch (JSONException e) {
+            Double satoshi = getLastSatoshi(key);
+            Double krw = getKrw("btc") * satoshi;
+            coinPrice.setSatoshi(String.valueOf(satoshi));
+            coinPrice.setKrw(String.valueOf(krw));
+        }
+
 
         return coinPrice;
     }
 
-    private String getLastSatoshi(String key) {
+    private Double getLastSatoshi(String key) {
+        Double price = 0.0;
 
-        String url = "https://api.coinrail.co.kr/public/last/order?currency=" + key + "-btc";
+        if ("BTC".equals(key)) {
+            price = 1.0000000;
+        } else {
 
-        String price = null;
-        try {
-            JSONObject jsonObject = httpUtils.getResponseByObject(url);
+            try {
+                String currency = key + "-btc";
+                URIBuilder uriInfo = new URIBuilder(API_COINRAIL_URL);
+                uriInfo.addParameter("currency", currency);
 
-            price = jsonObject.getString("last_price");
-        } catch (Exception e) {
-            LOGGER.info("#$#$#$ key : {}", key);
-            e.printStackTrace();
-            return "에러";
+                JSONObject jsonObject = httpUtils.getResponseByObject(uriInfo.toString());
+                price = jsonObject.getDouble("last_price");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         return price;
     }
+
+    private Double getKrw(String key) {
+        Double price = 0.0;
+        try {
+            String currency = key + "-krw";
+            URIBuilder uriInfo = new URIBuilder(API_COINRAIL_URL);
+            uriInfo.addParameter("currency", currency);
+
+            JSONObject jsonObject = httpUtils.getResponseByObject(uriInfo.toString());
+            price = jsonObject.getDouble("last_price");
+
+        } catch (JSONException jsonException) {
+            throw new JSONException("JSONException");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return price;
+    }
+
 }

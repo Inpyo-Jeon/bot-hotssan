@@ -3,6 +3,7 @@ package io.coinpeeker.bot_hotssan.utils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.coinpeeker.bot_hotssan.external.ApiClient;
+import io.coinpeeker.bot_hotssan.external.HanaExchange;
 import io.coinpeeker.bot_hotssan.model.CoinPrice;
 import io.coinpeeker.bot_hotssan.model.constant.CoinType;
 import org.apache.commons.lang3.EnumUtils;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -63,8 +65,7 @@ public class Commander {
     ApiClient upbitApiClient;
 
     @Autowired
-    @Qualifier("exchangeApiClientImpl")
-    ApiClient exchangeApiClient;
+    HanaExchange exchangeApi;
 
 
     private Map<CoinType, List<ApiClient>> tradeInfoMap = Maps.newHashMap();
@@ -80,7 +81,6 @@ public class Commander {
             tradeInfoMap.put(CoinType.valueOf("QTUM"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinnestApiClient, coinoneApiClient, coinrailApiClient, crytopiaApiClient, exxApiClient, kucoinApiClient, upbitApiClient));
             tradeInfoMap.put(CoinType.valueOf("NEO"), Arrays.asList(binanceApiClient, bittrexApiClient, coinnestApiClient, coinrailApiClient, crytopiaApiClient, kucoinApiClient, upbitApiClient));
             tradeInfoMap.put(CoinType.valueOf("XGOX"), Arrays.asList(crytopiaApiClient));
-            tradeInfoMap.put(CoinType.valueOf("BCH"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinnestApiClient, coinoneApiClient, coinrailApiClient, crytopiaApiClient, exxApiClient, kucoinApiClient, upbitApiClient));
             tradeInfoMap.put(CoinType.valueOf("XRP"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinoneApiClient, coinrailApiClient, upbitApiClient));
             tradeInfoMap.put(CoinType.valueOf("SPC"), Arrays.asList(exxApiClient));
         }
@@ -110,10 +110,16 @@ public class Commander {
 
     private List<CoinPrice> getCoinPriceList(String symbol, List<ApiClient> apiClientList) {
         List<CoinPrice> resultList = Lists.newArrayList();
+        double krwRate = 0.0;
+        try {
+            krwRate = exchangeApi.lastPrice();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
         for (ApiClient apiClient : apiClientList) {
-            resultList.add(apiClient.getCoinPrice(symbol));
+            resultList.add(apiClient.getCoinPrice(symbol, krwRate));
         }
 
         return resultList;

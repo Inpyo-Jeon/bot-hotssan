@@ -13,13 +13,28 @@ public class CommonUtils {
      * @param price
      * @return
      */
-    public static String convertKRW(double price) {
-        DecimalFormat decimalFormat = new DecimalFormat("###,###,###.### 원");
-        return decimalFormat.format(price);
+    public static String convertKRW(String price) {
+        Double tempPrice = Double.valueOf(price);
+        DecimalFormat decimalFormat = new DecimalFormat("###,###,### 원");
+        return decimalFormat.format(tempPrice);
     }
 
-    public static String convertUSD(double price){
+    public static String convertUSD(String price){
+        Double tempPrice = Double.valueOf(price);
         DecimalFormat decimalFormat = new DecimalFormat("###,###,###.### 달러");
-        return decimalFormat.format(price);
+        return decimalFormat.format(tempPrice);
+    }
+
+    public static String convertSatoshi(String price){
+        Double tempPrice = Double.valueOf(price);
+        DecimalFormat decimalFormat = null;
+
+        if(tempPrice >= 1.0){
+             decimalFormat = new DecimalFormat("#.########## 비트");
+        } else {
+            decimalFormat = new DecimalFormat("#.########## 사토시");
+        }
+
+        return decimalFormat.format(tempPrice);
     }
 }

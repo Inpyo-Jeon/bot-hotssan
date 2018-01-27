@@ -1,7 +1,6 @@
 package io.coinpeeker.bot_hotssan.external;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
-import io.coinpeeker.bot_hotssan.model.CoinPrice;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -14,12 +13,12 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-public class ExchangeApiClientImpl implements ApiClient {
+public class HanaExchange {
 
     @Autowired
     private HttpUtils httpUtils;
 
-    public String lastPrice(String key) throws IOException {
+    public Double lastPrice() throws IOException {
 
         CloseableHttpResponse httpResponse = httpUtils.get(CommonConstant.HANA_BANK_URL);
         String convertData = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
@@ -29,11 +28,6 @@ public class ExchangeApiClientImpl implements ApiClient {
                 .get(0).getElementsByClass("first")
                 .get(0).getElementsByClass("buy");
 
-        return buy.get(0).text();
-    }
-
-    @Override
-    public CoinPrice getCoinPrice(String key) {
-        return null;
+        return Double.parseDouble(buy.get(0).text());
     }
 }

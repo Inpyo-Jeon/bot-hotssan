@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 public class CoinoneApiClientImpl implements ApiClient {
 
     @Override
-    public CoinPrice getCoinPrice(String key) {
+    public CoinPrice getCoinPrice(String key, double krwRate) {
         CoinPrice coinPrice = new CoinPrice(key, "코인원");
 
         return coinPrice;

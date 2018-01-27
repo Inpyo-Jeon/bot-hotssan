@@ -11,4 +11,10 @@ public class CommonConstant {
     public static final String HANA_BANK_URL = "http://fx.kebhana.com/fxportal/jsp/RS/DEPLOY_EXRATE/fxrate_B_v2.html";
 
     public static final String API_UPBIT_URL = "https://crix-api-endpoint.upbit.com/v1/crix/candles/minutes/1";
+    public static final String API_BINANCE_URL = "https://api.binance.com/api/v3/ticker/price";
+    public static final String API_BITTREX_URL = "https://bittrex.com/api/v1.1/public/getmarketsummary";
+    public static final String API_EXX_URL = "https://api.exx.com/data/v1/ticker";
+    public static final String API_COINRAIL_URL = "https://api.coinrail.co.kr/public/last/order";
+    public static final String API_KUCOIN_URL = "https://api.kucoin.com/v1/open/tick";
+    public static final String API_CRYPTOPIA_URL = "https://www.cryptopia.co.nz/api/GetMarket";
 }
