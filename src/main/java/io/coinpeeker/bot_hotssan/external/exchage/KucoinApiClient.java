@@ -5,6 +5,8 @@ import io.coinpeeker.bot_hotssan.model.CoinPrice;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +14,8 @@ import static io.coinpeeker.bot_hotssan.common.CommonConstant.API_KUCOIN_URL;
 
 @Component
 public class KucoinApiClient implements ApiClient {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KucoinApiClient.class);
 
     @Autowired
     private HttpUtils httpUtils;

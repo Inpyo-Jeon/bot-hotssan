@@ -44,7 +44,7 @@ public class CryptopiaApiClient implements ApiClient {
         } else {
 
             try {
-                String symbol = "/" + key + "_BTC";
+                String symbol = "/api/GetMarket/" + key + "_BTC";
                 URIBuilder uriInfo = new URIBuilder(API_CRYPTOPIA_URL);
                 uriInfo.setPath(symbol);
 
@@ -62,7 +62,7 @@ public class CryptopiaApiClient implements ApiClient {
         Double price = 0.0;
 
         try {
-            String symbol = "/BTC_USDT";
+            String symbol = "/api/GetMarket/BTC_USDT";
             URIBuilder uriInfo = new URIBuilder(API_CRYPTOPIA_URL);
             uriInfo.setPath(symbol);
 
