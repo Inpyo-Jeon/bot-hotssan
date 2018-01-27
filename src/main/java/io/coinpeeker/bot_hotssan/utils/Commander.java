@@ -77,16 +77,37 @@ public class Commander {
 
     private void init() {
         if (CollectionUtils.isEmpty(tradeInfoMap)) {
-            tradeInfoMap.put(CoinType.valueOf("BTC"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinnestApiClient, coinoneApiClient, coinrailApiClient, crytopiaApiClient, exxApiClient, kucoinApiClient, upbitApiClient));
-            tradeInfoMap.put(CoinType.valueOf("ETH"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinnestApiClient, coinoneApiClient, coinrailApiClient, crytopiaApiClient, exxApiClient, kucoinApiClient, upbitApiClient));
-            tradeInfoMap.put(CoinType.valueOf("ETC"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinnestApiClient, coinoneApiClient, crytopiaApiClient, exxApiClient, kucoinApiClient, upbitApiClient));
+            // BTC - 빗썸, 비트렉스, 코인원, 업비트
+            tradeInfoMap.put(CoinType.valueOf("BTC"), Arrays.asList(bithumbApiClient, bittrexApiClient, coinoneApiClient, upbitApiClient));
+
+            // ETH - 빗썸, 비트렉스, 코인원, 업비트
+            tradeInfoMap.put(CoinType.valueOf("ETH"), Arrays.asList(bithumbApiClient, bittrexApiClient, coinoneApiClient, upbitApiClient));
+
+            // ETC - 빗썸, 비트렉스, 코인원, 업비트
+            tradeInfoMap.put(CoinType.valueOf("ETC"), Arrays.asList(bithumbApiClient, bittrexApiClient, coinoneApiClient, upbitApiClient));
+
+            // QTUM - 빗썸, 비트렉스, 코인원, 코인네스트, 업비트
+            tradeInfoMap.put(CoinType.valueOf("QTUM"), Arrays.asList(bithumbApiClient, bittrexApiClient, coinoneApiClient, coinnestApiClient, upbitApiClient));
+
+            // NEO - 비트렉스, 업비트
+            tradeInfoMap.put(CoinType.valueOf("NEO"), Arrays.asList(bittrexApiClient, upbitApiClient));
+
+            // DENT - 코인레일, 쿠코인
             tradeInfoMap.put(CoinType.valueOf("DENT"), Arrays.asList(coinrailApiClient, kucoinApiClient));
+
+            // MED - 코인레일
             tradeInfoMap.put(CoinType.valueOf("MED"), Arrays.asList(coinrailApiClient));
+
+            // TRX - 바이낸스, 코인네스트, 코인레일
             tradeInfoMap.put(CoinType.valueOf("TRX"), Arrays.asList(binanceApiClient, coinnestApiClient, coinrailApiClient));
-            tradeInfoMap.put(CoinType.valueOf("QTUM"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinnestApiClient, coinoneApiClient, coinrailApiClient, crytopiaApiClient, exxApiClient, kucoinApiClient, upbitApiClient));
-            tradeInfoMap.put(CoinType.valueOf("NEO"), Arrays.asList(binanceApiClient, bittrexApiClient, coinnestApiClient, coinrailApiClient, crytopiaApiClient, kucoinApiClient, upbitApiClient));
+
+            // XGOX - 크립토피아
             tradeInfoMap.put(CoinType.valueOf("XGOX"), Arrays.asList(crytopiaApiClient));
-            tradeInfoMap.put(CoinType.valueOf("XRP"), Arrays.asList(binanceApiClient, bithumbApiClient, bittrexApiClient, coinoneApiClient, coinrailApiClient, upbitApiClient));
+
+            // XRP - 빗썸, 비트렉스, 코인원, 업비트
+            tradeInfoMap.put(CoinType.valueOf("XRP"), Arrays.asList(bithumbApiClient, bittrexApiClient, coinoneApiClient, upbitApiClient));
+
+            // SPC - EXX
             tradeInfoMap.put(CoinType.valueOf("SPC"), Arrays.asList(exxApiClient));
         }
     }
