@@ -1,4 +1,4 @@
-package io.coinpeeker.bot_hotssan.external;
+package io.coinpeeker.bot_hotssan.external.bank;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-public class HanaExchange {
+public class HanaBankApiClient {
 
     @Autowired
     private HttpUtils httpUtils;

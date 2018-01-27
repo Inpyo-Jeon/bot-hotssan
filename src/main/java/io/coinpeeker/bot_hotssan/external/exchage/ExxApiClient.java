@@ -1,5 +1,6 @@
-package io.coinpeeker.bot_hotssan.external;
+package io.coinpeeker.bot_hotssan.external.exchage;
 
+import io.coinpeeker.bot_hotssan.external.ApiClient;
 import io.coinpeeker.bot_hotssan.model.CoinPrice;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.apache.http.client.utils.URIBuilder;
@@ -12,9 +13,9 @@ import org.springframework.stereotype.Component;
 import static io.coinpeeker.bot_hotssan.common.CommonConstant.API_EXX_URL;
 
 @Component
-public class ExxApiClientImpl implements ApiClient {
+public class ExxApiClient implements ApiClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExxApiClientImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExxApiClient.class);
 
     @Autowired
     private HttpUtils httpUtils;

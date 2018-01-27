@@ -3,7 +3,7 @@ package io.coinpeeker.bot_hotssan.utils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.coinpeeker.bot_hotssan.external.ApiClient;
-import io.coinpeeker.bot_hotssan.external.HanaExchange;
+import io.coinpeeker.bot_hotssan.external.bank.HanaBankApiClient;
 import io.coinpeeker.bot_hotssan.model.CoinPrice;
 import io.coinpeeker.bot_hotssan.model.constant.CoinType;
 import org.apache.commons.lang3.EnumUtils;
@@ -25,47 +25,47 @@ public class Commander {
     private static final Logger LOGGER = LoggerFactory.getLogger(Commander.class);
 
     @Autowired
-    @Qualifier("binanceApiClientImpl")
+    @Qualifier("binanceApiClient")
     ApiClient binanceApiClient;
 
     @Autowired
-    @Qualifier("bithumbApiClientImpl")
+    @Qualifier("bithumbApiClient")
     ApiClient bithumbApiClient;
 
     @Autowired
-    @Qualifier("bittrexApiClientImpl")
+    @Qualifier("bittrexApiClient")
     ApiClient bittrexApiClient;
 
     @Autowired
-    @Qualifier("coinnestApiClientImpl")
+    @Qualifier("coinnestApiClient")
     ApiClient coinnestApiClient;
 
     @Autowired
-    @Qualifier("coinoneApiClientImpl")
+    @Qualifier("coinoneApiClient")
     ApiClient coinoneApiClient;
 
     @Autowired
-    @Qualifier("coinrailApiClientImpl")
+    @Qualifier("coinrailApiClient")
     ApiClient coinrailApiClient;
 
     @Autowired
-    @Qualifier("cryptopiaApiClientImpl")
+    @Qualifier("cryptopiaApiClient")
     ApiClient crytopiaApiClient;
 
     @Autowired
-    @Qualifier("exxApiClientImpl")
+    @Qualifier("exxApiClient")
     ApiClient exxApiClient;
 
     @Autowired
-    @Qualifier("kucoinApiClientImpl")
+    @Qualifier("kucoinApiClient")
     ApiClient kucoinApiClient;
 
     @Autowired
-    @Qualifier("upbitApiClientImpl")
+    @Qualifier("upbitApiClient")
     ApiClient upbitApiClient;
 
     @Autowired
-    HanaExchange exchangeApi;
+    HanaBankApiClient exchangeApi;
 
 
     private Map<CoinType, List<ApiClient>> tradeInfoMap = Maps.newHashMap();
