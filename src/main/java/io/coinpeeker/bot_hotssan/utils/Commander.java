@@ -83,8 +83,8 @@ public class Commander {
 
     private void init() {
         if (CollectionUtils.isEmpty(tradeInfoMap)) {
-            // BTC - 빗썸, 비트렉스, 코인원, 업비트
-            tradeInfoMap.put(CoinType.valueOf("BTC"), Arrays.asList(bithumbApiClient, bittrexApiClient, coinoneApiClient, upbitApiClient));
+            // BTC - 비트파이넥스, 빗썸, 비트렉스, 업비트
+            tradeInfoMap.put(CoinType.valueOf("BTC"), Arrays.asList(bitfinexApiClient, bithumbApiClient, bittrexApiClient, upbitApiClient));
 
             // ETH - 빗썸, 비트렉스, 코인원, 업비트
             tradeInfoMap.put(CoinType.valueOf("ETH"), Arrays.asList(bithumbApiClient, bittrexApiClient, coinoneApiClient, upbitApiClient));
