@@ -4,9 +4,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.coinpeeker.bot_hotssan.external.ApiClient;
 import io.coinpeeker.bot_hotssan.external.bank.HanaBankApiClient;
+import io.coinpeeker.bot_hotssan.external.etc.XgoxApiClient;
 import io.coinpeeker.bot_hotssan.model.CoinPrice;
 import io.coinpeeker.bot_hotssan.model.constant.CoinType;
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +69,9 @@ public class Commander {
     @Autowired
     HanaBankApiClient exchangeApi;
 
+    @Autowired
+    XgoxApiClient xgoxApiClient;
+
 
     private Map<CoinType, List<ApiClient>> tradeInfoMap = Maps.newHashMap();
 
@@ -92,6 +97,15 @@ public class Commander {
 
         StringBuilder result = new StringBuilder();
         String coinSymbol = instruction.replace("/", "").toUpperCase();
+
+        if (StringUtils.equals("test", instruction)) {
+            try {
+                Double testResult = xgoxApiClient.getLastBalance();
+                LOGGER.info("#$@#$@#$@#$ testResult = {}", testResult);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         if (EnumUtils.isValidEnum(CoinType.class, coinSymbol)) {
             List<CoinPrice> responseList = getCoinPriceList(coinSymbol, tradeInfoMap.get(CoinType.valueOf(coinSymbol)));
