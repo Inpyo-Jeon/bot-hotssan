@@ -83,7 +83,6 @@ public class Commander {
 
     private void init() {
         if (CollectionUtils.isEmpty(tradeInfoMap)) {
-<<<<<<< HEAD
             // BTC - 빗썸, 비트렉스, 코인원, 업비트
             tradeInfoMap.put(CoinType.valueOf("BTC"), Arrays.asList(bithumbApiClient, bittrexApiClient, coinoneApiClient, upbitApiClient));
 
