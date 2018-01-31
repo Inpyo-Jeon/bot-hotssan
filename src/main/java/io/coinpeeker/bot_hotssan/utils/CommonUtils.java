@@ -30,9 +30,9 @@ public class CommonUtils {
         DecimalFormat decimalFormat = null;
 
         if(tempPrice >= 1.0){
-             decimalFormat = new DecimalFormat("#.########## 비트");
+             decimalFormat = new DecimalFormat("0.00000000 비트");
         } else {
-            decimalFormat = new DecimalFormat("#.########## 사토시");
+            decimalFormat = new DecimalFormat("0.00000000 사토시");
         }
 
         return decimalFormat.format(tempPrice);

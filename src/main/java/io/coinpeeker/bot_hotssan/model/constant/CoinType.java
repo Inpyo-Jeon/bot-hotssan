@@ -1,9 +1,11 @@
 package io.coinpeeker.bot_hotssan.model.constant;
 
 public enum CoinType {
-    ADA("카르다노", "ada")
+    ADA("카르다노", "ada"),
+    ADX("애드액스", "adx")
     ,BTC("비트코인", "btc")
     ,DENT("덴트", "dent")
+    ,EOS("이오스", "eos")
     ,ETC("이더리움클래식", "etc")
     ,ETH("이더리움", "eth")
     ,MED("메디블록", "med")

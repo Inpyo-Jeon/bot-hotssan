@@ -21,4 +21,5 @@ public class CommonConstant {
     public static final String API_BITHUMB_URL = "https://api.bithumb.com";
     public static final String API_COINONE_URL = "https://api.coinone.co.kr/ticker";
     public static final String API_BITFINEX_URL = "https://api.bitfinex.com";
+    public static final String API_OKEX_URL = "https://www.okex.com/api/v1/ticker.do";
 }

@@ -73,6 +73,10 @@ public class Commander {
     ApiClient upbitApiClient;
 
     @Autowired
+    @Qualifier("okexApiClient")
+    ApiClient okexApiClient;
+
+    @Autowired
     HanaBankApiClient exchangeApi;
 
     @Autowired
@@ -98,8 +102,8 @@ public class Commander {
             // NEO - 비트렉스, 업비트
             tradeInfoMap.put(CoinType.valueOf("NEO"), Arrays.asList(bittrexApiClient, upbitApiClient));
 
-            // DENT - 코인레일, 쿠코인
-            tradeInfoMap.put(CoinType.valueOf("DENT"), Arrays.asList(coinrailApiClient, kucoinApiClient));
+            // DENT - 코인레일, 쿠코인, OKEx
+            tradeInfoMap.put(CoinType.valueOf("DENT"), Arrays.asList(coinrailApiClient, kucoinApiClient, okexApiClient));
 
             // MED - 코인레일
             tradeInfoMap.put(CoinType.valueOf("MED"), Arrays.asList(coinrailApiClient));
@@ -114,13 +118,19 @@ public class Commander {
             tradeInfoMap.put(CoinType.valueOf("XRP"), Arrays.asList(bithumbApiClient, bittrexApiClient, coinoneApiClient, upbitApiClient));
 
             // SPC - EXX
-            tradeInfoMap.put(CoinType.valueOf("SPC"), Arrays.asList(exxApiClient));
+            tradeInfoMap.put(CoinType.valueOf("SPC"), Arrays.asList(exxApiClient, coinnestApiClient));
 
             // ADA - 업비트, 코인네스트, 비트렉스
             tradeInfoMap.put(CoinType.valueOf("ADA"), Arrays.asList(upbitApiClient, coinnestApiClient));
 
             // TSL - 코인네스트, 코인레일
             tradeInfoMap.put(CoinType.valueOf("TSL"), Arrays.asList(coinnestApiClient, coinrailApiClient));
+
+            // EOS - 빗썸, 비트파이넥스, OKEx
+            tradeInfoMap.put(CoinType.valueOf("EOS"), Arrays.asList(bithumbApiClient, bitfinexApiClient, okexApiClient));
+
+            // ADX - 바이낸스
+            tradeInfoMap.put(CoinType.valueOf("ADX"), Arrays.asList(binanceApiClient));
         }
     }
 
