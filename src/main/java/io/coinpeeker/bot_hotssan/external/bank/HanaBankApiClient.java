@@ -24,10 +24,14 @@ public class HanaBankApiClient {
         String convertData = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
 
         Element body = Jsoup.parseBodyFragment(convertData).body();
+
         Elements buy = body.getElementsByClass("tbl_cont")
                 .get(0).getElementsByClass("first")
                 .get(0).getElementsByClass("buy");
+        Elements sell = body.getElementsByClass("tbl_cont")
+                .get(0).getElementsByClass("first")
+                .get(0).getElementsByClass("sell");
 
-        return Double.parseDouble(buy.get(0).text());
+        return (Double.valueOf(buy.get(0).text()) + Double.valueOf(sell.get(0).text())) / 2.0;
     }
 }
