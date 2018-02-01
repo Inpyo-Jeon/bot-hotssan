@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import io.coinpeeker.bot_hotssan.external.ApiClient;
 import io.coinpeeker.bot_hotssan.external.bank.HanaBankApiClient;
 import io.coinpeeker.bot_hotssan.external.etc.XgoxApiClient;
+import io.coinpeeker.bot_hotssan.feature.PremiumCalc;
 import io.coinpeeker.bot_hotssan.model.CoinPrice;
 import io.coinpeeker.bot_hotssan.model.constant.CoinType;
 import org.apache.commons.lang3.EnumUtils;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -82,8 +84,13 @@ public class Commander {
     @Autowired
     XgoxApiClient xgoxApiClient;
 
+    @Autowired
+    PremiumCalc premiumCalc;
+
+
 
     private Map<CoinType, List<ApiClient>> tradeInfoMap = Maps.newHashMap();
+    private Map<CoinType, List<ApiClient>> premiumMap = Maps.newHashMap();
 
     private void init() {
         if (CollectionUtils.isEmpty(tradeInfoMap)) {
@@ -134,9 +141,19 @@ public class Commander {
         }
     }
 
+    private void premiumInit(){
+        premiumMap.put(CoinType.valueOf("BTC"), Arrays.asList(bithumbApiClient, upbitApiClient, coinoneApiClient, bitfinexApiClient, bittrexApiClient));
+        premiumMap.put(CoinType.valueOf("ETH"), Arrays.asList(bithumbApiClient, upbitApiClient, coinoneApiClient, bitfinexApiClient, bittrexApiClient));
+        premiumMap.put(CoinType.valueOf("ETC"), Arrays.asList(bithumbApiClient, upbitApiClient, coinoneApiClient, bitfinexApiClient, bittrexApiClient));
+        premiumMap.put(CoinType.valueOf("XRP"), Arrays.asList(bithumbApiClient, upbitApiClient, coinoneApiClient, bitfinexApiClient, bittrexApiClient));
+        premiumMap.put(CoinType.valueOf("QTUM"), Arrays.asList(bithumbApiClient, upbitApiClient, coinoneApiClient, bitfinexApiClient, bittrexApiClient));
+    }
+
+
 
     public String execute(String instruction) {
         init();
+        premiumInit();
 
         StringBuilder result = new StringBuilder();
         String coinSymbol = instruction.replace("/", "").toUpperCase();
@@ -161,6 +178,29 @@ public class Commander {
 
         } else if ("LIST".equals(coinSymbol)) {
             result.append(getCoinList());
+        } else if ("PP".equals(coinSymbol)){
+
+            try{
+                double krwRate = 0.0;
+                try {
+                    krwRate = exchangeApi.lastPrice();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
+                for (CoinType coin : premiumMap.keySet()){
+                    String symbol = coin.getSymbol().toUpperCase();
+                    result.append(premiumCalc.str(symbol, premiumMap, krwRate));
+                }
+            } catch (Exception e){
+                e.printStackTrace();
+                result.append("오류");
+            }
+
+
+
+
         } else {
             result.append("등록 되어있지 않은 명령어 혹은 심볼입니다.");
         }

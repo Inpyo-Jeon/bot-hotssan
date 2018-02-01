@@ -38,6 +38,10 @@ public class BitfinexApiClient implements ApiClient {
     private double getLastSatoshi(String key) {
         Double price = 0.0;
 
+        if (key.equals("QTUM")) {
+            key = "QTM";
+        }
+
         if ("BTC".equals(key)) {
             price = 1.00000000;
         } else {

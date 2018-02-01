@@ -14,9 +14,17 @@ public class CoinPrice {
     private String usd;
     private String satoshi;
 
+    public String getExchangeName() {
+        return this.exchangeName;
+    }
+
     public CoinPrice(String key, String exchangeName) {
         this.key = key;
         this.exchangeName = exchangeName;
+    }
+
+    public String getKrw() {
+        return this.krw;
     }
 
     public void setKrw(String krw) {

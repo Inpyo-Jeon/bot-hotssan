@@ -37,4 +37,10 @@ public class CommonUtils {
 
         return decimalFormat.format(tempPrice);
     }
+
+    public static String convertPremium(double price){
+        DecimalFormat decimalFormat = new DecimalFormat("###.##%");
+        return decimalFormat.format(price);
+    }
+
 }
