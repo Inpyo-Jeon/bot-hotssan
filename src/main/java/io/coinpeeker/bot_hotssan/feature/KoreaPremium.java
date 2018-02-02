@@ -32,7 +32,7 @@ public class KoreaPremium {
         List<String> foreignExchange = new ArrayList<>();
 
         for (String item : coinPriceMap.keySet()) {
-            if ("빗썸, 코인네스트, 코인원, 코인레일, 업비트".contains(item)) {
+            if ("업비트, 빗썸, 코인원, 코인레일, 코인네스트".contains(item)) {
                 Arrays.asList(item);
                 koreaExchange.add(item);
             } else {

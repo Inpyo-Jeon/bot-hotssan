@@ -50,7 +50,7 @@ public class OkexApiClient implements ApiClient {
     private double getLastSatoshi(String key) {
         double price = 0.0;
 
-        if ("BTC, EOS".equals(key)) {
+        if ("BTC".equals(key)) {
             price = 1.00000000;
         } else {
             try {
