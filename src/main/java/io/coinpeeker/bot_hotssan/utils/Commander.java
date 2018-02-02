@@ -5,13 +5,11 @@ import com.google.common.collect.Maps;
 import io.coinpeeker.bot_hotssan.external.ApiClient;
 import io.coinpeeker.bot_hotssan.external.bank.HanaBankApiClient;
 import io.coinpeeker.bot_hotssan.external.etc.XgoxApiClient;
-import io.coinpeeker.bot_hotssan.feature.PremiumCalc;
+import io.coinpeeker.bot_hotssan.feature.KoreaPremium;
 import io.coinpeeker.bot_hotssan.model.CoinPrice;
 import io.coinpeeker.bot_hotssan.model.constant.CoinType;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -85,12 +82,11 @@ public class Commander {
     XgoxApiClient xgoxApiClient;
 
     @Autowired
-    PremiumCalc premiumCalc;
-
+    KoreaPremium koreaPremium;
 
 
     private Map<CoinType, List<ApiClient>> tradeInfoMap = Maps.newHashMap();
-    private Map<CoinType, List<ApiClient>> premiumMap = Maps.newHashMap();
+    private Map<CoinType, List<ApiClient>> premiumExchangeMap = Maps.newHashMap();
 
     private void init() {
         if (CollectionUtils.isEmpty(tradeInfoMap)) {
@@ -141,14 +137,13 @@ public class Commander {
         }
     }
 
-    private void premiumInit(){
-        premiumMap.put(CoinType.valueOf("BTC"), Arrays.asList(bithumbApiClient, upbitApiClient, coinoneApiClient, bitfinexApiClient, bittrexApiClient));
-        premiumMap.put(CoinType.valueOf("ETH"), Arrays.asList(bithumbApiClient, upbitApiClient, coinoneApiClient, bitfinexApiClient, bittrexApiClient));
-        premiumMap.put(CoinType.valueOf("ETC"), Arrays.asList(bithumbApiClient, upbitApiClient, coinoneApiClient, bitfinexApiClient, bittrexApiClient));
-        premiumMap.put(CoinType.valueOf("XRP"), Arrays.asList(bithumbApiClient, upbitApiClient, coinoneApiClient, bitfinexApiClient, bittrexApiClient));
-        premiumMap.put(CoinType.valueOf("QTUM"), Arrays.asList(bithumbApiClient, upbitApiClient, coinoneApiClient, bitfinexApiClient, bittrexApiClient));
+    private void premiumInit() {
+        premiumExchangeMap.put(CoinType.valueOf("BTC"), Arrays.asList(bithumbApiClient, upbitApiClient, coinoneApiClient, bitfinexApiClient, bittrexApiClient));
+        premiumExchangeMap.put(CoinType.valueOf("ETH"), Arrays.asList(bithumbApiClient, upbitApiClient, coinoneApiClient, bitfinexApiClient, bittrexApiClient));
+        premiumExchangeMap.put(CoinType.valueOf("ETC"), Arrays.asList(bithumbApiClient, upbitApiClient, coinoneApiClient, bitfinexApiClient, bittrexApiClient));
+        premiumExchangeMap.put(CoinType.valueOf("XRP"), Arrays.asList(bithumbApiClient, upbitApiClient, coinoneApiClient, bitfinexApiClient, bittrexApiClient));
+        premiumExchangeMap.put(CoinType.valueOf("QTUM"), Arrays.asList(bithumbApiClient, upbitApiClient, coinoneApiClient, bitfinexApiClient, bittrexApiClient));
     }
-
 
 
     public String execute(String instruction) {
@@ -178,28 +173,26 @@ public class Commander {
 
         } else if ("LIST".equals(coinSymbol)) {
             result.append(getCoinList());
-        } else if ("PP".equals(coinSymbol)){
-
-            try{
+        } else if ("PP".equals(coinSymbol)) {
+            try {
                 double krwRate = 0.0;
                 try {
                     krwRate = exchangeApi.lastPrice();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-
-                for (CoinType coin : premiumMap.keySet()){
+                result.append("----- 한국 프리미엄 계산 -----");
+                result.append("\n기준환율 : ");
+                result.append(krwRate);
+                result.append(" 원\n\n");
+                for (CoinType coin : premiumExchangeMap.keySet()) {
                     String symbol = coin.getSymbol().toUpperCase();
-                    result.append(premiumCalc.str(symbol, premiumMap, krwRate));
+                    result.append(koreaPremium.calculate(symbol, premiumExchangeMap, krwRate));
                 }
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
                 result.append("오류");
             }
-
-
-
 
         } else {
             result.append("등록 되어있지 않은 명령어 혹은 심볼입니다.");

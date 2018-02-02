@@ -19,18 +19,18 @@ public class CommonUtils {
         return decimalFormat.format(tempPrice);
     }
 
-    public static String convertUSD(String price){
+    public static String convertUSD(String price) {
         Double tempPrice = Double.valueOf(price);
         DecimalFormat decimalFormat = new DecimalFormat("###,###,###.### 달러");
         return decimalFormat.format(tempPrice);
     }
 
-    public static String convertSatoshi(String price){
+    public static String convertSatoshi(String price) {
         Double tempPrice = Double.valueOf(price);
         DecimalFormat decimalFormat = null;
 
-        if(tempPrice >= 1.0){
-             decimalFormat = new DecimalFormat("0.00000000 비트");
+        if (tempPrice >= 1.0) {
+            decimalFormat = new DecimalFormat("0.00000000 비트");
         } else {
             decimalFormat = new DecimalFormat("0.00000000 사토시");
         }
@@ -38,9 +38,9 @@ public class CommonUtils {
         return decimalFormat.format(tempPrice);
     }
 
-    public static String convertPremium(double price){
-        DecimalFormat decimalFormat = new DecimalFormat("###.##%");
-        return decimalFormat.format(price);
+    public static String convertPremium(double price) {
+        DecimalFormat decimalFormat = new DecimalFormat("#.00%;-#.00%");
+        return decimalFormat.format((price - 1.00));
     }
 
 }
