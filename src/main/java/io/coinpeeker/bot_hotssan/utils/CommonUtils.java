@@ -15,7 +15,7 @@ public class CommonUtils {
      */
     public static String convertKRW(String price) {
         Double tempPrice = Double.valueOf(price);
-        DecimalFormat decimalFormat = new DecimalFormat("###,###,### 원");
+        DecimalFormat decimalFormat = new DecimalFormat("###,###,###.# 원");
         return decimalFormat.format(tempPrice);
     }
 
@@ -39,7 +39,7 @@ public class CommonUtils {
     }
 
     public static String convertPremium(double price) {
-        DecimalFormat decimalFormat = new DecimalFormat("#.00%;-#.00%");
+        DecimalFormat decimalFormat = new DecimalFormat("##0.00%;-##0.00%");
         return decimalFormat.format((price - 1.00));
     }
 
