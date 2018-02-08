@@ -1,7 +1,6 @@
 package io.coinpeeker.bot_hotssan.utils;
 
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -48,9 +47,45 @@ public class HttpUtils {
         HttpGet httpGet = new HttpGet(url);
         httpGet.setConfig(localConfig);
 
+
         CloseableHttpResponse response = httpClient.execute(httpGet);
         return response;
     }
+
+    /**
+     * HttpGet Overloading
+     *
+     * @param url, header
+     * @return
+     * @throws IOException
+     */
+    public CloseableHttpResponse get(String url, List<NameValuePair> header) throws IOException {
+        RequestConfig globalConfig = RequestConfig.custom()
+                .setCookieSpec(CookieSpecs.DEFAULT)
+                .build();
+
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setDefaultRequestConfig(globalConfig)
+                .build();
+
+        RequestConfig localConfig = RequestConfig.copy(globalConfig)
+                .setCookieSpec(CookieSpecs.STANDARD)
+                .build();
+
+        HttpGet httpGet = new HttpGet(url);
+        httpGet.setConfig(localConfig);
+
+        for (NameValuePair item : header) {
+            httpGet.setHeader(item.getName(), item.getValue());
+        }
+
+
+        CloseableHttpResponse response = httpClient.execute(httpGet);
+        return response;
+
+
+    }
+
 
     /**
      * HttpPost
@@ -63,6 +98,14 @@ public class HttpUtils {
     public CloseableHttpResponse post(String url, List<NameValuePair> params) throws IOException {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(url);
+
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setSocketTimeout(1000*10)
+                .setConnectTimeout(1000*10)
+                .setConnectionRequestTimeout(1000*10)
+                .build();
+
+        httpPost.setConfig(requestConfig);
 
         httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
         CloseableHttpResponse response = httpClient.execute(httpPost);
@@ -85,6 +128,12 @@ public class HttpUtils {
         return jsonObject;
     }
 
+    public JSONArray getResponseByArrays(String url) throws IOException {
+        CloseableHttpResponse httpResponse = get(url);
+        JSONArray jsonArrays = new JSONArray(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
+        return jsonArrays;
+    }
+
     /**
      * API 호출결과를 JSONObject 로 리턴받는 메소드, apiResponse 의 최상단이 Object 인 경우
      *
@@ -96,6 +145,19 @@ public class HttpUtils {
         CloseableHttpResponse httpResponse = get(url);
         JSONObject jsonObject = new JSONObject(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
 
+        return jsonObject;
+    }
+
+    public JSONObject getResponseByObject(String url, List<NameValuePair> header) throws IOException {
+        CloseableHttpResponse httpResponse = get(url, header);
+        JSONObject jsonObject = new JSONObject(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
+
+        return jsonObject;
+    }
+
+    public JSONObject getPostResponseByObject(String url, List<NameValuePair> param) throws IOException{
+        CloseableHttpResponse httpResponse = post(url, param);
+        JSONObject jsonObject = new JSONObject(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
         return jsonObject;
     }
 }
