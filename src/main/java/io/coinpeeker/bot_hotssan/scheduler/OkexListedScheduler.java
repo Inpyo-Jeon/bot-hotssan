@@ -47,8 +47,6 @@ public class OkexListedScheduler {
             JSONObject jsonObject = httpUtils.getPostResponseByObject(URL, params);
             JSONObject list = jsonObject.getJSONObject("info").getJSONObject("funds").getJSONObject("free");
 
-            LOGGER.info(list.toString());
-
             if (OKEX_LAST_LIST == null) {
                 LOGGER.info("@#@#@# OKEX_LAST_LIST is null");
 
