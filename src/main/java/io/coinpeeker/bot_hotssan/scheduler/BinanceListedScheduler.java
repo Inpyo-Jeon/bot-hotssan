@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.*;
 
 @Component
 public class BinanceListedScheduler {
@@ -46,60 +47,80 @@ public class BinanceListedScheduler {
     private static final String HEADER_VALUE = "jPgNEo8XGAyDPuqpJJV3gnzNROGbV3F2jzWhVP7lpYAOcuBTex0OBZlfRApoiY2D";
 
 
-    @Scheduled(initialDelay = 1000, fixedDelay = 1000 * 5)
-    public void checkListedCoin() throws NoSuchAlgorithmException {
+    @Scheduled(initialDelay = 1000, fixedDelay = 5000)
+    public void checkListedCoin() {
         List<NameValuePair> header = new ArrayList<>();
         header.add(new BasicNameValuePair(HEADER_KEY, HEADER_VALUE));
-        StringBuilder sb = new StringBuilder();
-        Mac mac = Mac.getInstance("HMACSHA256");
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         LOGGER.info(count + "회차 뺑뺑이");
-        for (String item : noListedCoin.getCoinList()) {
-            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        Future<?> future = null;
 
-            sb.append("https://api.binance.com/wapi/v3/depositAddress.html?");
-            String queryString = "asset=" + item + "&recvWindow=5000&timestamp=" + timestamp.getTime();
-            sb.append(queryString);
 
-            try {
-                sb.append("&signature=");
-                mac.init(new SecretKeySpec(SECRET_KEY.getBytes(), "HMACSHA256"));
+        for (int i = 0; i < noListedCoin.getCoinList().size(); i++) {
+            String currentCoin = noListedCoin.getCoinList().get(i);
 
-                for (byte byteItem : mac.doFinal(queryString.getBytes())){
-                    sb.append(Integer.toString((byteItem & 0xFF) + 0x100, 16).substring(1));
+            Runnable task = new Runnable() {
+                @Override
+                public void run() {
+                    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("https://api.binance.com/wapi/v3/depositAddress.html?");
+                    String queryString = "asset=" + currentCoin + "&recvWindow=5000&timestamp=" + timestamp.getTime();
+                    sb.append(queryString);
+
+                    try {
+                        sb.append("&signature=");
+                        Mac mac = Mac.getInstance("HMACSHA256");
+                        mac.init(new SecretKeySpec(SECRET_KEY.getBytes(), "HMACSHA256"));
+
+                        for (byte byteItem : mac.doFinal(queryString.getBytes())) {
+                            sb.append(Integer.toString((byteItem & 0xFF) + 0x100, 16).substring(1));
+                        }
+
+                        JSONObject jsonObject = httpUtils.getResponseByObject(sb.toString(), header);
+
+                        LOGGER.info(jsonObject.toString() + " : " + currentCoin);
+
+
+                        if (jsonObject.getBoolean("success")) {
+                            StringBuilder content = new StringBuilder();
+                            Date today = new Date();
+                            content.append("!! 바이낸스 상장 정보 !!");
+                            content.append("\n상장 예정 코인 : ");
+                            content.append(jsonObject.getString("asset"));
+                            content.append("\n주소 : ");
+                            content.append(jsonObject.getString("address"));
+                            content.append("\n딱 걸린 시간 : ");
+                            content.append(today);
+                            LOGGER.info(jsonObject.getBoolean("success") + " : " + currentCoin);
+                            content.append(jsonObject.toString());
+                            String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
+                            messageUtils.sendMessage(url, -259666461L, content.toString());
+
+                        }
+                    } catch (InvalidKeyException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (NoSuchAlgorithmException e) {
+                        e.printStackTrace();
+                    }
+
+                    sb.setLength(0);
                 }
+            };
 
-                JSONObject jsonObject = httpUtils.getResponseByObject(sb.toString(), header);
+            future = executorService.submit(task);
+        }
 
-                LOGGER.info(jsonObject.toString() + " : " + item);
-
-
-                if (jsonObject.getBoolean("success")) {
-                    StringBuilder content = new StringBuilder();
-                    Date today = new Date();
-//                    content.append("!! 바이낸스 상장 정보 !!");
-//                    content.append("\n상장 예정 코인 : ");
-//                    content.append(jsonObject.getString("asset"));
-//                    content.append("\n주소 : ");
-//                    content.append(jsonObject.getString("address"));
-//                    content.append("\n딱 걸린 시간 : ");
-//                    content.append(today);
-                    LOGGER.info(jsonObject.getBoolean("success") + " : " + item);
-                    content.append(jsonObject.toString());
-                    String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                    messageUtils.sendMessage(url, -259666461L, content.toString());
-
-                }
-            } catch (InvalidKeyException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            sb.setLength(0);
-
-
+        try {
+            future.get();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         count++;
+
     }
 }
