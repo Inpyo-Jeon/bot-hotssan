@@ -1,5 +1,6 @@
 package io.coinpeeker.bot_hotssan.service;
 
+import com.google.common.collect.Maps;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.module.HotssanUpdateHandler;
 import io.coinpeeker.bot_hotssan.utils.AuthUtils;
@@ -16,14 +17,16 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.api.objects.Update;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
 
 
 @Service
 public class HotssanService implements HotssanUpdateHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HotssanService.class);
+    private static Map<String, LocalDateTime> temp = Maps.newHashMap();
 
     @Value("${property.hotssan_id}")
     private String apiKey;
@@ -82,13 +85,48 @@ public class HotssanService implements HotssanUpdateHandler {
         String instruction = update.getMessage().getText();
         StringBuilder message = new StringBuilder();
 
-        if (!authUtils.isAuthenticated(chatId)) {
-            message.append("등록되지 않은 사용자입니다.\n사용자 아이디 등록을 요청하세요 : ");
-            message.append(chatId);
-        } else {
-            message.append(commander.execute(instruction));
+        Timer m_timer = new Timer();
+        TimerTask m_task = new TimerTask() {
+            @Override
+            public void run() {
+                temp.remove(instruction);
+            }
+        };
+
+        if (temp.containsKey(instruction) && Duration.between(temp.get(instruction), LocalDateTime.now()).toMillis() < 3000) {
+            m_timer.schedule(m_task, 3000);
         }
 
-        messageUtils.sendMessage(url, chatId, message.toString());
+
+        if (temp.isEmpty() || !temp.containsKey(instruction)) {
+            temp.put(instruction, LocalDateTime.now());
+            if (!authUtils.isAuthenticated(chatId)) {
+                message.append("등록되지 않은 사용자입니다.\n사용자 아이디 등록을 요청하세요 : ");
+                message.append(chatId);
+            } else {
+                temp.put(instruction, LocalDateTime.now());
+                message.append(commander.execute(instruction));
+                m_timer.schedule(m_task, 3000);
+                messageUtils.sendMessage(url, chatId, message.toString());
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+    public void removedTemp(){
+
     }
 }
