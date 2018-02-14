@@ -37,8 +37,15 @@ dependencies {
 	// telegram api
 	compile('org.telegram:telegrambots:3.5')
 
+	// jsoup
 	compile group: 'org.jsoup', name: 'jsoup', version: '1.8.3'
+
+	// spring boot-redis interface
+	compile("org.springframework.boot:spring-boot-starter-data-redis")
+
 	testCompile('org.springframework.boot:spring-boot-starter-test')
+	compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
+
 
 
 }

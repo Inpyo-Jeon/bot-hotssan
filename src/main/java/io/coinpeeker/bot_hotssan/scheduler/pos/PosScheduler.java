@@ -1,4 +1,4 @@
-package io.coinpeeker.bot_hotssan.scheduler;
+package io.coinpeeker.bot_hotssan.scheduler.pos;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.external.etc.XgoxApiClient;

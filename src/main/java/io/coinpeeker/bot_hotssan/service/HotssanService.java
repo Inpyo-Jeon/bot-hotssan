@@ -26,7 +26,7 @@ import java.util.*;
 public class HotssanService implements HotssanUpdateHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HotssanService.class);
-    private static Map<String, LocalDateTime> temp = Maps.newHashMap();
+    private static Map<String, LocalDateTime> tempInstructionMap = Maps.newHashMap();
 
     @Value("${property.hotssan_id}")
     private String apiKey;
@@ -89,44 +89,25 @@ public class HotssanService implements HotssanUpdateHandler {
         TimerTask m_task = new TimerTask() {
             @Override
             public void run() {
-                temp.remove(instruction);
+                tempInstructionMap.remove(instruction);
             }
         };
 
-        if (temp.containsKey(instruction) && Duration.between(temp.get(instruction), LocalDateTime.now()).toMillis() < 3000) {
+        if (tempInstructionMap.containsKey(instruction) && Duration.between(tempInstructionMap.get(instruction), LocalDateTime.now()).toMillis() < 3000) {
             m_timer.schedule(m_task, 3000);
         }
 
-
-        if (temp.isEmpty() || !temp.containsKey(instruction)) {
-            temp.put(instruction, LocalDateTime.now());
+        if (tempInstructionMap.isEmpty() || !tempInstructionMap.containsKey(instruction)) {
+            tempInstructionMap.put(instruction, LocalDateTime.now());
             if (!authUtils.isAuthenticated(chatId)) {
                 message.append("등록되지 않은 사용자입니다.\n사용자 아이디 등록을 요청하세요 : ");
                 message.append(chatId);
             } else {
-                temp.put(instruction, LocalDateTime.now());
+                tempInstructionMap.put(instruction, LocalDateTime.now());
                 message.append(commander.execute(instruction));
                 m_timer.schedule(m_task, 3000);
                 messageUtils.sendMessage(url, chatId, message.toString());
             }
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    }
-
-    public void removedTemp(){
-
     }
 }
