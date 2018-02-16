@@ -118,6 +118,8 @@ public class BinanceListedScheduler implements Listing {
 
                         JSONObject jsonObject = httpUtils.getResponseByObject(sb.toString(), header);
 
+                        LOGGER.info(jsonObject.toString());
+
                         if (jsonObject.getBoolean("success")) {
                             Date date = new Date();
                             StringBuilder messageContent = new StringBuilder();

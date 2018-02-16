@@ -213,6 +213,8 @@ public class UpbitListedScheduler implements Listing{
 
                         JSONObject jsonObject = httpUtils.getResponseByObject(tempURL);
 
+                        LOGGER.info(jsonObject.toString());
+
                         if(!jsonObject.has("error") && jsonObject.has("name")){
                             StringBuilder messageContent = new StringBuilder();
 
