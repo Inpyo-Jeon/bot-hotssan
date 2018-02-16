@@ -22,6 +22,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,7 +33,6 @@ public class BinanceListedScheduler implements Listing {
 
     @Autowired
     HttpUtils httpUtils;
-
 
     @Autowired
     MessageUtils messageUtils;
@@ -56,19 +56,21 @@ public class BinanceListedScheduler implements Listing {
     public void init() throws IOException {
 
         // Redis에 coinMarketCap 존재 여부 체크
-        if (hashOperations.keys("cap").isEmpty()) {
-            LOGGER.info("@#@#@# cap Listing is null");
+        if (hashOperations.keys("CoinMarketCap").isEmpty()) {
+            LOGGER.info("@#@#@# CoinMarketCap Listing is null");
             coinMarketCapScheduler.refreshCoinData();
         }
 
         // Redis에 binance 상장목록 존재 여부 체크
-        if (hashOperations.keys("binanceListing").isEmpty()) {
-            LOGGER.info("@#@#@# Binance Listing is null");
+        if (hashOperations.keys("BinanceListing").isEmpty()) {
+            LOGGER.info("@#@#@# binance Listing is null");
+
+            hashOperations.put("BinanceListing", "BTC", "0");
 
             JSONArray jsonArrayBinance = httpUtils.getResponseByArrays("https://api.binance.com/api/v3/ticker/price");
             for (int i = 0; i < jsonArrayBinance.length(); i++) {
                 if (jsonArrayBinance.getJSONObject(i).getString("symbol").contains("BTC")) {
-                    hashOperations.put("binanceListing", jsonArrayBinance.getJSONObject(i).getString("symbol").replace("BTC", ""), "0");
+                    hashOperations.put("BinanceListing", jsonArrayBinance.getJSONObject(i).getString("symbol").replace("BTC", ""), "0");
                 }
             }
         }
@@ -76,23 +78,23 @@ public class BinanceListedScheduler implements Listing {
 
 
     @Override
-    @Scheduled(initialDelay = 5000, fixedDelay = 5000000)
+    @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 5)
     public void inspectListedCoin() throws IOException {
         init();
 
         List<NameValuePair> header = new ArrayList<>();
         header.add(new BasicNameValuePair(HEADER_KEY, HEADER_VALUE));
 
-        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         List<String> noListedCoinList = new ArrayList<>();
-        for (String item : hashOperations.keys("cap")) {
-            if (!hashOperations.hasKey("binanceListing", item)) {
+        for (String item : hashOperations.keys("CoinMarketCap")) {
+            if (!hashOperations.hasKey("BinanceListing", item)) {
                 noListedCoinList.add(item);
             }
         }
 
-        LOGGER.info(count + "회차 뺑뺑이");
+        LOGGER.info("Binance " + count + "회차 뺑뺑이");
 
         Future<?> future = null;
         for (String item : noListedCoinList) {
@@ -116,25 +118,26 @@ public class BinanceListedScheduler implements Listing {
 
                         JSONObject jsonObject = httpUtils.getResponseByObject(sb.toString(), header);
 
-                        LOGGER.info(jsonObject.toString() + " : " + item);
-
                         if (jsonObject.getBoolean("success")) {
-                            StringBuilder content = new StringBuilder();
-                            Date today = new Date();
-                            content.append("!! 바이낸스 상장 정보 !!");
-                            content.append("\n상장 예정 코인 : ");
-                            content.append(jsonObject.getString("asset"));
-                            content.append("\n주소 : ");
-                            content.append(jsonObject.getString("address"));
-                            content.append("\n딱 걸린 시간 : ");
-                            content.append(today);
-                            LOGGER.info(jsonObject.getBoolean("success") + " : " + item);
-                            content.append(jsonObject.toString());
+                            Date date = new Date();
+                            StringBuilder messageContent = new StringBuilder();
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd, hh:mm:ss a");
+
+                            messageContent.append("!! 바이낸스 상장 정보 !!");
+                            messageContent.append("\n코인 정보 : ");
+                            messageContent.append(hashOperations.get("CoinMarketCap", jsonObject.getString("asset")));
+                            messageContent.append(" (");
+                            messageContent.append(jsonObject.getString("asset"));
+                            messageContent.append(")");
+                            messageContent.append("\n주소 : ");
+                            messageContent.append(jsonObject.getString("address"));
+                            messageContent.append("\n확인시간 : ");
+                            messageContent.append(simpleDateFormat.format(date).toString());
 
                             String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                            messageUtils.sendMessage(url, -259666461L, content.toString());
+                            messageUtils.sendMessage(url, -294606763L, messageContent.toString());
 
-                            hashOperations.put("binanceListing", item, "0");
+                            hashOperations.put("BinanceListing", item, "0");
                         }
                     } catch (Exception e) {
                         e.printStackTrace();

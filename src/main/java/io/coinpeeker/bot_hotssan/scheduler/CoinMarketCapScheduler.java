@@ -23,15 +23,19 @@ public class CoinMarketCapScheduler {
     @Resource(name="redisTemplate")
     private HashOperations<String, String, String> hashOperations;
 
+    //TODO : 24시간 마다 갱신, 갱신 시 각 스케줄러와 동시성은 어떻게 처리해야 할 지!
+
     @Scheduled(fixedRate = 1000 * 60 * 60 * 24)
     public void refreshCoinData() throws IOException {
 
-        JSONArray jsonArray = httpUtils.getResponseByArrays("https://api.coinmarketcap.com/v1/ticker/?limit=1600");
+        if (hashOperations.keys("CoinMarketCap").isEmpty()) {
+            LOGGER.info("@#@#@# CoinMarketCap Listing is null");
 
-        for (int i = 0; i < jsonArray.length(); i++){
-            hashOperations.put("cap", jsonArray.getJSONObject(i).getString("symbol"), jsonArray.getJSONObject(i).getString("name"));
+            JSONArray jsonArray = httpUtils.getResponseByArrays("https://api.coinmarketcap.com/v1/ticker/?limit=1600");
+
+            for (int i = 0; i < jsonArray.length(); i++){
+                hashOperations.put("CoinMarketCap", jsonArray.getJSONObject(i).getString("symbol"), jsonArray.getJSONObject(i).getString("name"));
+            }
         }
-
-        LOGGER.info(hashOperations.entries("cap").toString());
     }
 }

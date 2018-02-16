@@ -39,6 +39,7 @@ public class OkexListedScheduler implements Listing {
     @Value("${property.hotssan_id}")
     private String apiKey;
 
+    private int count = 1;
     private static final Logger LOGGER = LoggerFactory.getLogger(OkexListedScheduler.class);
     private static final String URL = "https://www.okex.com/api/v1/userinfo.do";
     private static final String API_KEY = "4b47a99a-bc50-4bf2-9ae3-3bb53b681148";
@@ -46,8 +47,8 @@ public class OkexListedScheduler implements Listing {
 
     @Override
     public void init() throws IOException {
-        if (hashOperations.keys("cap").isEmpty()) {
-            LOGGER.info("@#@#@# cap Listing is null");
+        if (hashOperations.keys("CoinMarketCap").isEmpty()) {
+            LOGGER.info("@#@#@# CoinMarketCap Listing is null");
             coinMarketCapScheduler.refreshCoinData();
         }
 
@@ -69,7 +70,7 @@ public class OkexListedScheduler implements Listing {
 
 
     @Override
-    @Scheduled(initialDelay = 6000, fixedDelay = 1000 * 10)
+    @Scheduled(initialDelay = 1000 * 6, fixedDelay = 1000 * 10)
     public void inspectListedCoin() throws IOException {
         init();
 
@@ -77,33 +78,33 @@ public class OkexListedScheduler implements Listing {
         params.add(new BasicNameValuePair("api_key", API_KEY));
         params.add(new BasicNameValuePair("sign", SIGN));
 
-        Date date = new Date();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd, hh:mm:ss a");
-
         JSONObject jsonObject = httpUtils.getPostResponseByObject(URL, params);
         JSONObject list = jsonObject.getJSONObject("info").getJSONObject("funds").getJSONObject("free");
 
-        LOGGER.info(simpleDateFormat.format(date).toString() + " : " + String.valueOf(hashOperations.values("OKExListing").size()) + "//" + String.valueOf(list.length()));
+        LOGGER.info("OKEx " + count + "회차 뺑뺑이 : " + hashOperations.values("OKExListing").size() + " // " + list.length());
 
         if (hashOperations.values("OKExListing").size() != list.length()) {
 
+            Date date = new Date();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd, hh:mm:ss a");
+
             for (Object item : list.keySet()) {
                 if (!hashOperations.hasKey("OKExListing", item.toString())) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(" !!!! OKEx 상장 정보 !!!! ");
-                    sb.append("\n지갑이 생성 되었나 봅니다.");
-                    sb.append("\n확인시간 : ");
-                    sb.append(simpleDateFormat.format(date).toString());
-                    sb.append("\n코인 Symbol : ");
-                    sb.append(item.toString());
-//
+                    StringBuilder messageContent = new StringBuilder();
+                    messageContent.append("!! OKEx 상장 정보 !!");
+                    messageContent.append("\n지갑이 생성 되었나 봅니다.");
+                    messageContent.append("\n확인시간 : ");
+                    messageContent.append(simpleDateFormat.format(date).toString());
+                    messageContent.append("\n코인 Symbol : ");
+                    messageContent.append(item.toString().toUpperCase());
+
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                    messageUtils.sendMessage(url, -259666461L, sb.toString());
+                    messageUtils.sendMessage(url, -294606763L, messageContent.toString());
 
                     hashOperations.put("OKExListing", item.toString(), "0");
                 }
             }
         }
-
+        count++;
     }
 }
