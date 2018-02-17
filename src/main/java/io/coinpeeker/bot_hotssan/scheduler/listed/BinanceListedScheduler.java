@@ -137,7 +137,7 @@ public class BinanceListedScheduler implements Listing {
                             messageContent.append(simpleDateFormat.format(date).toString());
 
                             String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                            messageUtils.sendMessage(url, -294606763L, messageContent.toString());
+                            messageUtils.sendMessage(url, -300048567L, messageContent.toString());
 
                             hashOperations.put("BinanceListing", item, "0");
                         }

@@ -99,7 +99,7 @@ public class OkexListedScheduler implements Listing {
                     messageContent.append(item.toString().toUpperCase());
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                    messageUtils.sendMessage(url, -294606763L, messageContent.toString());
+                    messageUtils.sendMessage(url, -300048567L, messageContent.toString());
 
                     hashOperations.put("OKExListing", item.toString(), "0");
                 }
