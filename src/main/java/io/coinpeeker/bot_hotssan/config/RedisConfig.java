@@ -7,8 +7,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import redis.clients.jedis.Jedis;
 
-@EnableAutoConfiguration
+//@EnableAutoConfiguration
 @Configuration
 public class RedisConfig {
 
@@ -25,6 +26,11 @@ public class RedisConfig {
         jedisConnectionFactory.setPort(redisPort);
         jedisConnectionFactory.setUsePool(true);
         return jedisConnectionFactory;
+    }
+
+    @Bean
+    public Jedis initJedis(JedisConnectionFactory connectionFactory) {
+        return (Jedis) connectionFactory.getConnection().getNativeConnection();
     }
 
     @Bean

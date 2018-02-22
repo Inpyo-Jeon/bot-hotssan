@@ -16,11 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.HashOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import redis.clients.jedis.Jedis;
 
-import javax.annotation.Resource;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
@@ -29,7 +28,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Component
 public class BinanceListedScheduler implements Listing {
@@ -45,8 +46,10 @@ public class BinanceListedScheduler implements Listing {
     @Autowired
     CoinMarketCapScheduler coinMarketCapScheduler;
 
-    @Resource(name = "redisTemplate")
-    private HashOperations<String, String, String> hashOperations;
+//    @Resource(name = "redisTemplate")
+//    private HashOperations<String, String, String> hashOperations;
+    @Autowired
+    private Jedis jedis;
 
     @Value("${property.hotssan_id}")
     private String apiKey;
@@ -64,21 +67,25 @@ public class BinanceListedScheduler implements Listing {
     public void init() throws IOException {
 
         // Redis에 coinMarketCap 존재 여부 체크
-        if (hashOperations.keys("CoinMarketCap").isEmpty()) {
+//        if (hashOperations.keys("CoinMarketCap").isEmpty()) {
+        if (jedis.keys("CoinMarketCap").isEmpty()) {
             LOGGER.info("@#@#@# CoinMarketCap Listing is null");
             coinMarketCapScheduler.refreshCoinData();
         }
 
         // Redis에 binance 상장목록 존재 여부 체크
-        if (hashOperations.keys("BinanceListing").isEmpty()) {
+//        if (hashOperations.keys("BinanceListing").isEmpty()) {
+        if (jedis.hkeys("BinanceListing").isEmpty()) {
             LOGGER.info("@#@#@# binance Listing is null");
 
-            hashOperations.put("BinanceListing", "BTC", "0");
+//            hashOperations.put("BinanceListing", "BTC", "0");
+            jedis.hset("BinanceListing", "BTC", "0");
 
             JSONArray jsonArrayBinance = httpUtils.getResponseByArrays("https://api.binance.com/api/v3/ticker/price");
             for (int i = 0; i < jsonArrayBinance.length(); i++) {
                 if (jsonArrayBinance.getJSONObject(i).getString("symbol").contains("BTC")) {
-                    hashOperations.put("BinanceListing", jsonArrayBinance.getJSONObject(i).getString("symbol").replace("BTC", ""), "0");
+//                    hashOperations.put("BinanceListing", jsonArrayBinance.getJSONObject(i).getString("symbol").replace("BTC", ""), "0");
+                    jedis.hset("BinanceListing", jsonArrayBinance.getJSONObject(i).getString("symbol").replace("BTC", ""), "0");
                 }
             }
         }
@@ -104,8 +111,10 @@ public class BinanceListedScheduler implements Listing {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         List<String> noListedCoinList = new ArrayList<>();
-        for (String item : hashOperations.keys("CoinMarketCap")) {
-            if (!hashOperations.hasKey("BinanceListing", item)) {
+//        for (String item : hashOperations.keys("CoinMarketCap")) {
+        for (String item : jedis.hkeys("CoinMarketCap")) {
+//            if (!hashOperations.hasKey("BinanceListing", item)) {
+            if (!jedis.hexists("BinanceListing", item)) {
                 noListedCoinList.add(item);
             }
         }
@@ -145,7 +154,8 @@ public class BinanceListedScheduler implements Listing {
                             messageContent.append("\n확인시간 : ");
                             messageContent.append(simpleDateFormat.format(date).toString());
                             messageContent.append("\n코인 정보 : ");
-                            messageContent.append(hashOperations.get("CoinMarketCap", item));
+//                            messageContent.append(hashOperations.get("CoinMarketCap", item));
+                            messageContent.append(jedis.hget("CoinMarketCap", item));
                             messageContent.append(" (");
                             messageContent.append(item);
                             messageContent.append(")");
@@ -159,7 +169,8 @@ public class BinanceListedScheduler implements Listing {
                             messageUtils.sendMessage(url, -300048567L, messageContent.toString());
                             messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
-                            hashOperations.put("BinanceListing", item, "0");
+//                            hashOperations.put("BinanceListing", item, "0");
+                            jedis.hset("BinanceListing", item, "0");
 
                             LOGGER.info("Binance 상장 : " + item + " (" + simpleDateFormat.format(date).toString() + ")");
                         }

@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import redis.clients.jedis.Jedis;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -38,8 +39,10 @@ public class OkexListedScheduler implements Listing {
     @Autowired
     CoinMarketCapScheduler coinMarketCapScheduler;
 
-    @Resource(name = "redisTemplate")
-    private HashOperations<String, String, String> hashOperations;
+//    @Resource(name = "redisTemplate")
+//    private HashOperations<String, String, String> hashOperations;
+    @Autowired
+    private Jedis jedis;
 
     @Value("${property.hotssan_id}")
     private String apiKey;
@@ -55,12 +58,14 @@ public class OkexListedScheduler implements Listing {
 
     @Override
     public void init() throws IOException {
-        if (hashOperations.keys("CoinMarketCap").isEmpty()) {
+//        if (hashOperations.keys("CoinMarketCap").isEmpty()) {
+        if (jedis.hkeys("CoinMarketCap").isEmpty()) {
             LOGGER.info("@#@#@# CoinMarketCap Listing is null");
             coinMarketCapScheduler.refreshCoinData();
         }
 
-        if (hashOperations.keys("OKExListing").isEmpty()) {
+//        if (hashOperations.keys("OKExListing").isEmpty()) {
+        if (jedis.hkeys("OKExListing").isEmpty()) {
             LOGGER.info("@#@#@# OKEx Listing is null");
 
             List<NameValuePair> params = new ArrayList<>();
@@ -71,7 +76,8 @@ public class OkexListedScheduler implements Listing {
             JSONObject list = jsonObject.getJSONObject("info").getJSONObject("funds").getJSONObject("free");
 
             for (Object item : list.keySet()) {
-                hashOperations.put("OKExListing", item.toString(), "0");
+//                hashOperations.put("OKExListing", item.toString(), "0");
+                jedis.hset("OKExListing", item.toString(), "0");
             }
         }
     }
@@ -96,13 +102,15 @@ public class OkexListedScheduler implements Listing {
         JSONObject jsonObject = httpUtils.getPostResponseByObject(URL, params);
         JSONObject list = jsonObject.getJSONObject("info").getJSONObject("funds").getJSONObject("free");
 
-        if (hashOperations.values("OKExListing").size() != list.length()) {
+//        if (hashOperations.values("OKExListing").size() != list.length()) {
+        if (jedis.hvals("OKExListing").size() != list.length()) {
 
             Date date = new Date();
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd, hh:mm:ss a");
 
             for (Object item : list.keySet()) {
-                if (!hashOperations.hasKey("OKExListing", item.toString())) {
+//                if (!hashOperations.hasKey("OKExListing", item.toString())) {
+                if (!jedis.hexists("OKExListing", item.toString())) {
                     StringBuilder messageContent = new StringBuilder();
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
@@ -121,7 +129,8 @@ public class OkexListedScheduler implements Listing {
                     messageUtils.sendMessage(url, -300048567L, messageContent.toString());
                     messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
-                    hashOperations.put("OKExListing", item.toString(), "0");
+//                    hashOperations.put("OKExListing", item.toString(), "0");
+                    jedis.hset("OKExListing", item.toString(), "0");
 
                     LOGGER.info("OKEx 상장 : " + item + " (" + simpleDateFormat.format(date).toString() + ")");
                 }
