@@ -47,6 +47,7 @@ public class UpbitListedScheduler implements Listing {
     @Resource(name = "redisTemplate")
     private HashOperations<String, String, String> hashOperations;
     private static final Logger LOGGER = LoggerFactory.getLogger(UpbitListedScheduler.class);
+    private int count = 1;
 
     @Override
     public void init() throws IOException {
@@ -204,6 +205,8 @@ public class UpbitListedScheduler implements Listing {
 
         init();
 
+        LOGGER.info(count + "회차 Upbit");
+
         List<String> noListedCoinList = new ArrayList<>();
         for (String item : hashOperations.keys("CoinMarketCap")) {
             if (!hashOperations.hasKey("UpbitListing", item)) {
@@ -255,6 +258,6 @@ public class UpbitListedScheduler implements Listing {
                 e.printStackTrace();
             }
         }
-
+        count++;
     }
 }

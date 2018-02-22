@@ -54,6 +54,7 @@ public class BinanceListedScheduler implements Listing {
     @Value("${property.env}")
     private String env;
 
+    private int count = 1;
     private static final Logger LOGGER = LoggerFactory.getLogger(BinanceListedScheduler.class);
     private static final String SECRET_KEY = "7pKYaqrMkI2o0sJRatGjRuaFwolPw4gfxhhZprcu9dqECZYFE0dBSdo2LgQY2cGp";
     private static final String HEADER_KEY = "X-MBX-APIKEY";
@@ -77,7 +78,7 @@ public class BinanceListedScheduler implements Listing {
             JSONArray jsonArrayBinance = httpUtils.getResponseByArrays("https://api.binance.com/api/v3/ticker/price");
             for (int i = 0; i < jsonArrayBinance.length(); i++) {
                 if (jsonArrayBinance.getJSONObject(i).getString("symbol").contains("BTC")) {
-//                    hashOperations.put("BinanceListing", jsonArrayBinance.getJSONObject(i).getString("symbol").replace("BTC", ""), "0");
+                    hashOperations.put("BinanceListing", jsonArrayBinance.getJSONObject(i).getString("symbol").replace("BTC", ""), "0");
                 }
             }
         }
@@ -93,6 +94,8 @@ public class BinanceListedScheduler implements Listing {
         }
 
         init();
+
+        LOGGER.info(count + "회차 Binance");
 
         Future<?> future = null;
         List<NameValuePair> header = new ArrayList<>();
@@ -176,5 +179,6 @@ public class BinanceListedScheduler implements Listing {
             e.printStackTrace();
         }
 
+        count++;
     }
 }

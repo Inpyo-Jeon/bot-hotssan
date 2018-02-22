@@ -47,6 +47,7 @@ public class OkexListedScheduler implements Listing {
     @Value("${property.env}")
     private String env;
 
+    private int count = 1;
     private static final Logger LOGGER = LoggerFactory.getLogger(OkexListedScheduler.class);
     private static final String URL = "https://www.okex.com/api/v1/userinfo.do";
     private static final String API_KEY = "4b47a99a-bc50-4bf2-9ae3-3bb53b681148";
@@ -86,6 +87,8 @@ public class OkexListedScheduler implements Listing {
 
         init();
 
+        LOGGER.info(count + "회차 OKEx");
+
         List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("api_key", API_KEY));
         params.add(new BasicNameValuePair("sign", SIGN));
@@ -124,5 +127,6 @@ public class OkexListedScheduler implements Listing {
                 }
             }
         }
+        count++;
     }
 }
