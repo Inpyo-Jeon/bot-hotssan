@@ -35,6 +35,7 @@ public class CoinMarketCapScheduler {
 
             for (int i = 0; i < jsonArray.length(); i++){
                 hashOperations.put("CoinMarketCap", jsonArray.getJSONObject(i).getString("symbol"), jsonArray.getJSONObject(i).getString("name"));
+                hashOperations.put("CoinMarketCap_Address", jsonArray.getJSONObject(i).getString("symbol"), jsonArray.getJSONObject(i).getString("id"));
             }
         }
     }

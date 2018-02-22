@@ -1,10 +1,13 @@
 package io.coinpeeker.bot_hotssan.scheduler.listed;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
+import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.scheduler.CoinMarketCapScheduler;
 import io.coinpeeker.bot_hotssan.scheduler.Listing;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +23,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 @Component
-public class UpbitListedScheduler implements Listing{
+public class UpbitListedScheduler implements Listing {
+    @Autowired
+    MarketInfo marketInfo;
 
     @Autowired
     CoinMarketCapScheduler coinMarketCapScheduler;
@@ -39,10 +41,12 @@ public class UpbitListedScheduler implements Listing{
     @Value("${property.hotssan_id}")
     private String apiKey;
 
+    @Value("${property.env}")
+    private String env;
+
     @Resource(name = "redisTemplate")
     private HashOperations<String, String, String> hashOperations;
     private static final Logger LOGGER = LoggerFactory.getLogger(UpbitListedScheduler.class);
-    private int count = 1;
 
     @Override
     public void init() throws IOException {
@@ -174,6 +178,7 @@ public class UpbitListedScheduler implements Listing{
             hashOperations.put("UpbitListing", "EXCL", "0");
             hashOperations.put("UpbitListing", "MTL", "0");
             hashOperations.put("UpbitListing", "GNT", "0");
+            hashOperations.put("UpbitListing", "DOPE", "0");
             hashOperations.put("UpbitListing", "MYST", "0");    // 지원종료
             hashOperations.put("UpbitListing", "RISE", "0");    // 지원종료
             hashOperations.put("UpbitListing", "DGD", "0");     // 지원종료
@@ -183,6 +188,8 @@ public class UpbitListedScheduler implements Listing{
             hashOperations.put("UpbitListing", "SNGLS", "0");   // 지원종료
             hashOperations.put("UpbitListing", "XAUR", "0");    // 지원종료
             hashOperations.put("UpbitListing", "ZRX", "0");
+            hashOperations.put("UpbitListing", "VEE", "0");
+            hashOperations.put("UpbitListing", "BCPT", "0");
 
         }
     }
@@ -190,9 +197,12 @@ public class UpbitListedScheduler implements Listing{
     @Override
     @Scheduled(initialDelay = 1000 * 6, fixedDelay = 1000 * 10)
     public void inspectListedCoin() throws IOException {
-        init();
+        /** env validation check.**/
+        if (!StringUtils.equals("real", env)) {
+            return;
+        }
 
-        ExecutorService executorService = Executors.newFixedThreadPool(1);
+        init();
 
         List<String> noListedCoinList = new ArrayList<>();
         for (String item : hashOperations.keys("CoinMarketCap")) {
@@ -201,50 +211,43 @@ public class UpbitListedScheduler implements Listing{
             }
         }
 
-        LOGGER.info("Upbit  " + count + "회차 뺑뺑이");
-
-        Future<?> future = null;
         for (String item : noListedCoinList) {
-            Runnable task = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        String tempURL = "https://ccx.upbit.com/api/v1/market_status?market=BTC-" + item;
 
-                        JSONObject jsonObject = httpUtils.getResponseByObject(tempURL);
+            String tempURL = "https://ccx.upbit.com/api/v1/market_status?market=BTC-" + item;
 
-                        LOGGER.info(jsonObject.toString());
+            JSONObject jsonObject = httpUtils.getResponseByObject(tempURL);
 
-                        if(!jsonObject.has("error") && jsonObject.has("name")){
-                            StringBuilder messageContent = new StringBuilder();
+            if (!jsonObject.has("error") && jsonObject.has("name")) {
+                StringBuilder messageContent = new StringBuilder();
 
-                            Date today = new Date();
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd, hh:mm:ss a");
+                Date today = new Date();
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd, hh:mm:ss a");
 
-                            messageContent.append("!! Upbit 상장 정보 !!");
-                            messageContent.append("\n상장 리스트 탐지되었습니다.");
-                            messageContent.append("\n확인 시간 : ");
-                            messageContent.append(simpleDateFormat.format(today).toString());
-                            messageContent.append("\n코인 정보 : ");
-                            messageContent.append(hashOperations.get("CoinMarketCap", item.toString()));
-                            messageContent.append(" (");
-                            messageContent.append(jsonObject.getString("name"));
-                            messageContent.append(")");
+                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                messageContent.append(" [ Upbit ] 상장 정보 ");
+                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                messageContent.append("\n상장 리스트 탐지되었습니다.");
+                messageContent.append("\n확인 시간 : ");
+                messageContent.append(simpleDateFormat.format(today).toString());
+                messageContent.append("\n코인 정보 : ");
+                messageContent.append(hashOperations.get("CoinMarketCap", item));
+                messageContent.append(" (");
+                messageContent.append(item);
+                messageContent.append(")");
+                messageContent.append("\n구매 가능 거래소");
+                messageContent.append(marketInfo.availableMarketList(item));
 
-                            String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                            messageUtils.sendMessage(url, -300048567L, messageContent.toString());
+                String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
+                messageUtils.sendMessage(url, -300048567L, messageContent.toString());
+                messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
-                            hashOperations.put("UpbitListing", item.toString(), "0");
+                hashOperations.put("UpbitListing", item, "0");
 
-                        }
+                LOGGER.info("Upbit 상장 : " + item + " (" + today + ")");
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            };
-
-            future = executorService.submit(task);
+            }
 
             try {
                 Thread.sleep(1000);
@@ -252,14 +255,6 @@ public class UpbitListedScheduler implements Listing{
                 e.printStackTrace();
             }
         }
-
-        try {
-            future.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        count++;
 
     }
 }

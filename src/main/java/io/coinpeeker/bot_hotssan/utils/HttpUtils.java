@@ -160,4 +160,9 @@ public class HttpUtils {
         JSONObject jsonObject = new JSONObject(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
         return jsonObject;
     }
+
+    public String getResponseByHtmlString(String url) throws IOException {
+        CloseableHttpResponse httpResponse = get(url);
+        return EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
+    }
 }

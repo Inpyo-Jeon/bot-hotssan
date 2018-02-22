@@ -26,7 +26,6 @@ import java.util.*;
 public class HotssanService implements HotssanUpdateHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HotssanService.class);
-    private static Map<String, LocalDateTime> tempInstructionMap = Maps.newHashMap();
 
     @Value("${property.hotssan_id}")
     private String apiKey;
@@ -85,29 +84,12 @@ public class HotssanService implements HotssanUpdateHandler {
         String instruction = update.getMessage().getText();
         StringBuilder message = new StringBuilder();
 
-        Timer m_timer = new Timer();
-        TimerTask m_task = new TimerTask() {
-            @Override
-            public void run() {
-                tempInstructionMap.remove(instruction);
-            }
-        };
-
-        if (tempInstructionMap.containsKey(instruction) && Duration.between(tempInstructionMap.get(instruction), LocalDateTime.now()).toMillis() < 3000) {
-            m_timer.schedule(m_task, 3000);
-        }
-
-        if (tempInstructionMap.isEmpty() || !tempInstructionMap.containsKey(instruction)) {
-            tempInstructionMap.put(instruction, LocalDateTime.now());
-            if (!authUtils.isAuthenticated(chatId)) {
-                message.append("등록되지 않은 사용자입니다.\n사용자 아이디 등록을 요청하세요 : ");
-                message.append(chatId);
-            } else {
-                tempInstructionMap.put(instruction, LocalDateTime.now());
-                message.append(commander.execute(instruction));
-                m_timer.schedule(m_task, 3000);
-                messageUtils.sendMessage(url, chatId, message.toString());
-            }
+        if (!authUtils.isAuthenticated(chatId)) {
+            message.append("등록되지 않은 사용자입니다.\n사용자 아이디 등록을 요청하세요 : ");
+            message.append(chatId);
+        } else {
+            message.append(commander.execute(instruction));
+            messageUtils.sendMessage(url, chatId, message.toString());
         }
     }
 }

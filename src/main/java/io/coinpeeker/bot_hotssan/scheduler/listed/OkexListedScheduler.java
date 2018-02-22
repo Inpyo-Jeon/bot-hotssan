@@ -1,10 +1,13 @@
 package io.coinpeeker.bot_hotssan.scheduler.listed;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
+import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.scheduler.CoinMarketCapScheduler;
 import io.coinpeeker.bot_hotssan.scheduler.Listing;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
@@ -23,6 +26,8 @@ import java.util.*;
 
 @Component
 public class OkexListedScheduler implements Listing {
+    @Autowired
+    MarketInfo marketInfo;
 
     @Autowired
     HttpUtils httpUtils;
@@ -39,7 +44,9 @@ public class OkexListedScheduler implements Listing {
     @Value("${property.hotssan_id}")
     private String apiKey;
 
-    private int count = 1;
+    @Value("${property.env}")
+    private String env;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(OkexListedScheduler.class);
     private static final String URL = "https://www.okex.com/api/v1/userinfo.do";
     private static final String API_KEY = "4b47a99a-bc50-4bf2-9ae3-3bb53b681148";
@@ -72,6 +79,11 @@ public class OkexListedScheduler implements Listing {
     @Override
     @Scheduled(initialDelay = 1000 * 6, fixedDelay = 1000 * 10)
     public void inspectListedCoin() throws IOException {
+        /** env validation check.**/
+        if (!StringUtils.equals("real", env)) {
+            return;
+        }
+
         init();
 
         List<NameValuePair> params = new ArrayList<>();
@@ -81,8 +93,6 @@ public class OkexListedScheduler implements Listing {
         JSONObject jsonObject = httpUtils.getPostResponseByObject(URL, params);
         JSONObject list = jsonObject.getJSONObject("info").getJSONObject("funds").getJSONObject("free");
 
-        LOGGER.info("OKEx " + count + "회차 뺑뺑이 : " + hashOperations.values("OKExListing").size() + " // " + list.length());
-
         if (hashOperations.values("OKExListing").size() != list.length()) {
 
             Date date = new Date();
@@ -91,20 +101,28 @@ public class OkexListedScheduler implements Listing {
             for (Object item : list.keySet()) {
                 if (!hashOperations.hasKey("OKExListing", item.toString())) {
                     StringBuilder messageContent = new StringBuilder();
-                    messageContent.append("!! OKEx 상장 정보 !!");
-                    messageContent.append("\n지갑이 생성 되었나 봅니다.");
+                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                    messageContent.append(" [ OKEx ] 상장 정보 ");
+                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                    messageContent.append("\n상장 리스트 탐지되었습니다.");
                     messageContent.append("\n확인시간 : ");
                     messageContent.append(simpleDateFormat.format(date).toString());
-                    messageContent.append("\n코인 Symbol : ");
+                    messageContent.append("\n코인 정보 : ");
                     messageContent.append(item.toString().toUpperCase());
+                    messageContent.append("\n구매 가능 거래소");
+                    messageContent.append(marketInfo.availableMarketList(item.toString().toUpperCase()));
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
                     messageUtils.sendMessage(url, -300048567L, messageContent.toString());
+                    messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
                     hashOperations.put("OKExListing", item.toString(), "0");
+
+                    LOGGER.info("OKEx 상장 : " + item + " (" + simpleDateFormat.format(date).toString() + ")");
                 }
             }
         }
-        count++;
     }
 }

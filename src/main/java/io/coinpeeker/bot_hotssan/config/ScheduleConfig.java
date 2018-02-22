@@ -12,7 +12,7 @@ public class ScheduleConfig implements SchedulingConfigurer {
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
         ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
 
-        threadPoolTaskScheduler.setPoolSize(4); // POS(xgox),marketCap, binance, OKEx
+        threadPoolTaskScheduler.setPoolSize(5); // POS(xgox),marketCap, binance, OKEx
         threadPoolTaskScheduler.setThreadNamePrefix("hotssan-scheduled-task-pool-");
         threadPoolTaskScheduler.initialize();
 

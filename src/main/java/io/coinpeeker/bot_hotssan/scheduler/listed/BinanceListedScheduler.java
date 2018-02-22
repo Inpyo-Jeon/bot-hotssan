@@ -1,10 +1,13 @@
 package io.coinpeeker.bot_hotssan.scheduler.listed;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
+import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.scheduler.CoinMarketCapScheduler;
 import io.coinpeeker.bot_hotssan.scheduler.Listing;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
@@ -30,6 +33,8 @@ import java.util.concurrent.*;
 
 @Component
 public class BinanceListedScheduler implements Listing {
+    @Autowired
+    MarketInfo marketInfo;
 
     @Autowired
     HttpUtils httpUtils;
@@ -46,7 +51,9 @@ public class BinanceListedScheduler implements Listing {
     @Value("${property.hotssan_id}")
     private String apiKey;
 
-    private int count = 1;
+    @Value("${property.env}")
+    private String env;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(BinanceListedScheduler.class);
     private static final String SECRET_KEY = "7pKYaqrMkI2o0sJRatGjRuaFwolPw4gfxhhZprcu9dqECZYFE0dBSdo2LgQY2cGp";
     private static final String HEADER_KEY = "X-MBX-APIKEY";
@@ -70,7 +77,7 @@ public class BinanceListedScheduler implements Listing {
             JSONArray jsonArrayBinance = httpUtils.getResponseByArrays("https://api.binance.com/api/v3/ticker/price");
             for (int i = 0; i < jsonArrayBinance.length(); i++) {
                 if (jsonArrayBinance.getJSONObject(i).getString("symbol").contains("BTC")) {
-                    hashOperations.put("BinanceListing", jsonArrayBinance.getJSONObject(i).getString("symbol").replace("BTC", ""), "0");
+//                    hashOperations.put("BinanceListing", jsonArrayBinance.getJSONObject(i).getString("symbol").replace("BTC", ""), "0");
                 }
             }
         }
@@ -80,8 +87,14 @@ public class BinanceListedScheduler implements Listing {
     @Override
     @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 5)
     public void inspectListedCoin() throws IOException {
+        /** env validation check.**/
+        if (!StringUtils.equals("real", env)) {
+            return;
+        }
+
         init();
 
+        Future<?> future = null;
         List<NameValuePair> header = new ArrayList<>();
         header.add(new BasicNameValuePair(HEADER_KEY, HEADER_VALUE));
 
@@ -94,9 +107,6 @@ public class BinanceListedScheduler implements Listing {
             }
         }
 
-        LOGGER.info("Binance " + count + "회차 뺑뺑이");
-
-        Future<?> future = null;
         for (String item : noListedCoinList) {
             Runnable task = new Runnable() {
                 @Override
@@ -118,28 +128,37 @@ public class BinanceListedScheduler implements Listing {
 
                         JSONObject jsonObject = httpUtils.getResponseByObject(sb.toString(), header);
 
-                        LOGGER.info(jsonObject.toString());
-
                         if (jsonObject.getBoolean("success")) {
                             Date date = new Date();
                             StringBuilder messageContent = new StringBuilder();
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd, hh:mm:ss a");
 
-                            messageContent.append("!! 바이낸스 상장 정보 !!");
-                            messageContent.append("\n코인 정보 : ");
-                            messageContent.append(hashOperations.get("CoinMarketCap", jsonObject.getString("asset")));
-                            messageContent.append(" (");
-                            messageContent.append(jsonObject.getString("asset"));
-                            messageContent.append(")");
-                            messageContent.append("\n주소 : ");
-                            messageContent.append(jsonObject.getString("address"));
+                            messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                            messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                            messageContent.append(" [ Binance ] 상장 정보 ");
+                            messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                            messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                            messageContent.append("\n상장 리스트 탐지되었습니다(지갑주소)");
                             messageContent.append("\n확인시간 : ");
                             messageContent.append(simpleDateFormat.format(date).toString());
+                            messageContent.append("\n코인 정보 : ");
+                            messageContent.append(hashOperations.get("CoinMarketCap", item));
+                            messageContent.append(" (");
+                            messageContent.append(item);
+                            messageContent.append(")");
+                            messageContent.append("\n지갑주소 : ");
+                            messageContent.append(jsonObject.getString("address"));
+                            messageContent.append("\n구매 가능 거래소");
+                            messageContent.append(marketInfo.availableMarketList(item));
+
 
                             String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
                             messageUtils.sendMessage(url, -300048567L, messageContent.toString());
+                            messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
                             hashOperations.put("BinanceListing", item, "0");
+
+                            LOGGER.info("Binance 상장 : " + item + " (" + simpleDateFormat.format(date).toString() + ")");
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -148,7 +167,6 @@ public class BinanceListedScheduler implements Listing {
                     sb.setLength(0);
                 }
             };
-
             future = executorService.submit(task);
         }
 
@@ -158,6 +176,5 @@ public class BinanceListedScheduler implements Listing {
             e.printStackTrace();
         }
 
-        count++;
     }
 }
