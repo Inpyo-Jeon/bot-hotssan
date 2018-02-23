@@ -84,7 +84,7 @@ public class OkexListedScheduler implements Listing {
 
 
     @Override
-    @Scheduled(initialDelay = 1000 * 6, fixedDelay = 1000 * 10)
+//    @Scheduled(initialDelay = 1000 * 6, fixedDelay = 1000 * 10)
     public void inspectListedCoin() throws IOException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {

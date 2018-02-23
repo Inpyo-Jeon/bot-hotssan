@@ -93,7 +93,7 @@ public class BinanceListedScheduler implements Listing {
 
 
     @Override
-    @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 5)
+//    @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 5)
     public void inspectListedCoin() throws IOException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {

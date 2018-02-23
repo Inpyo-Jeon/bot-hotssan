@@ -28,7 +28,7 @@ public class CoinMarketCapScheduler {
 
     //TODO : 24시간 마다 갱신, 갱신 시 각 스케줄러와 동시성은 어떻게 처리해야 할 지!
 
-    @Scheduled(fixedRate = 1000 * 60 * 60 * 24)
+//    @Scheduled(fixedRate = 1000 * 60 * 60 * 24)
     public void refreshCoinData() throws IOException {
 
 //        if (hashOperations.keys("CoinMarketCap").isEmpty()) {
