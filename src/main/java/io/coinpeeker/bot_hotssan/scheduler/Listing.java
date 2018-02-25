@@ -4,8 +4,6 @@ import java.io.IOException;
 
 public interface Listing {
 
-    void init() throws IOException;
-
     void inspectListedCoin() throws IOException;
 
 }
