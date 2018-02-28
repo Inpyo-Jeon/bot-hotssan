@@ -7,6 +7,7 @@ import io.coinpeeker.bot_hotssan.scheduler.Listing;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
@@ -52,12 +53,13 @@ public class BinanceListedScheduler implements Listing {
     private static final Logger LOGGER = LoggerFactory.getLogger(BinanceListedScheduler.class);
 
     @Override
-    @Scheduled(initialDelay = 1000 * 10, fixedDelay = 1000 * 5)
+    @Scheduled(initialDelay = 1000 * 60, fixedDelay = 1000 * 10)
     public void inspectListedCoin() throws IOException {
-//        /** env validation check.**/
-//        if (!StringUtils.equals("real", env)) {
-//            return;
-//        }
+        /** env validation check.**/
+        if (!StringUtils.equals("real", env)) {
+            return;
+        }
+
 
         List<NameValuePair> header = new ArrayList<>();
         header.add(new BasicNameValuePair(SecretKey.getHeaderKeyBinance(), SecretKey.getHeaderValueBinance()));
@@ -101,8 +103,6 @@ public class BinanceListedScheduler implements Listing {
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append("\n상장 리스트 탐지되었습니다(지갑주소)");
-                    messageContent.append("\n확인시간 : ");
-                    messageContent.append(simpleDateFormat.format(date).toString());
                     messageContent.append("\n코인 정보 : ");
                     synchronized (jedis) {
                         messageContent.append(jedis.hget("CoinMarketCap", item));
@@ -117,9 +117,8 @@ public class BinanceListedScheduler implements Listing {
 
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                    messageUtils.sendMessage(url, -294606763L, messageContent.toString());
-//                            messageUtils.sendMessage(url, -300048567L, messageContent.toString());
-//                            messageUtils.sendMessage(url, -277619118L, messageContent.toString());
+                    messageUtils.sendMessage(url, -300048567L, messageContent.toString());
+                    messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
                     synchronized (jedis) {
                         jedis.hset("BinanceListing", item, "0");

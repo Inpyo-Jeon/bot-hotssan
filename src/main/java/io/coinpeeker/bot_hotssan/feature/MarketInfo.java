@@ -8,9 +8,11 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.ShardedJedisPool;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -24,15 +26,12 @@ public class MarketInfo {
 
     @Autowired
     private Jedis jedis;
-//    @Resource(name = "redisTemplate")
-//    private HashOperations<String, String, String> hashOperations;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MarketInfo.class);
 
     public String availableMarketList(String coin) throws IOException {
         Map<String, List<String>> market = Maps.newHashMap();
-
-//        String url = "https://coinmarketcap.com/currencies/" + hashOperations.get("CoinMarketCap_Address", coin) + "#markets";
+        RedisConnection redisConnection = null;
         String url = "https://coinmarketcap.com/currencies/" + jedis.hget("CoinMarketCap_Address", coin) + "#markets";
 
 

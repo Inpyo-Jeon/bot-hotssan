@@ -6,6 +6,7 @@ import io.coinpeeker.bot_hotssan.scheduler.Listing;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,12 +47,12 @@ public class UpbitListedScheduler implements Listing {
     private static final Logger LOGGER = LoggerFactory.getLogger(UpbitListedScheduler.class);
 
     @Override
-    @Scheduled(initialDelay = 1000 * 10, fixedDelay = 1000 * 10)
+    @Scheduled(initialDelay = 1000 * 60, fixedDelay = 1000 * 10)
     public void inspectListedCoin() throws IOException {
-//        /** env validation check.**/
-//        if (!StringUtils.equals("real", env)) {
-//            return;
-//        }
+        /** env validation check.**/
+        if (!StringUtils.equals("real", env)) {
+            return;
+        }
 
         List<String> noListedCoinList = new ArrayList<>();
 
@@ -82,8 +83,6 @@ public class UpbitListedScheduler implements Listing {
                 messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                 messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                 messageContent.append("\n상장 리스트 탐지되었습니다.");
-                messageContent.append("\n확인 시간 : ");
-                messageContent.append(simpleDateFormat.format(today).toString());
                 messageContent.append("\n코인 정보 : ");
                 synchronized (jedis) {
                     messageContent.append(jedis.hget("CoinMarketCap", item));
@@ -96,13 +95,12 @@ public class UpbitListedScheduler implements Listing {
 
                 // 정확한 정보 완료일 경우 / 아닐 경우
                 if (!jsonObject.has("id")) {
-                    messageContent.append("\n!! 알 수 없는 에러였으니 확인바람 !!");
+                    messageContent.append("\n!! 관리자의 확인이 필요한 코인 !!");
                 }
 
                 String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                messageUtils.sendMessage(url, -294606763L, messageContent.toString());
-//                messageUtils.sendMessage(url, -300048567L, messageContent.toString());
-//                messageUtils.sendMessage(url, -277619118L, messageContent.toString());
+                messageUtils.sendMessage(url, -300048567L, messageContent.toString());
+                messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
                 synchronized (jedis) {
                     jedis.hset("UpbitListing", item, "0");

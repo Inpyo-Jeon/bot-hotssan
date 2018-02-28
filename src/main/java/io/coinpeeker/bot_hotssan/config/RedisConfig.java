@@ -17,16 +17,20 @@ public class RedisConfig {
     @Value("${spring.redis.port}")
     private int redisPort;
 
+    @Value("${spring.redis.password}")
+    private String redisPassword;
+
     @Bean
     public JedisConnectionFactory connectionFactory() {
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-        jedisPoolConfig.setMaxTotal(4);
+        jedisPoolConfig.setMaxTotal(8);
         jedisPoolConfig.setTestOnBorrow(true);
         jedisPoolConfig.setTestOnReturn(true);
 
         JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory();
         jedisConnectionFactory.setHostName(redisHost);
         jedisConnectionFactory.setPort(redisPort);
+        jedisConnectionFactory.setPassword(redisPassword);
         jedisConnectionFactory.setUsePool(true);
         jedisConnectionFactory.setPoolConfig(jedisPoolConfig);
         jedisConnectionFactory.setTimeout(1000000);
@@ -37,5 +41,6 @@ public class RedisConfig {
     public Jedis initJedis(JedisConnectionFactory connectionFactory) {
         return (Jedis) connectionFactory.getConnection().getNativeConnection();
     }
+
 
 }
