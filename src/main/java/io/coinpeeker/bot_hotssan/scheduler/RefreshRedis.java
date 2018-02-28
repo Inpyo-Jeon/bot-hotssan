@@ -2,6 +2,7 @@ package io.coinpeeker.bot_hotssan.scheduler;
 
 import io.coinpeeker.bot_hotssan.common.SecretKey;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
@@ -9,6 +10,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
@@ -28,14 +30,23 @@ public class RefreshRedis {
     @Autowired
     private Jedis jedis;
 
+    @Value("${property.env}")
+    String env;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RefreshRedis.class);
 
     @Scheduled(initialDelay = 1000, fixedDelay = 1000 * 60 * 60 * 24)
     public void start() throws IOException {
+        /** env validation check.**/
+        if (!StringUtils.equals("real", env)) {
+            return;
+        }
+
         coinMarketCap();
         binance();
         okex();
         upbit();
+        kucoin();
     }
 
 
@@ -242,5 +253,22 @@ public class RefreshRedis {
             }
         }
 
+    }
+
+    public void kucoin() throws IOException {
+        synchronized (jedis) {
+            if (!jedis.exists("KucoinListing")) {
+                LOGGER.info("@#@#@# Kucoin Listing is null");
+
+                jedis.hset("KucoinListing", "USDT", "0");
+
+                JSONObject jsonObject = httpUtils.getResponseByObject("https://api.kucoin.com/v1/open/tick");
+                JSONArray list = jsonObject.getJSONArray("data");
+
+                for (int i = 0; i < list.length(); i++) {
+                    jedis.hset("KucoinListing", list.getJSONObject(i).getString("coinType"), "0");
+                }
+            }
+        }
     }
 }
