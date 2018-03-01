@@ -101,7 +101,6 @@ public class KucoinListedScheduler implements Listing {
             header.add(new BasicNameValuePair("KC-API-SIGNATURE", signatureResult));
 
             JSONObject jsonObject = httpUtils.getResponseByObject(host + endpoint, header);
-            LOGGER.info(jsonObject.toString());
 
             if (jsonObject.has("ContentLengthZero")) {
                 try {
