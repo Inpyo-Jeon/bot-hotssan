@@ -100,9 +100,9 @@ public class HttpUtils {
         HttpPost httpPost = new HttpPost(url);
 
         RequestConfig requestConfig = RequestConfig.custom()
-                .setSocketTimeout(1000*10)
-                .setConnectTimeout(1000*10)
-                .setConnectionRequestTimeout(1000*10)
+                .setSocketTimeout(1000 * 10)
+                .setConnectTimeout(1000 * 10)
+                .setConnectionRequestTimeout(1000 * 10)
                 .build();
 
         httpPost.setConfig(requestConfig);
@@ -150,12 +150,17 @@ public class HttpUtils {
 
     public JSONObject getResponseByObject(String url, List<NameValuePair> header) throws IOException {
         CloseableHttpResponse httpResponse = get(url, header);
-        JSONObject jsonObject = new JSONObject(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
+        if (httpResponse.getEntity().getContentLength() != 0) {
+            JSONObject jsonObject = new JSONObject(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
+            return jsonObject;
+        } else {
+            System.out.println(url);
+            return new JSONObject("{'ContentLengthZero':'true'}");
+        }
 
-        return jsonObject;
     }
 
-    public JSONObject getPostResponseByObject(String url, List<NameValuePair> param) throws IOException{
+    public JSONObject getPostResponseByObject(String url, List<NameValuePair> param) throws IOException {
         CloseableHttpResponse httpResponse = post(url, param);
         JSONObject jsonObject = new JSONObject(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
         return jsonObject;
