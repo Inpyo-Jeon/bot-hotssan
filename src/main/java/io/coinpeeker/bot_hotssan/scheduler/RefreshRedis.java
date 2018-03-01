@@ -39,6 +39,10 @@ public class RefreshRedis {
     public void start() throws IOException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
+            JSONArray jsonArray = httpUtils.getResponseByArrays("https://api.coinmarketcap.com/v1/ticker/?limit=1600");
+            for (int i = 0; i < jsonArray.length(); i++) {
+                capList.add(jsonArray.getJSONObject(i).getString("symbol"));
+            }
             return;
         }
 
