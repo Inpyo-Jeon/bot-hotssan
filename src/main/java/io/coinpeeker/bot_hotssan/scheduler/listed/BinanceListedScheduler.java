@@ -130,6 +130,8 @@ public class BinanceListedScheduler implements Listing {
                     }
 
                     LOGGER.info("Binance 상장 : " + item + " (" + simpleDateFormat.format(date).toString() + ")");
+                } else if (!jsonObject.getBoolean("success")) {
+
                 } else {
                     LOGGER.info(" [ Binance ] 상장 정보 이상발생");
                     LOGGER.info("코인 정보 : " + item);
