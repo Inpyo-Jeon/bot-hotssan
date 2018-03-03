@@ -92,6 +92,11 @@ public class BinanceListedScheduler implements Listing {
 
                 JSONObject jsonObject = httpUtils.getResponseByObject(sb.toString(), header);
 
+                if (jsonObject.has("ContentLengthZero")) {
+                    sb.setLength(0);
+                    continue;
+                }
+
                 if (jsonObject.getBoolean("success")) {
                     Date date = new Date();
                     StringBuilder messageContent = new StringBuilder();
@@ -125,8 +130,14 @@ public class BinanceListedScheduler implements Listing {
                     }
 
                     LOGGER.info("Binance 상장 : " + item + " (" + simpleDateFormat.format(date).toString() + ")");
+                } else {
+                    LOGGER.info(" [ Binance ] 상장 정보 이상발생");
+                    LOGGER.info("코인 정보 : " + item);
+                    LOGGER.info("에러내용 : " + jsonObject.toString());
                 }
             } catch (Exception e) {
+                LOGGER.info(" [ Binance ] Exception");
+                LOGGER.info("코인 정보 : " + item);
                 e.printStackTrace();
             }
             sb.setLength(0);

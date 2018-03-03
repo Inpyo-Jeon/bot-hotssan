@@ -96,6 +96,7 @@ public class UpbitListedScheduler implements Listing {
                 // 정확한 정보 완료일 경우 / 아닐 경우
                 if (!jsonObject.has("id")) {
                     messageContent.append("\n!! 관리자의 확인이 필요한 코인 !!");
+                    messageContent.append(jsonObject.toString());
                 }
 
                 String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;

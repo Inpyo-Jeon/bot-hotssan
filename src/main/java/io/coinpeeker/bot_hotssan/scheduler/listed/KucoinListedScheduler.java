@@ -8,6 +8,7 @@ import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
@@ -58,10 +59,10 @@ public class KucoinListedScheduler implements Listing {
     @Override
     @Scheduled(initialDelay = 1000 * 10, fixedDelay = 1000 * 10)
     public void inspectListedCoin() throws IOException, NoSuchAlgorithmException, InvalidKeyException {
-//        /** env validation check.**/
-//        if (!StringUtils.equals("real", env)) {
-//            return;
-//        }
+        /** env validation check.**/
+        if (!StringUtils.equals("real", env)) {
+            return;
+        }
 
         List<String> noListedCoinList = new ArrayList<>();
 
@@ -104,14 +105,14 @@ public class KucoinListedScheduler implements Listing {
 
             if (jsonObject.has("ContentLengthZero")) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 continue;
             }
 
-            if (jsonObject.has("data")) {
+            if (jsonObject.has("data") && !jsonObject.get("data").equals("null")) {
                 Date date = new Date();
                 StringBuilder messageContent = new StringBuilder();
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd, hh:mm:ss a");
@@ -134,31 +135,26 @@ public class KucoinListedScheduler implements Listing {
                 messageContent.append("\n구매 가능 거래소");
                 messageContent.append(marketInfo.availableMarketList(item));
 
+
                 String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                messageUtils.sendMessage(url, -294606763L, messageContent.toString());
-//                            messageUtils.sendMessage(url, -300048567L, messageContent.toString());
-//                            messageUtils.sendMessage(url, -277619118L, messageContent.toString());
+                messageUtils.sendMessage(url, -300048567L, messageContent.toString());
+                messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
                 synchronized (jedis) {
                     jedis.hset("KucoinListing", item, "0");
                 }
 
                 LOGGER.info("Kucoin 상장 : " + item + " (" + simpleDateFormat.format(date).toString() + ")");
-            } else if ((jsonObject.has("error") && jsonObject.getString("error").equals("Not Found")) || (jsonObject.has("msg") && jsonObject.getString("msg").equals("\"I/O error on POST request for \\\"http://WEB-CORE/user/info\\\": Connection timed out (Connection timed out); nested exception is java.net.ConnectException: Connection timed out (Connection timed out)"))) {
+            } else if ((jsonObject.has("error") && jsonObject.getString("error").equals("Not Found"))) {
 
             } else {
-                StringBuilder messageContent = new StringBuilder();
-                messageContent.append(" [ Kucoin ] 상장 정보 이상발생");
-                messageContent.append("\n코인 정보 : ");
-                messageContent.append(item);
-                messageContent.append("\n에러내용 : ");
-                messageContent.append(jsonObject.toString());
-                String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                messageUtils.sendMessage(url, -294606763L, messageContent.toString());
+                LOGGER.info(" [ Kucoin ] 상장 정보 이상발생");
+                LOGGER.info("코인 정보 : " + item);
+                LOGGER.info("에러내용 : " + jsonObject.toString());
             }
 
             try {
-                Thread.sleep(1000);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
