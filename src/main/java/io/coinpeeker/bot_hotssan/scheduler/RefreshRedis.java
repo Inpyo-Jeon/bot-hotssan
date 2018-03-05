@@ -51,6 +51,7 @@ public class RefreshRedis {
         okex();
         upbit();
         kucoin();
+        bittrex();
     }
 
 
@@ -274,5 +275,22 @@ public class RefreshRedis {
                 }
             }
         }
+    }
+
+    public void bittrex() throws IOException {
+        synchronized (jedis) {
+            if (!jedis.exists("BittrexListing")) {
+                LOGGER.info("@#@#@# Bittrex Listing is null");
+
+
+                JSONObject jsonObject = httpUtils.getResponseByObject("https://bittrex.com/api/v1.1/public/getcurrencies");
+                JSONArray list = jsonObject.getJSONArray("result");
+
+                for (int i = 0; i < list.length(); i++) {
+                    jedis.hset("BittrexListing", list.getJSONObject(i).getString("Currency"), "0");
+                }
+            }
+        }
+
     }
 }

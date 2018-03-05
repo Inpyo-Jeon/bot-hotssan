@@ -13,6 +13,17 @@ public class SecretKey {
     private static final String SECRET_KEY_KUCOIN = "fba73622-f0b1-45fc-a42d-c6c5f8860639";
     private static final String API_KEY_KUCOIN = "5a952d64df542b46a01e55c0";
 
+    private static final String API_KEY_BITTREX = "07cabf10847743ec9a1ebd9f765ff355";
+    private static final String SECRET_KEY_BITTREX = "78dc556147c7490d807190c73d731426";
+
+    public static String getApiKeyBittrex() {
+        return API_KEY_BITTREX;
+    }
+
+    public static String getSecretKeyBittrex() {
+        return SECRET_KEY_BITTREX;
+    }
+
     public static String getApiKeyKucoin() {
         return API_KEY_KUCOIN;
     }
