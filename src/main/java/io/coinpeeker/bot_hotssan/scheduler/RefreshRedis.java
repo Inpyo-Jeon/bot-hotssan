@@ -37,6 +37,13 @@ public class RefreshRedis {
 
     @Scheduled(initialDelay = 1000, fixedDelay = 1000 * 60 * 60 * 24)
     public void start() throws IOException {
+
+        binance();
+        okex();
+        upbit();
+        kucoin();
+        bittrex();
+
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
             JSONArray jsonArray = httpUtils.getResponseByArrays("https://api.coinmarketcap.com/v1/ticker/?limit=1600");
@@ -47,11 +54,6 @@ public class RefreshRedis {
         }
 
         coinMarketCap();
-        binance();
-        okex();
-        upbit();
-        kucoin();
-        bittrex();
     }
 
 
