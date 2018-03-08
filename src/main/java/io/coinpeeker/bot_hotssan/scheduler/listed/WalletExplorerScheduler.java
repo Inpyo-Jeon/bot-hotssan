@@ -24,9 +24,9 @@ import java.util.Map;
 @Component
 public class WalletExplorerScheduler {
 
-
     @Autowired
     HttpUtils httpUtils;
+
     @Autowired
     Jedis jedis;
 
@@ -38,7 +38,6 @@ public class WalletExplorerScheduler {
 
     @Value("${property.env}")
     private String env;
-
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WalletExplorerScheduler.class);
 
@@ -89,6 +88,7 @@ public class WalletExplorerScheduler {
             JSONArray jsonArray = jsonObject.getJSONArray("tokens");
             Map<String, Integer> checkMap = Maps.newHashMap();
             JSONArray toJsonArray = new JSONArray();
+            boolean isExistWallet = false;
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject checkJsonObject = jsonArray.getJSONObject(i).getJSONObject("tokenInfo");
@@ -101,8 +101,13 @@ public class WalletExplorerScheduler {
                     toJsonArray.put(checkJsonObject);
                 }
             }
+            synchronized (jedis) {
+                if (jedis.exists("Wallet-" + item)) {
+                    isExistWallet = true;
+                }
+            }
 
-            if (jedis.exists("Wallet-" + item)) {
+            if (isExistWallet) {
                 synchronized (jedis) {
                     jedisCount = Math.toIntExact(jedis.hlen("Wallet-" + item));
                 }
@@ -111,26 +116,34 @@ public class WalletExplorerScheduler {
                     for (int i = 0; i < toJsonArray.length(); i++) {
                         String symbol = toJsonArray.getJSONObject(i).getString("symbol");
                         String address = toJsonArray.getJSONObject(i).getString("address");
-
+                        boolean isExistSymbol = true;
 
                         synchronized (jedis) {
                             if (!jedis.hexists("Wallet-" + item, symbol)) {
-                                StringBuilder messageContent = new StringBuilder();
-                                messageContent.append("Wallet-");
-                                messageContent.append(item);
-                                messageContent.append(" ");
-                                messageContent.append(symbol);
-                                messageContent.append("심볼 생성");
-                                messageContent.append("\nEtherScan : \n");
-                                messageContent.append("https://etherscan.io/token/");
-                                messageContent.append(address);
-                                messageContent.append("?a=");
-                                messageContent.append(marketWallet);
+                                isExistSymbol = false;
+                            }
+                        }
 
-                                String botUrl = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                                messageUtils.sendMessage(botUrl, -259666461L, messageContent.toString());
+                        if (!isExistSymbol) {
+                            StringBuilder messageContent = new StringBuilder();
+                            messageContent.append("Wallet-");
+                            messageContent.append(item);
+                            messageContent.append(" ");
+                            messageContent.append(symbol);
+                            messageContent.append("심볼 생성");
+                            messageContent.append("\nEtherScan : \n");
+                            messageContent.append("https://etherscan.io/token/");
+                            messageContent.append(address);
+                            messageContent.append("?a=");
+                            messageContent.append(marketWallet);
 
-                                LOGGER.info("Wallet-" + item + " : " + symbol + " 심볼 생성");
+                            String botUrl = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
+                            messageUtils.sendMessage(botUrl, -259666461L, messageContent.toString());
+                            messageUtils.sendMessage(botUrl, -294606763L, messageContent.toString());
+
+                            LOGGER.info("Wallet-" + item + " : " + symbol + " 심볼 생성");
+
+                            synchronized (jedis) {
                                 jedis.hset("Wallet-" + item, symbol, "0");
                             }
                         }
@@ -139,7 +152,10 @@ public class WalletExplorerScheduler {
             } else {
                 for (int i = 0; i < toJsonArray.length(); i++) {
                     String symbol = toJsonArray.getJSONObject(i).getString("symbol");
-                    jedis.hset("Wallet-" + item, symbol, "0");
+
+                    synchronized (jedis) {
+                        jedis.hset("Wallet-" + item, symbol, "0");
+                    }
                 }
             }
 
