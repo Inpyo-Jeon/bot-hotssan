@@ -128,7 +128,7 @@ public class WalletExplorerScheduler {
                                 messageContent.append(marketWallet);
 
                                 String botUrl = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                                messageUtils.sendMessage(botUrl, -294606763L, messageContent.toString());
+                                messageUtils.sendMessage(botUrl, -259666461L, messageContent.toString());
 
                                 LOGGER.info("Wallet-" + item + " : " + symbol + " 심볼 생성");
                                 jedis.hset("Wallet-" + item, symbol, "0");
