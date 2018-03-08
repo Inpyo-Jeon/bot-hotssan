@@ -92,7 +92,7 @@ public class BittrexListedScheduler implements Listing {
             JSONObject jsonObject = httpUtils.getResponseByObject(endpoint, header);
             LOGGER.info(jsonObject.toString() + " : " + item);
 
-            if (jsonObject.getBoolean("success") || jsonObject.getString("message").equals("ADDRESS_GENERATING")) {
+            if (jsonObject.getBoolean("success") || jsonObject.getString("message").equals("ADDRESS_GENERATING") || jsonObject.getString("message").equals("CURRENCY_OFFLINE")) {
                 Date date = new Date();
                 StringBuilder messageContent = new StringBuilder();
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd, hh:mm:ss a");
