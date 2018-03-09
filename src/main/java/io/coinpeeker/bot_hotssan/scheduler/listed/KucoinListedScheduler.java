@@ -65,6 +65,8 @@ public class KucoinListedScheduler implements Listing {
         }
 
         List<String> noListedCoinList = new ArrayList<>();
+        List<String> capList = new ArrayList<>();
+        capList.addAll(CommonConstant.getCapList());
 
         for (String item : capList) {
             synchronized (jedis) {

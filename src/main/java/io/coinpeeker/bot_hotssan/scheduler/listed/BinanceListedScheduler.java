@@ -65,6 +65,8 @@ public class BinanceListedScheduler implements Listing {
         header.add(new BasicNameValuePair(SecretKey.getHeaderKeyBinance(), SecretKey.getHeaderValueBinance()));
 
         List<String> noListedCoinList = new ArrayList<>();
+        List<String> capList = new ArrayList<>();
+        capList.addAll(CommonConstant.getCapList());
 
         for (String item : capList) {
             synchronized (jedis) {
