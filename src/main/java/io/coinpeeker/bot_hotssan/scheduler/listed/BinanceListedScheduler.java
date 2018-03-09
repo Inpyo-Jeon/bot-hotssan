@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static io.coinpeeker.bot_hotssan.common.CommonConstant.capList;
-
 @Component
 public class BinanceListedScheduler implements Listing {
     @Autowired
@@ -65,6 +63,8 @@ public class BinanceListedScheduler implements Listing {
         header.add(new BasicNameValuePair(SecretKey.getHeaderKeyBinance(), SecretKey.getHeaderValueBinance()));
 
         List<String> noListedCoinList = new ArrayList<>();
+        List<String> capList = new ArrayList<>();
+        capList.addAll(CommonConstant.getCapList());
 
         for (String item : capList) {
             synchronized (jedis) {

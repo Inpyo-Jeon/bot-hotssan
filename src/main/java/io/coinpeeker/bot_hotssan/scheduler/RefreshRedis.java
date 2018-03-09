@@ -1,5 +1,6 @@
 package io.coinpeeker.bot_hotssan.scheduler;
 
+import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.common.SecretKey;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,8 +19,6 @@ import redis.clients.jedis.Jedis;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static io.coinpeeker.bot_hotssan.common.CommonConstant.capList;
 
 @Component
 public class RefreshRedis {
@@ -48,7 +47,7 @@ public class RefreshRedis {
         if (!StringUtils.equals("real", env)) {
             JSONArray jsonArray = httpUtils.getResponseByArrays("https://api.coinmarketcap.com/v1/ticker/?limit=1600");
             for (int i = 0; i < jsonArray.length(); i++) {
-                capList.add(jsonArray.getJSONObject(i).getString("symbol"));
+                CommonConstant.getCapList().add(jsonArray.getJSONObject(i).getString("symbol"));
             }
             return;
         }
@@ -68,12 +67,13 @@ public class RefreshRedis {
                 LOGGER.info("@#@#@# CoinMarketCap Listing is delete and push");
                 jedis.del("CoinMarketCap");
                 jedis.del("CoinMarketCap_Address");
+                CommonConstant.getCapList().clear();
             }
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 jedis.hset("CoinMarketCap", jsonArray.getJSONObject(i).getString("symbol"), jsonArray.getJSONObject(i).getString("name"));
                 jedis.hset("CoinMarketCap_Address", jsonArray.getJSONObject(i).getString("symbol"), jsonArray.getJSONObject(i).getString("id"));
-                capList.add(jsonArray.getJSONObject(i).getString("symbol"));
+                CommonConstant.getCapList().add(jsonArray.getJSONObject(i).getString("symbol"));
             }
 
         }
