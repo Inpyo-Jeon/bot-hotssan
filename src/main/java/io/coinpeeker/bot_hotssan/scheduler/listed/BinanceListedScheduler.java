@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static io.coinpeeker.bot_hotssan.common.CommonConstant.capList;
-
 @Component
 public class BinanceListedScheduler implements Listing {
     @Autowired

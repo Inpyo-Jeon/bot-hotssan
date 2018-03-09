@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.coinpeeker.bot_hotssan.common.CommonConstant.capList;
-
 @Component
 public class RefreshRedis {
 

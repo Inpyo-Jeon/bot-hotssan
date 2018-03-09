@@ -32,8 +32,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
-import static io.coinpeeker.bot_hotssan.common.CommonConstant.capList;
-
 @Component
 public class KucoinListedScheduler implements Listing {
     @Autowired
