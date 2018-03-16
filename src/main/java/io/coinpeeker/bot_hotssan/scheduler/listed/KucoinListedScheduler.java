@@ -55,7 +55,7 @@ public class KucoinListedScheduler implements Listing {
     private static final Logger LOGGER = LoggerFactory.getLogger(KucoinListedScheduler.class);
 
     @Override
-//    @Scheduled(initialDelay = 1000 * 60, fixedDelay = 1000 * 10)
+    @Scheduled(initialDelay = 1000 * 60, fixedDelay = 1000 * 10)
     public void inspectListedCoin() throws IOException, NoSuchAlgorithmException, InvalidKeyException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -159,7 +159,5 @@ public class KucoinListedScheduler implements Listing {
                 e.printStackTrace();
             }
         }
-
-
     }
 }

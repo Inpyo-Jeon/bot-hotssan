@@ -46,14 +46,14 @@ public class OkexListedScheduler implements Listing {
     private static final Logger LOGGER = LoggerFactory.getLogger(OkexListedScheduler.class);
 
     @Override
-//    @Scheduled(initialDelay = 1000 * 60, fixedDelay = 1000 * 10)
+    @Scheduled(initialDelay = 1000 * 60, fixedDelay = 1000)
     public void inspectListedCoin() throws IOException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
             return;
         }
 
-        int jedisCount = 0;
+        int listingCount = 0;
         List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("api_key", SecretKey.getApiKeyOkex()));
         params.add(new BasicNameValuePair("sign", SecretKey.getSignOkex()));
@@ -62,10 +62,12 @@ public class OkexListedScheduler implements Listing {
         JSONObject list = jsonObject.getJSONObject("info").getJSONObject("funds").getJSONObject("free");
 
         synchronized (jedis) {
-            jedisCount = Math.toIntExact(jedis.hlen("OKExListing"));
+            listingCount = Math.toIntExact(jedis.hlen("Listing-OKEx"));
         }
 
-        if (jedisCount != list.length()) {
+        LOGGER.info(String.valueOf(list.length()) + " // " + String.valueOf(listingCount) + " : OKEx");
+
+        if (listingCount != list.length()) {
 
             Date date = new Date();
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd, hh:mm:ss a");
@@ -76,7 +78,7 @@ public class OkexListedScheduler implements Listing {
                 boolean isExist = true;
 
                 synchronized (jedis) {
-                    if (!jedis.hexists("OKExListing", toStringItem)) {
+                    if (!jedis.hexists("Listing-OKEx", toStringItem)) {
                         isExist = false;
                     }
                 }
@@ -99,9 +101,8 @@ public class OkexListedScheduler implements Listing {
                     messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
                     synchronized (jedis) {
-                        jedis.hset("OKExListing", toStringItem, "0");
+                        jedis.hset("Listing-OKEx", toStringItem, "1");
                     }
-
 
                     LOGGER.info("OKEx 상장 : " + item + " (" + simpleDateFormat.format(date).toString() + ")");
                 }

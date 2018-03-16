@@ -101,8 +101,8 @@ public class RefreshRedis {
 
     public void okex() throws IOException {
         synchronized (jedis) {
-            if (!jedis.exists("OKExListing")) {
-                LOGGER.info("@#@#@# OKEx Listing is null");
+            if (!jedis.exists("Listing-OKEx")) {
+                LOGGER.info("@#@#@# Listing-OKEx is null");
 
                 List<NameValuePair> params = new ArrayList<>();
                 params.add(new BasicNameValuePair("api_key", SecretKey.getApiKeyOkex()));
@@ -112,7 +112,7 @@ public class RefreshRedis {
                 JSONObject list = jsonObject.getJSONObject("info").getJSONObject("funds").getJSONObject("free");
 
                 for (Object item : list.keySet()) {
-                    jedis.hset("OKExListing", item.toString().toUpperCase(), "0");
+                    jedis.hset("Listing-OKEx", item.toString().toUpperCase(), "1");
                 }
             }
         }
@@ -281,15 +281,15 @@ public class RefreshRedis {
 
     public void bittrex() throws IOException {
         synchronized (jedis) {
-            if (!jedis.exists("BittrexListing")) {
-                LOGGER.info("@#@#@# Bittrex Listing is null");
+            if (!jedis.exists("Listing-Bittrex")) {
+                LOGGER.info("@#@#@# Listing-Bittrex is null");
 
 
-                JSONObject jsonObject = httpUtils.getResponseByObject("https://bittrex.com/api/v1.1/public/getcurrencies");
+                JSONObject jsonObject = httpUtils.getResponseByObject("https://bittrex.com/api/v2.0/pub/markets/GetMarketSummaries");
                 JSONArray list = jsonObject.getJSONArray("result");
 
                 for (int i = 0; i < list.length(); i++) {
-                    jedis.hset("BittrexListing", list.getJSONObject(i).getString("Currency"), "0");
+                    jedis.hset("Listing-Bittrex", list.getJSONObject(i).getJSONObject("Market").getString("MarketCurrency"), "1");
                 }
             }
         }
