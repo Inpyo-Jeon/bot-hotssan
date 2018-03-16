@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
@@ -63,6 +64,11 @@ public class WalletExplorerScheduler {
 
     @Scheduled(initialDelay = 1000, fixedDelay = 1000)
     public void searchWallet() throws IOException, InterruptedException {
+        /** env validation check.**/
+        if (!StringUtils.equals("dev", env)) {
+            return;
+        }
+
         Map<String, String> marketWalletMap = getMarketWallet();
         String explorerApiAddress = "https://api.ethplorer.io/";
         String endPoint = "getAddressInfo/";
