@@ -1,5 +1,6 @@
 package io.coinpeeker.bot_hotssan.scheduler.listed;
 
+import com.google.common.collect.Maps;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.scheduler.Listing;
@@ -20,6 +21,7 @@ import redis.clients.jedis.Jedis;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 @Component
 public class BittrexListedScheduler implements Listing {
@@ -44,7 +46,7 @@ public class BittrexListedScheduler implements Listing {
     private static final Logger LOGGER = LoggerFactory.getLogger(BittrexListedScheduler.class);
 
     @Override
-    @Scheduled(initialDelay = 1000 * 10, fixedDelay = 1000 * 3)
+    @Scheduled(initialDelay = 1000 * 60, fixedDelay = 1000 * 3)
     public void inspectListedCoin() throws IOException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -55,16 +57,20 @@ public class BittrexListedScheduler implements Listing {
         String endPoint = "https://bittrex.com/api/v2.0/pub/markets/GetMarketSummaries";
         JSONObject jsonObject = httpUtils.getResponseByObject(endPoint);
         JSONArray list = jsonObject.getJSONArray("result");
+        Map<String, Integer> deDuplicationMap = Maps.newHashMap();
+
+        for(int i = 0; i < list.length(); i++){
+            deDuplicationMap.put(list.getJSONObject(i).getJSONObject("Market").getString("MarketCurrency"), 1);
+        }
 
         synchronized (jedis) {
             listingCount = Math.toIntExact(jedis.hlen("Listing-Bittrex"));
         }
 
-        LOGGER.info(String.valueOf(list.length()) + " // " + String.valueOf(listingCount) + " : bittrex");
+        LOGGER.info(String.valueOf(deDuplicationMap.size()) + " // " + String.valueOf(listingCount) + " : Bittrex");
 
-        if (listingCount != list.length()) {
-            for (int i = 0; i < list.length(); i++) {
-                String item = list.getJSONObject(i).getJSONObject("Market").getString("MarketCurrency");
+        if (deDuplicationMap.size() != listingCount) {
+            for (String item : deDuplicationMap.keySet()){
                 boolean isExist = true;
 
                 synchronized (jedis) {
@@ -97,8 +103,8 @@ public class BittrexListedScheduler implements Listing {
                     messageContent.append(marketInfo.availableMarketList(item));
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                    messageUtils.sendMessage(url, -300048567L, messageContent.toString());
-                    messageUtils.sendMessage(url, -277619118L, messageContent.toString());
+//                    messageUtils.sendMessage(url, -300048567L, messageContent.toString());
+//                    messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
                     synchronized (jedis) {
                         jedis.hset("Listing-Bittrex", item, "1");
