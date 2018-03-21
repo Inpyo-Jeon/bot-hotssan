@@ -10,8 +10,8 @@ public class SecretKey {
     private static final String API_KEY_OKEX = "4b47a99a-bc50-4bf2-9ae3-3bb53b681148";
     private static final String SIGN_OKEX = "E03C5D7899A25793A9E173EC80FC1B81";
 
-    private static final String SECRET_KEY_KUCOIN = "fba73622-f0b1-45fc-a42d-c6c5f8860639";
-    private static final String API_KEY_KUCOIN = "5a952d64df542b46a01e55c0";
+    private static final String SECRET_KEY_KUCOIN = "a2b32690-a6a5-446b-894f-ac80dbdfed2e";
+    private static final String API_KEY_KUCOIN = "5ab22d9318da34d7d0682000";
 
     private static final String API_KEY_BITTREX = "07cabf10847743ec9a1ebd9f765ff355";
     private static final String SECRET_KEY_BITTREX = "78dc556147c7490d807190c73d731426";
