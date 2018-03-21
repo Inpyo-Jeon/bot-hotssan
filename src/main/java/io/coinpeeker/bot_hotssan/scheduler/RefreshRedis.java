@@ -81,22 +81,25 @@ public class RefreshRedis {
     }
 
     public void binance() throws IOException {
+        String endPoint = "https://www.binance.com/dictionary/getAssetPic.html";
+
+        JSONObject jsonObject = httpUtils.getPostResponseByObject(endPoint);
+        JSONArray jsonArray = jsonObject.getJSONArray("data");
+
         synchronized (jedis) {
-            // Redis에 binance 상장목록 존재 여부 체크
-            if (!jedis.exists("BinanceListing")) {
-                LOGGER.info("@#@#@# binance Listing is null");
+            if (!jedis.exists("Listing-Binance")) {
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    String asset = jsonArray.getJSONObject(i).getString("asset");
+                    String pic = "-";
 
-                jedis.hset("BinanceListing", "BTC", "0");
-
-                JSONArray jsonArrayBinance = httpUtils.getResponseByArrays("https://api.binance.com/api/v3/ticker/price");
-                for (int i = 0; i < jsonArrayBinance.length(); i++) {
-                    if (jsonArrayBinance.getJSONObject(i).getString("symbol").contains("BTC")) {
-                        jedis.hset("BinanceListing", jsonArrayBinance.getJSONObject(i).getString("symbol").replace("BTC", ""), "0");
+                    if (jsonArray.getJSONObject(i).has("pic")) {
+                        pic = jsonArray.getJSONObject(i).getString("pic");
                     }
+
+                    jedis.hset("Listing-Binance", asset, pic);
                 }
             }
         }
-
     }
 
     public void okex() throws IOException {

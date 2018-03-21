@@ -113,6 +113,23 @@ public class HttpUtils {
         return response;
     }
 
+    public CloseableHttpResponse post(String url) throws IOException {
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(url);
+
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setSocketTimeout(1000 * 10)
+                .setConnectTimeout(1000 * 10)
+                .setConnectionRequestTimeout(1000 * 10)
+                .build();
+
+        httpPost.setConfig(requestConfig);
+
+        CloseableHttpResponse response = httpClient.execute(httpPost);
+
+        return response;
+    }
+
     /**
      * API 호출결과를 JSONObject 로 리턴받는 메소드, apiResponse 의 최상단이 Array 인 경우
      *
@@ -162,6 +179,12 @@ public class HttpUtils {
 
     public JSONObject getPostResponseByObject(String url, List<NameValuePair> param) throws IOException {
         CloseableHttpResponse httpResponse = post(url, param);
+        JSONObject jsonObject = new JSONObject(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
+        return jsonObject;
+    }
+
+    public JSONObject getPostResponseByObject(String url) throws IOException {
+        CloseableHttpResponse httpResponse = post(url);
         JSONObject jsonObject = new JSONObject(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
         return jsonObject;
     }
