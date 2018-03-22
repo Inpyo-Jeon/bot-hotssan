@@ -48,7 +48,7 @@ public class BinanceListedScheduler implements Listing {
     @Scheduled(initialDelay = 1000, fixedDelay = 1)
     public void inspectListedCoin() throws IOException {
         /** env validation check.**/
-        if (!StringUtils.equals("dev", env)) {
+        if (!StringUtils.equals("real", env)) {
             return;
         }
 
