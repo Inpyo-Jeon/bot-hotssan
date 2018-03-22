@@ -62,13 +62,14 @@ public class OkexListedScheduler implements Listing {
         JSONObject list = jsonObject.getJSONObject("info").getJSONObject("funds").getJSONObject("free");
 
         synchronized (jedis) {
-            listingCount = Math.toIntExact(jedis.hlen("Listing-OKEx"));
+            listingCount = Math.toIntExact(jedis.hlen("L-OKEx"));
         }
 
         if (listingCount != list.length()) {
 
-            Date date = new Date();
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd, hh:mm:ss a");
+            Date nowDate = new Date();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
 
             for (Object item : list.keySet()) {
                 String toStringItem = item.toString().toUpperCase();
@@ -76,7 +77,7 @@ public class OkexListedScheduler implements Listing {
                 boolean isExist = true;
 
                 synchronized (jedis) {
-                    if (!jedis.hexists("Listing-OKEx", toStringItem)) {
+                    if (!jedis.hexists("L-OKEx", toStringItem)) {
                         isExist = false;
                     }
                 }
@@ -88,10 +89,19 @@ public class OkexListedScheduler implements Listing {
                     messageContent.append(" [ OKEx ] 상장 정보 ");
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                    messageContent.append("\n상장 리스트 탐지되었습니다.");
-                    messageContent.append("\n코인 정보 : ");
+                    messageContent.append("\n");
+                    messageContent.append(simpleDateFormat.format(nowDate));
+                    messageContent.append("\n확인방법 : List");
+                    messageContent.append("\n코인정보 : ");
+
+                    synchronized (jedis) {
+                        messageContent.append(jedis.hget("I-CoinMarketCap", toStringItem.toUpperCase()));
+                    }
+
+                    messageContent.append(" (");
                     messageContent.append(toStringItem.toUpperCase());
-                    messageContent.append("\n구매 가능 거래소");
+                    messageContent.append(")");
+                    messageContent.append("\n구매가능 거래소 : ");
                     messageContent.append(marketInfo.availableMarketList(toStringItem.toUpperCase()));
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
@@ -99,10 +109,10 @@ public class OkexListedScheduler implements Listing {
                     messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
                     synchronized (jedis) {
-                        jedis.hset("Listing-OKEx", toStringItem, "1");
+                        jedis.hset("L-OKEx", toStringItem, "1");
                     }
 
-                    LOGGER.info("OKEx 상장 : " + item + " (" + simpleDateFormat.format(date).toString() + ")");
+                    LOGGER.info("OKEx 상장 : " + item + " (" + simpleDateFormat.format(nowDate).toString() + ")");
                 }
             }
         }

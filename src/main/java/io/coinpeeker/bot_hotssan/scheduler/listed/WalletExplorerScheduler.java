@@ -62,7 +62,7 @@ public class WalletExplorerScheduler {
     }
 
 
-    @Scheduled(initialDelay = 1000, fixedDelay = 1000)
+    @Scheduled(initialDelay = 1000 * 120, fixedDelay = 1000)
     public void searchWallet() throws IOException, InterruptedException {
         /** env validation check.**/
         if (!StringUtils.equals("dev", env)) {
@@ -108,14 +108,14 @@ public class WalletExplorerScheduler {
                 }
             }
             synchronized (jedis) {
-                if (jedis.exists("Wallet-" + item)) {
+                if (jedis.exists("W-" + item)) {
                     isExistWallet = true;
                 }
             }
 
             if (isExistWallet) {
                 synchronized (jedis) {
-                    jedisCount = Math.toIntExact(jedis.hlen("Wallet-" + item));
+                    jedisCount = Math.toIntExact(jedis.hlen("W-" + item));
                 }
 
                 if (jedisCount != toJsonArray.length()) {
@@ -125,14 +125,14 @@ public class WalletExplorerScheduler {
                         boolean isExistSymbol = true;
 
                         synchronized (jedis) {
-                            if (!jedis.hexists("Wallet-" + item, symbol)) {
+                            if (!jedis.hexists("W-" + item, symbol)) {
                                 isExistSymbol = false;
                             }
                         }
 
                         if (!isExistSymbol) {
                             StringBuilder messageContent = new StringBuilder();
-                            messageContent.append("Wallet-");
+                            messageContent.append("W-");
                             messageContent.append(item);
                             messageContent.append(" ");
                             messageContent.append(symbol);
@@ -147,10 +147,10 @@ public class WalletExplorerScheduler {
                             messageUtils.sendMessage(botUrl, -259666461L, messageContent.toString());
                             messageUtils.sendMessage(botUrl, -294606763L, messageContent.toString());
 
-                            LOGGER.info("Wallet-" + item + " : " + symbol + " 심볼 생성");
+                            LOGGER.info("W-" + item + " : " + symbol + " 심볼 생성");
 
                             synchronized (jedis) {
-                                jedis.hset("Wallet-" + item, symbol, "0");
+                                jedis.hset("W-" + item, symbol, "0");
                             }
                         }
                     }
@@ -160,7 +160,7 @@ public class WalletExplorerScheduler {
                     String symbol = toJsonArray.getJSONObject(i).getString("symbol");
 
                     synchronized (jedis) {
-                        jedis.hset("Wallet-" + item, symbol, "0");
+                        jedis.hset("W-" + item, symbol, "0");
                     }
                 }
             }

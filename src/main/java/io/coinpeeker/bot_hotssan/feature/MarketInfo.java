@@ -31,8 +31,7 @@ public class MarketInfo {
 
     public String availableMarketList(String coin) throws IOException {
         Map<String, List<String>> market = Maps.newHashMap();
-        RedisConnection redisConnection = null;
-        String url = "https://coinmarketcap.com/currencies/" + jedis.hget("CoinMarketCap_Address", coin) + "#markets";
+        String url = "https://coinmarketcap.com/currencies/" + jedis.hget("I-CoinMarketCap-Address", coin) + "#markets";
 
 
         StringBuilder pair = new StringBuilder();

@@ -27,10 +27,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class KucoinListedScheduler implements Listing {
@@ -55,7 +52,7 @@ public class KucoinListedScheduler implements Listing {
     private static final Logger LOGGER = LoggerFactory.getLogger(KucoinListedScheduler.class);
 
     @Override
-    @Scheduled(initialDelay = 1000 * 60, fixedDelay = 1000 * 10)
+    @Scheduled(initialDelay = 1000 * 50, fixedDelay = 1000 * 10)
     public void inspectListedCoin() throws IOException, NoSuchAlgorithmException, InvalidKeyException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -68,7 +65,7 @@ public class KucoinListedScheduler implements Listing {
 
         for (String item : capList) {
             synchronized (jedis) {
-                if (!jedis.hexists("KucoinListing", item)) {
+                if (!jedis.hexists("L-Kucoin", item)) {
                     noListedCoinList.add(item);
                 }
             }
@@ -113,26 +110,29 @@ public class KucoinListedScheduler implements Listing {
             }
 
             if (jsonObject.has("data") && !jsonObject.get("data").equals("null")) {
-                Date date = new Date();
+                Date nowDate = new Date();
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
+                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
                 StringBuilder messageContent = new StringBuilder();
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd, hh:mm:ss a");
 
                 messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                 messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                 messageContent.append(" [ Kucoin ] 상장 정보 ");
                 messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                 messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                messageContent.append("\n상장 리스트 탐지되었습니다(지갑주소)");
-                messageContent.append("\n코인 정보 : ");
+                messageContent.append("\n");
+                messageContent.append(simpleDateFormat.format(nowDate));
+                messageContent.append("\n확인방법 : Address");
+                messageContent.append("\n코인정보 : ");
+
                 synchronized (jedis) {
-                    messageContent.append(jedis.hget("CoinMarketCap", item));
+                    messageContent.append(jedis.hget("I-CoinMarketCap", item));
                 }
+
                 messageContent.append(" (");
                 messageContent.append(item);
                 messageContent.append(")");
-                messageContent.append("\n지갑주소 : ");
-                messageContent.append(jsonObject.getJSONObject("data").getString("address"));
-                messageContent.append("\n구매 가능 거래소");
+                messageContent.append("\n구매가능 거래소 : ");
                 messageContent.append(marketInfo.availableMarketList(item));
 
 
@@ -141,10 +141,10 @@ public class KucoinListedScheduler implements Listing {
                 messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
                 synchronized (jedis) {
-                    jedis.hset("KucoinListing", item, "0");
+                    jedis.hset("L-Kucoin", item, "0");
                 }
 
-                LOGGER.info("Kucoin 상장 : " + item + " (" + simpleDateFormat.format(date).toString() + ")");
+                LOGGER.info("Kucoin 상장 : " + item + " (" + simpleDateFormat.format(nowDate).toString() + ")");
             } else if ((jsonObject.has("error") && jsonObject.getString("error").equals("Not Found"))) {
 
             } else {

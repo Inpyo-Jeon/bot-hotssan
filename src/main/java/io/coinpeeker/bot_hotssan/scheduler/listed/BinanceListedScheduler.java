@@ -45,7 +45,7 @@ public class BinanceListedScheduler implements Listing {
 
 
     @Override
-    @Scheduled(initialDelay = 1000, fixedDelay = 1)
+    @Scheduled(initialDelay = 1000 * 30, fixedDelay = 1)
     public void inspectListedCoin() throws IOException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -59,7 +59,7 @@ public class BinanceListedScheduler implements Listing {
         JSONArray jsonArray = jsonObject.getJSONArray("data");
 
         synchronized (jedis) {
-            listingCount = Math.toIntExact(jedis.hlen("Listing-Binance"));
+            listingCount = Math.toIntExact(jedis.hlen("L-Binance"));
         }
 
         if (listingCount != jsonArray.length()) {
@@ -67,7 +67,7 @@ public class BinanceListedScheduler implements Listing {
                 boolean isExist = true;
 
                 synchronized (jedis) {
-                    if (!jedis.hexists("Listing-Binance", jsonArray.getJSONObject(i).getString("asset"))) {
+                    if (!jedis.hexists("L-Binance", jsonArray.getJSONObject(i).getString("asset"))) {
                         isExist = false;
                     }
                 }
@@ -98,27 +98,32 @@ public class BinanceListedScheduler implements Listing {
                     messageContent.append(" [ Binance ] 상장 정보 ");
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                    messageContent.append("\n상장 리스트 탐지되었습니다. (이미지)");
-                    messageContent.append("\n코인 정보 : ");
+                    messageContent.append("\n");
+                    messageContent.append(simpleDateFormat.format(nowDate));
+                    messageContent.append("\n확인방법 : Image");
+                    messageContent.append("\n코인정보 : ");
+
                     synchronized (jedis) {
-                        messageContent.append(jedis.hget("CoinMarketCap", asset));
+                        messageContent.append(jedis.hget("I-CoinMarketCap", asset));
                     }
+
                     messageContent.append(" (");
                     messageContent.append(asset);
                     messageContent.append(")");
                     messageContent.append("\n이미지주소 : ");
                     messageContent.append(pic);
-                    messageContent.append("\nTimestamp 상장 시간 : ");
+                    messageContent.append("\n변환시간 : ");
                     messageContent.append(simpleDateFormat.format(imageTimeStamp));
-                    messageContent.append("\n구매 가능 거래소");
+                    messageContent.append("\n구매가능 거래소 : ");
                     messageContent.append(marketInfo.availableMarketList(asset));
 
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                    messageUtils.sendMessage(url, -294606763L, messageContent.toString());
+                    messageUtils.sendMessage(url, -300048567L, messageContent.toString());
+                    messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
                     synchronized (jedis) {
-                        jedis.hset("Listing-Binance", asset, pic);
+                        jedis.hset("L-Binance", asset, pic);
                     }
 
                     LOGGER.info("Binance 상장 : " + asset + " (" + simpleDateFormat.format(nowDate) + ")");

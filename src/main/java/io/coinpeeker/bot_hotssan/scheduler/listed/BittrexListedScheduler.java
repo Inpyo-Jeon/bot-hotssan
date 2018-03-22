@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.TimeZone;
 
 @Component
 public class BittrexListedScheduler implements Listing {
@@ -46,7 +47,7 @@ public class BittrexListedScheduler implements Listing {
     private static final Logger LOGGER = LoggerFactory.getLogger(BittrexListedScheduler.class);
 
     @Override
-    @Scheduled(initialDelay = 1000 * 60, fixedDelay = 1000 * 3)
+    @Scheduled(initialDelay = 1000 * 40, fixedDelay = 1000 * 3)
     public void inspectListedCoin() throws IOException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -64,7 +65,7 @@ public class BittrexListedScheduler implements Listing {
         }
 
         synchronized (jedis) {
-            listingCount = Math.toIntExact(jedis.hlen("Listing-Bittrex"));
+            listingCount = Math.toIntExact(jedis.hlen("L-Bittrex"));
         }
 
         if (deDuplicationMap.size() != listingCount) {
@@ -72,32 +73,35 @@ public class BittrexListedScheduler implements Listing {
                 boolean isExist = true;
 
                 synchronized (jedis) {
-                    if (!jedis.hexists("Listing-Bittrex", item)) {
+                    if (!jedis.hexists("L-Bittrex", item)) {
                         isExist = false;
                     }
                 }
 
                 if (!isExist) {
-                    Date date = new Date();
                     StringBuilder messageContent = new StringBuilder();
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd, hh:mm:ss a");
+                    Date nowDate = new Date();
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
+                    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
 
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(" [ Bittrex ] 상장 정보 ");
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                    messageContent.append("\n상장 리스트 탐지되었습니다.");
-                    messageContent.append("\n코인 정보 : ");
+                    messageContent.append("\n");
+                    messageContent.append(simpleDateFormat.format(nowDate));
+                    messageContent.append("\n확인방법 : List");
+                    messageContent.append("\n코인정보 : ");
 
                     synchronized (jedis) {
-                        messageContent.append(jedis.hget("CoinMarketCap", item));
+                        messageContent.append(jedis.hget("I-CoinMarketCap", item));
                     }
 
                     messageContent.append(" (");
                     messageContent.append(item);
                     messageContent.append(")");
-                    messageContent.append("\n구매 가능 거래소");
+                    messageContent.append("\n구매가능 거래소 : ");
                     messageContent.append(marketInfo.availableMarketList(item));
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
@@ -105,10 +109,10 @@ public class BittrexListedScheduler implements Listing {
                     messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
                     synchronized (jedis) {
-                        jedis.hset("Listing-Bittrex", item, "1");
+                        jedis.hset("L-Bittrex", item, "1");
                     }
 
-                    LOGGER.info("Bittrex 상장 : " + item + " (" + simpleDateFormat.format(date).toString() + ")");
+                    LOGGER.info("Bittrex 상장 : " + item + " (" + simpleDateFormat.format(nowDate).toString() + ")");
                 }
             }
         }
