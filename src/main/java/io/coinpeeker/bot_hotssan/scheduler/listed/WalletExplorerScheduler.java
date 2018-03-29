@@ -30,10 +30,10 @@ public class WalletExplorerScheduler {
     HttpUtils httpUtils;
 
     @Autowired
-    CustomJedis customJedis;
+    MessageUtils messageUtils;
 
     @Autowired
-    MessageUtils messageUtils;
+    Jedis jedis;
 
     @Value("${property.hotssan_id}")
     private String apiKey;
@@ -69,8 +69,6 @@ public class WalletExplorerScheduler {
         if (!StringUtils.equals("dev", env)) {
             return;
         }
-
-        Jedis jedis;
 
         Map<String, String> marketWalletMap = getMarketWallet();
         String explorerApiAddress = "https://api.ethplorer.io/";
@@ -111,16 +109,16 @@ public class WalletExplorerScheduler {
                 }
             }
 
-            jedis = customJedis.getResource();
-            if (jedis.exists("W-" + item)) {
-                isExistWallet = true;
+            synchronized (jedis) {
+                if (jedis.exists("W-" + item)) {
+                    isExistWallet = true;
+                }
             }
-            jedis.close();
 
             if (isExistWallet) {
-                jedis = customJedis.getResource();
-                jedisCount = Math.toIntExact(jedis.hlen("W-" + item));
-                jedis.close();
+                synchronized (jedis) {
+                    jedisCount = Math.toIntExact(jedis.hlen("W-" + item));
+                }
 
                 if (jedisCount != toJsonArray.length()) {
                     for (int i = 0; i < toJsonArray.length(); i++) {
@@ -128,11 +126,11 @@ public class WalletExplorerScheduler {
                         String address = toJsonArray.getJSONObject(i).getString("address");
                         boolean isExistSymbol = true;
 
-                        jedis = customJedis.getResource();
-                        if (!jedis.hexists("W-" + item, symbol)) {
-                            isExistSymbol = false;
+                        synchronized (jedis) {
+                            if (!jedis.hexists("W-" + item, symbol)) {
+                                isExistSymbol = false;
+                            }
                         }
-                        jedis.close();
 
                         if (!isExistSymbol) {
                             StringBuilder messageContent = new StringBuilder();
@@ -153,9 +151,9 @@ public class WalletExplorerScheduler {
 
                             LOGGER.info("W-" + item + " : " + symbol + " 심볼 생성");
 
-                            jedis = customJedis.getResource();
-                            jedis.hset("W-" + item, symbol, "0");
-                            jedis.close();
+                            synchronized (jedis) {
+                                jedis.hset("W-" + item, symbol, "0");
+                            }
                         }
                     }
                 }
@@ -163,9 +161,9 @@ public class WalletExplorerScheduler {
                 for (int i = 0; i < toJsonArray.length(); i++) {
                     String symbol = toJsonArray.getJSONObject(i).getString("symbol");
 
-                    jedis = customJedis.getResource();
-                    jedis.hset("W-" + item, symbol, "0");
-                    jedis.close();
+                    synchronized (jedis) {
+                        jedis.hset("W-" + item, symbol, "0");
+                    }
                 }
             }
 

@@ -33,14 +33,14 @@ public class BinanceListedScheduler implements Listing {
     @Autowired
     MessageUtils messageUtils;
 
-    @Autowired
-    private CustomJedis customJedis;
-
     @Value("${property.hotssan_id}")
     private String apiKey;
 
     @Value("${property.env}")
     private String env;
+
+    @Autowired
+    Jedis jedis;
 
     private int articleCount = 0;
 
@@ -55,26 +55,25 @@ public class BinanceListedScheduler implements Listing {
             return;
         }
 
-        Jedis jedis;
         int listingCount = 0;
         String endPoint = "https://www.binance.com/dictionary/getAssetPic.html";
 
         JSONObject jsonObject = httpUtils.getPostResponseByObject(endPoint);
         JSONArray jsonArray = jsonObject.getJSONArray("data");
 
-        jedis = customJedis.getResource();
-        listingCount = Math.toIntExact(jedis.hlen("L-Binance"));
-        jedis.close();
+        synchronized (jedis) {
+            listingCount = Math.toIntExact(jedis.hlen("L-Binance"));
+        }
 
         if (listingCount != jsonArray.length()) {
             for (int i = 0; i < jsonArray.length(); i++) {
                 boolean isExist = true;
 
-                jedis = customJedis.getResource();
-                if (!jedis.hexists("L-Binance", jsonArray.getJSONObject(i).getString("asset"))) {
-                    isExist = false;
+                synchronized (jedis) {
+                    if (!jedis.hexists("L-Binance", jsonArray.getJSONObject(i).getString("asset"))) {
+                        isExist = false;
+                    }
                 }
-                jedis.close();
 
                 if (!isExist) {
                     String asset = jsonArray.getJSONObject(i).getString("asset");
@@ -107,9 +106,9 @@ public class BinanceListedScheduler implements Listing {
                     messageContent.append("\n확인방법 : Image");
                     messageContent.append("\n코인정보 : ");
 
-                    jedis = customJedis.getResource();
-                    messageContent.append(jedis.hget("I-CoinMarketCap", asset));
-                    jedis.close();
+                    synchronized (jedis) {
+                        messageContent.append(jedis.hget("I-CoinMarketCap", asset));
+                    }
 
                     messageContent.append(" (");
                     messageContent.append(asset);
@@ -126,9 +125,9 @@ public class BinanceListedScheduler implements Listing {
                     messageUtils.sendMessage(url, -300048567L, messageContent.toString());
                     messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
-                    jedis = customJedis.getResource();
-                    jedis.hset("L-Binance", asset, pic);
-                    jedis.close();
+                    synchronized (jedis) {
+                        jedis.hset("L-Binance", asset, pic);
+                    }
 
                     LOGGER.info("Binance 상장(Image) : " + asset + " (" + simpleDateFormat.format(nowDate) + ")");
                     LOGGER.info("이미지상 상장시간 : " + asset + " (" + simpleDateFormat.format(imageTimeStamp) + ")");
@@ -153,7 +152,6 @@ public class BinanceListedScheduler implements Listing {
             return;
         }
 
-        Jedis jedis;
         String endPoint = "https://support.binance.com/hc/api/internal/recent_activities?locale=en-us&page=1&per_page=1&locale=en-us";
 
         JSONObject jsonObject = httpUtils.getResponseByObject(endPoint);
@@ -192,9 +190,9 @@ public class BinanceListedScheduler implements Listing {
                 messageContent.append("\n확인방법 : InternalAPI");
                 messageContent.append("\n코인정보 : ");
 
-                jedis = customJedis.getResource();
-                messageContent.append(jedis.hget("I-CoinMarketCap", asset));
-                jedis.close();
+                synchronized (jedis) {
+                    messageContent.append(jedis.hget("I-CoinMarketCap", asset));
+                }
 
                 messageContent.append(" (");
                 messageContent.append(asset);
@@ -207,9 +205,9 @@ public class BinanceListedScheduler implements Listing {
                 messageUtils.sendMessage(url, -300048567L, messageContent.toString());
                 messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
-                jedis = customJedis.getResource();
-                jedis.hset("L-Binance-A", asset, "0");
-                jedis.close();
+                synchronized (jedis) {
+                    jedis.hset("L-Binance-A", asset, "0");
+                }
 
                 LOGGER.info("Binance 상장(Article) : " + asset + " (" + simpleDateFormat.format(nowDate) + ")");
                 LOGGER.info(messageContent.toString());

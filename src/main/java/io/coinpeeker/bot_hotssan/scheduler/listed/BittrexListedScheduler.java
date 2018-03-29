@@ -34,10 +34,10 @@ public class BittrexListedScheduler implements Listing {
     HttpUtils httpUtils;
 
     @Autowired
-    CustomJedis customJedis;
+    MessageUtils messageUtils;
 
     @Autowired
-    MessageUtils messageUtils;
+    Jedis jedis;
 
     @Value("${property.hotssan_id}")
     private String apiKey;
@@ -55,7 +55,6 @@ public class BittrexListedScheduler implements Listing {
             return;
         }
 
-        Jedis jedis;
         int listingCount = 0;
         String endPoint = "https://bittrex.com/api/v2.0/pub/markets/GetMarketSummaries";
         JSONObject jsonObject = httpUtils.getResponseByObject(endPoint);
@@ -66,9 +65,9 @@ public class BittrexListedScheduler implements Listing {
             deDuplicationMap.put(list.getJSONObject(i).getJSONObject("Market").getString("MarketCurrency"), 1);
         }
 
-        jedis = customJedis.getResource();
-        listingCount = Math.toIntExact(jedis.hlen("L-Bittrex"));
-        jedis.close();
+        synchronized (jedis) {
+            listingCount = Math.toIntExact(jedis.hlen("L-Bittrex"));
+        }
 
         System.out.println(listingCount);
         System.out.println(deDuplicationMap.size());
@@ -77,11 +76,11 @@ public class BittrexListedScheduler implements Listing {
             for (String item : deDuplicationMap.keySet()) {
                 boolean isExist = true;
 
-                jedis = customJedis.getResource();
-                if (!jedis.hexists("L-Bittrex", item)) {
-                    isExist = false;
+                synchronized (jedis) {
+                    if (!jedis.hexists("L-Bittrex", item)) {
+                        isExist = false;
+                    }
                 }
-                jedis.close();
 
                 if (!isExist) {
                     StringBuilder messageContent = new StringBuilder();
@@ -99,9 +98,9 @@ public class BittrexListedScheduler implements Listing {
                     messageContent.append("\n확인방법 : List");
                     messageContent.append("\n코인정보 : ");
 
-                    jedis = customJedis.getResource();
-                    messageContent.append(jedis.hget("I-CoinMarketCap", item));
-                    jedis.close();
+                    synchronized (jedis) {
+                        messageContent.append(jedis.hget("I-CoinMarketCap", item));
+                    }
 
                     messageContent.append(" (");
                     messageContent.append(item);
@@ -113,9 +112,9 @@ public class BittrexListedScheduler implements Listing {
                     messageUtils.sendMessage(url, -300048567L, messageContent.toString());
                     messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
-                    jedis = customJedis.getResource();
-                    jedis.hset("L-Bittrex", item, "1");
-                    jedis.close();
+                    synchronized (jedis) {
+                        jedis.hset("L-Bittrex", item, "1");
+                    }
 
                     LOGGER.info("Bittrex 상장 : " + item + " (" + simpleDateFormat.format(nowDate).toString() + ")");
                 }

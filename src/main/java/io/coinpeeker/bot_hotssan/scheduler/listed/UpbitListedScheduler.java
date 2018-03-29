@@ -36,7 +36,7 @@ public class UpbitListedScheduler implements Listing {
     HttpUtils httpUtils;
 
     @Autowired
-    CustomJedis customJedis;
+    Jedis jedis;
 
     @Value("${property.hotssan_id}")
     private String apiKey;
@@ -54,18 +54,17 @@ public class UpbitListedScheduler implements Listing {
             return;
         }
 
-        Jedis jedis;
-
         List<String> noListedCoinList = new ArrayList<>();
         List<String> capList = new ArrayList<>();
         capList.addAll(CommonConstant.getCapList());
 
         for (String item : capList) {
-            jedis = customJedis.getResource();
-            if (!jedis.hexists("L-Upbit", item)) {
-                noListedCoinList.add(item);
+            synchronized (jedis) {
+                if (!jedis.hexists("L-Upbit", item)) {
+                    noListedCoinList.add(item);
+                }
             }
-            jedis.close();
+
         }
 
         for (String item : noListedCoinList) {
@@ -91,9 +90,9 @@ public class UpbitListedScheduler implements Listing {
                 messageContent.append(simpleDateFormat.format(nowDate));
                 messageContent.append("\n코인정보 : ");
 
-                jedis = customJedis.getResource();
-                messageContent.append(jedis.hget("I-CoinMarketCap", item));
-                jedis.close();
+                synchronized (jedis) {
+                    messageContent.append(jedis.hget("I-CoinMarketCap", item));
+                }
 
                 messageContent.append(" (");
                 messageContent.append(item);
@@ -111,9 +110,9 @@ public class UpbitListedScheduler implements Listing {
                 messageUtils.sendMessage(url, -300048567L, messageContent.toString());
                 messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
-                jedis = customJedis.getResource();
-                jedis.hset("L-Upbit", item, "0");
-                jedis.close();
+                synchronized (jedis) {
+                    jedis.hset("L-Upbit", item, "0");
+                }
                 LOGGER.info("Upbit 상장 : " + item + " (" + nowDate + ")");
 
             }

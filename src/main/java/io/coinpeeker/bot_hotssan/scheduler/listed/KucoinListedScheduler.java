@@ -39,10 +39,10 @@ public class KucoinListedScheduler implements Listing {
     HttpUtils httpUtils;
 
     @Autowired
-    CustomJedis customJedis;
+    MessageUtils messageUtils;
 
     @Autowired
-    MessageUtils messageUtils;
+    Jedis jedis;
 
     @Value("${property.hotssan_id}")
     private String apiKey;
@@ -60,19 +60,17 @@ public class KucoinListedScheduler implements Listing {
             return;
         }
 
-        Jedis jedis;
-
         List<String> noListedCoinList = new ArrayList<>();
         List<String> capList = new ArrayList<>();
         capList.addAll(CommonConstant.getCapList());
 
 
         for (String item : capList) {
-            jedis = customJedis.getResource();
-            if (!jedis.hexists("L-Kucoin", item)) {
-                noListedCoinList.add(item);
+            synchronized (jedis) {
+                if (!jedis.hexists("L-Kucoin", item)) {
+                    noListedCoinList.add(item);
+                }
             }
-            jedis.close();
         }
 
         for (String item : noListedCoinList) {
@@ -129,9 +127,9 @@ public class KucoinListedScheduler implements Listing {
                 messageContent.append("\n확인방법 : Address");
                 messageContent.append("\n코인정보 : ");
 
-                jedis = customJedis.getResource();
-                messageContent.append(jedis.hget("I-CoinMarketCap", item));
-                jedis.close();
+                synchronized (jedis) {
+                    messageContent.append(jedis.hget("I-CoinMarketCap", item));
+                }
 
                 messageContent.append(" (");
                 messageContent.append(item);
@@ -144,9 +142,9 @@ public class KucoinListedScheduler implements Listing {
                 messageUtils.sendMessage(url, -300048567L, messageContent.toString());
                 messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
-                jedis = customJedis.getResource();
-                jedis.hset("L-Kucoin", item, "0");
-                jedis.close();
+                synchronized (jedis) {
+                    jedis.hset("L-Kucoin", item, "0");
+                }
 
                 LOGGER.info("Kucoin 상장 : " + item + " (" + simpleDateFormat.format(nowDate).toString() + ")");
             } else if ((jsonObject.has("error") && jsonObject.getString("error").equals("Not Found"))) {

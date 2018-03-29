@@ -36,7 +36,7 @@ public class OkexListedScheduler implements Listing {
     MessageUtils messageUtils;
 
     @Autowired
-    CustomJedis customJedis;
+    Jedis jedis;
 
     @Value("${property.hotssan_id}")
     private String apiKey;
@@ -54,8 +54,6 @@ public class OkexListedScheduler implements Listing {
             return;
         }
 
-        Jedis jedis;
-
         int listingCount = 0;
         List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("api_key", SecretKey.getApiKeyOkex()));
@@ -64,10 +62,9 @@ public class OkexListedScheduler implements Listing {
         JSONObject jsonObject = httpUtils.getPostResponseByObject(SecretKey.getUrlOkex(), params);
         JSONObject list = jsonObject.getJSONObject("info").getJSONObject("funds").getJSONObject("free");
 
-        jedis = customJedis.getResource();
-        listingCount = Math.toIntExact(jedis.hlen("L-OKEx"));
-        jedis.close();
-
+        synchronized (jedis) {
+            listingCount = Math.toIntExact(jedis.hlen("L-OKEx"));
+        }
 
         if (listingCount != list.length()) {
 
@@ -80,11 +77,11 @@ public class OkexListedScheduler implements Listing {
 
                 boolean isExist = true;
 
-                jedis = customJedis.getResource();
-                if (!jedis.hexists("L-OKEx", toStringItem)) {
-                    isExist = false;
+                synchronized (jedis) {
+                    if (!jedis.hexists("L-OKEx", toStringItem)) {
+                        isExist = false;
+                    }
                 }
-                jedis.close();
 
                 if (!isExist) {
                     StringBuilder messageContent = new StringBuilder();
@@ -98,9 +95,9 @@ public class OkexListedScheduler implements Listing {
                     messageContent.append("\n확인방법 : List");
                     messageContent.append("\n코인정보 : ");
 
-                    jedis = customJedis.getResource();
-                    messageContent.append(jedis.hget("I-CoinMarketCap", toStringItem.toUpperCase()));
-                    jedis.close();
+                    synchronized (jedis) {
+                        messageContent.append(jedis.hget("I-CoinMarketCap", toStringItem.toUpperCase()));
+                    }
 
                     messageContent.append(" (");
                     messageContent.append(toStringItem.toUpperCase());
@@ -112,9 +109,9 @@ public class OkexListedScheduler implements Listing {
                     messageUtils.sendMessage(url, -300048567L, messageContent.toString());
                     messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
-                    jedis = customJedis.getResource();
-                    jedis.hset("L-OKEx", toStringItem, "1");
-                    jedis.close();
+                    synchronized (jedis) {
+                        jedis.hset("L-OKEx", toStringItem, "1");
+                    }
 
                     LOGGER.info("OKEx 상장 : " + item + " (" + simpleDateFormat.format(nowDate).toString() + ")");
                 }
