@@ -1,6 +1,7 @@
 package io.coinpeeker.bot_hotssan.scheduler;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
+import io.coinpeeker.bot_hotssan.common.CustomJedis;
 import io.coinpeeker.bot_hotssan.common.SecretKey;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,12 +28,13 @@ public class RefreshRedis {
     private HttpUtils httpUtils;
 
     @Autowired
-    private Jedis jedis;
+    private CustomJedis customJedis;
 
     @Value("${property.env}")
     String env;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RefreshRedis.class);
+
 
     @Scheduled(initialDelay = 1000, fixedDelay = 1000 * 60 * 60 * 24)
     public void start() throws IOException {
@@ -60,251 +62,260 @@ public class RefreshRedis {
 
         JSONArray jsonArray = httpUtils.getResponseByArrays("https://api.coinmarketcap.com/v1/ticker/?limit=1600");
 
-        synchronized (jedis) {
-            if (!jedis.exists("I-CoinMarketCap")) {
-                LOGGER.info("@#@#@# I-CoinMarketCap Listing is null");
-            } else {
-                LOGGER.info("@#@#@# I-CoinMarketCap Listing is delete and push");
-                jedis.del("I-CoinMarketCap");
-                jedis.del("I-CoinMarketCap-Address");
-                CommonConstant.getCapList().clear();
-            }
+        Jedis jedis;
+        jedis = customJedis.getResource();
 
-            for (int i = 0; i < jsonArray.length(); i++) {
-                jedis.hset("I-CoinMarketCap", jsonArray.getJSONObject(i).getString("symbol"), jsonArray.getJSONObject(i).getString("name"));
-                jedis.hset("I-CoinMarketCap-Address", jsonArray.getJSONObject(i).getString("symbol"), jsonArray.getJSONObject(i).getString("id"));
-                CommonConstant.getCapList().add(jsonArray.getJSONObject(i).getString("symbol"));
-            }
-
+        if (!jedis.exists("I-CoinMarketCap")) {
+            LOGGER.info("@#@#@# I-CoinMarketCap Listing is null");
+        } else {
+            LOGGER.info("@#@#@# I-CoinMarketCap Listing is delete and push");
+            jedis.del("I-CoinMarketCap");
+            jedis.del("I-CoinMarketCap-Address");
+            CommonConstant.getCapList().clear();
         }
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            jedis.hset("I-CoinMarketCap", jsonArray.getJSONObject(i).getString("symbol"), jsonArray.getJSONObject(i).getString("name"));
+            jedis.hset("I-CoinMarketCap-Address", jsonArray.getJSONObject(i).getString("symbol"), jsonArray.getJSONObject(i).getString("id"));
+            CommonConstant.getCapList().add(jsonArray.getJSONObject(i).getString("symbol"));
+        }
+
+        jedis.close();
 
     }
 
     public void binance() throws IOException {
+        Jedis jedis;
         String endPoint = "https://www.binance.com/dictionary/getAssetPic.html";
-
         JSONObject jsonObject = httpUtils.getPostResponseByObject(endPoint);
         JSONArray jsonArray = jsonObject.getJSONArray("data");
 
-        synchronized (jedis) {
-            if (!jedis.exists("L-Binance")) {
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    String asset = jsonArray.getJSONObject(i).getString("asset");
-                    String pic = "-";
 
-                    if (jsonArray.getJSONObject(i).has("pic")) {
-                        pic = jsonArray.getJSONObject(i).getString("pic");
-                    }
+        jedis = customJedis.getResource();
+        if (!jedis.exists("L-Binance")) {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                String asset = jsonArray.getJSONObject(i).getString("asset");
+                String pic = "-";
 
-                    jedis.hset("L-Binance", asset, pic);
+                if (jsonArray.getJSONObject(i).has("pic")) {
+                    pic = jsonArray.getJSONObject(i).getString("pic");
                 }
+
+                jedis.hset("L-Binance", asset, pic);
+
             }
         }
+        jedis.close();
     }
 
     public void okex() throws IOException {
-        synchronized (jedis) {
-            if (!jedis.exists("L-OKEx")) {
-                LOGGER.info("@#@#@# L-OKEx is null");
+        Jedis jedis;
+        jedis = customJedis.getResource();
 
-                List<NameValuePair> params = new ArrayList<>();
-                params.add(new BasicNameValuePair("api_key", SecretKey.getApiKeyOkex()));
-                params.add(new BasicNameValuePair("sign", SecretKey.getSignOkex()));
+        if (!jedis.exists("L-OKEx")) {
+            LOGGER.info("@#@#@# L-OKEx is null");
 
-                JSONObject jsonObject = httpUtils.getPostResponseByObject(SecretKey.getUrlOkex(), params);
-                JSONObject list = jsonObject.getJSONObject("info").getJSONObject("funds").getJSONObject("free");
+            List<NameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair("api_key", SecretKey.getApiKeyOkex()));
+            params.add(new BasicNameValuePair("sign", SecretKey.getSignOkex()));
 
-                for (Object item : list.keySet()) {
-                    jedis.hset("L-OKEx", item.toString().toUpperCase(), "1");
-                }
+            JSONObject jsonObject = httpUtils.getPostResponseByObject(SecretKey.getUrlOkex(), params);
+            JSONObject list = jsonObject.getJSONObject("info").getJSONObject("funds").getJSONObject("free");
+
+            for (Object item : list.keySet()) {
+                jedis.hset("L-OKEx", item.toString().toUpperCase(), "1");
             }
         }
+        jedis.close();
 
     }
 
     public void upbit() {
-        synchronized (jedis) {
-            if (!jedis.exists("L-Upbit")) {
-                LOGGER.info("@#@#@# L-Upbit is null");
-                jedis.hset("L-Upbit", "BTC", "0");
-                jedis.hset("L-Upbit", "WAX", "0");
-                jedis.hset("L-Upbit", "LTC", "0");
-                jedis.hset("L-Upbit", "XRP", "0");
-                jedis.hset("L-Upbit", "ETH", "0");
-                jedis.hset("L-Upbit", "ETC", "0");
-                jedis.hset("L-Upbit", "NBT", "0");
-                jedis.hset("L-Upbit", "ADA", "0");
-                jedis.hset("L-Upbit", "XLM", "0");
-                jedis.hset("L-Upbit", "NEO", "0");
-                jedis.hset("L-Upbit", "BCC", "0");
-                jedis.hset("L-Upbit", "SRN", "0");
-                jedis.hset("L-Upbit", "BCC", "0");
-                jedis.hset("L-Upbit", "LSK", "0");
-                jedis.hset("L-Upbit", "WAVES", "0");
-                jedis.hset("L-Upbit", "DOGE", "0");
-                jedis.hset("L-Upbit", "SC", "0");
-                jedis.hset("L-Upbit", "XVG", "0");
-                jedis.hset("L-Upbit", "STRAT", "0");
-                jedis.hset("L-Upbit", "QTUM", "0");
-                jedis.hset("L-Upbit", "XEM", "0");
-                jedis.hset("L-Upbit", "KMD", "0");
-                jedis.hset("L-Upbit", "OMG", "0");
-                jedis.hset("L-Upbit", "ZEC", "0");
-                jedis.hset("L-Upbit", "DGB", "0");
-                jedis.hset("L-Upbit", "NXS", "0");
-                jedis.hset("L-Upbit", "XMR", "0");
-                jedis.hset("L-Upbit", "DASH", "0");
-                jedis.hset("L-Upbit", "BTG", "0");
-                jedis.hset("L-Upbit", "STEEM", "0");
-                jedis.hset("L-Upbit", "RDD", "0");
-                jedis.hset("L-Upbit", "IGNIS", "0");
-                jedis.hset("L-Upbit", "SYS", "0");
-                jedis.hset("L-Upbit", "NXT", "0");
-                jedis.hset("L-Upbit", "PIVX", "0");
-                jedis.hset("L-Upbit", "SALT", "0");
-                jedis.hset("L-Upbit", "GMT", "0");
-                jedis.hset("L-Upbit", "POWR", "0");
-                jedis.hset("L-Upbit", "ARK", "0");
-                jedis.hset("L-Upbit", "MONA", "0");
-                jedis.hset("L-Upbit", "VTC", "0");
-                jedis.hset("L-Upbit", "XDN", "0");
-                jedis.hset("L-Upbit", "MANA", "0");
-                jedis.hset("L-Upbit", "GUP", "0");
-                jedis.hset("L-Upbit", "ARDR", "0");
-                jedis.hset("L-Upbit", "GBYTE", "0");
-                jedis.hset("L-Upbit", "VOX", "0");
-                jedis.hset("L-Upbit", "ZEN", "0");
-                jedis.hset("L-Upbit", "BITB", "0");
-                jedis.hset("L-Upbit", "UKG", "0");
-                jedis.hset("L-Upbit", "SBD", "0");
-                jedis.hset("L-Upbit", "BAT", "0");
-                jedis.hset("L-Upbit", "SNT", "0");
-                jedis.hset("L-Upbit", "EDG", "0");
-                jedis.hset("L-Upbit", "REP", "0");
-                jedis.hset("L-Upbit", "EMC2", "0");
-                jedis.hset("L-Upbit", "ION", "0");
-                jedis.hset("L-Upbit", "PAY", "0");
-                jedis.hset("L-Upbit", "ADT", "0");
-                jedis.hset("L-Upbit", "XZC", "0");
-                jedis.hset("L-Upbit", "BAY", "0");
-                jedis.hset("L-Upbit", "ENG", "0");
-                jedis.hset("L-Upbit", "DNT", "0");
-                jedis.hset("L-Upbit", "VIA", "0");
-                jedis.hset("L-Upbit", "ADX", "0");
-                jedis.hset("L-Upbit", "CVC", "0");
-                jedis.hset("L-Upbit", "DCR", "0");
-                jedis.hset("L-Upbit", "QRL", "0");
-                jedis.hset("L-Upbit", "BURST", "0");
-                jedis.hset("L-Upbit", "RCN", "0");
-                jedis.hset("L-Upbit", "RLC", "0");
-                jedis.hset("L-Upbit", "MAID", "0");
-                jedis.hset("L-Upbit", "STORJ", "0");
-                jedis.hset("L-Upbit", "MCO", "0");
-                jedis.hset("L-Upbit", "LBC", "0");
-                jedis.hset("L-Upbit", "VIB", "0");
-                jedis.hset("L-Upbit", "GRS", "0");
-                jedis.hset("L-Upbit", "FCT", "0");
-                jedis.hset("L-Upbit", "BLOCK", "0");
-                jedis.hset("L-Upbit", "ANT", "0");
-                jedis.hset("L-Upbit", "AMP", "0");
-                jedis.hset("L-Upbit", "HMQ", "0");
-                jedis.hset("L-Upbit", "BNT", "0");
-                jedis.hset("L-Upbit", "SYNX", "0");
-                jedis.hset("L-Upbit", "SWT", "0");
-                jedis.hset("L-Upbit", "EXP", "0");
-                jedis.hset("L-Upbit", "GAME", "0");
-                jedis.hset("L-Upbit", "OK", "0");
-                jedis.hset("L-Upbit", "KORE", "0");
-                jedis.hset("L-Upbit", "NMR", "0");
-                jedis.hset("L-Upbit", "1ST", "0");
-                jedis.hset("L-Upbit", "WINGS", "0");
-                jedis.hset("L-Upbit", "UBQ", "0");
-                jedis.hset("L-Upbit", "NAV", "0");
-                jedis.hset("L-Upbit", "MER", "0");
-                jedis.hset("L-Upbit", "IOP", "0");
-                jedis.hset("L-Upbit", "PTOY", "0");
-                jedis.hset("L-Upbit", "VRC", "0");
-                jedis.hset("L-Upbit", "XEL", "0");
-                jedis.hset("L-Upbit", "PART", "0");
-                jedis.hset("L-Upbit", "BLK", "0");
-                jedis.hset("L-Upbit", "DYN", "0");
-                jedis.hset("L-Upbit", "TX", "0");
-                jedis.hset("L-Upbit", "SHIFT", "0");
-                jedis.hset("L-Upbit", "CFI", "0");
-                jedis.hset("L-Upbit", "TIX", "0");
-                jedis.hset("L-Upbit", "CLOAK", "0");
-                jedis.hset("L-Upbit", "AGRS", "0");
-                jedis.hset("L-Upbit", "GNO", "0");
-                jedis.hset("L-Upbit", "UNB", "0");
-                jedis.hset("L-Upbit", "RADS", "0");
-                jedis.hset("L-Upbit", "BSD", "0");
-                jedis.hset("L-Upbit", "DCT", "0");
-                jedis.hset("L-Upbit", "SLS", "0");
-                jedis.hset("L-Upbit", "MEME", "0");
-                jedis.hset("L-Upbit", "FTC", "0");
-                jedis.hset("L-Upbit", "SPHR", "0");
-                jedis.hset("L-Upbit", "SIB", "0");
-                jedis.hset("L-Upbit", "MUE", "0");
-                jedis.hset("L-Upbit", "EXCL", "0");
-                jedis.hset("L-Upbit", "MTL", "0");
-                jedis.hset("L-Upbit", "GNT", "0");
-                jedis.hset("L-Upbit", "DOPE", "0");
-                jedis.hset("L-Upbit", "MYST", "0");    // 지원종료
-                jedis.hset("L-Upbit", "RISE", "0");    // 지원종료
-                jedis.hset("L-Upbit", "DGD", "0");     // 지원종료
-                jedis.hset("L-Upbit", "FUN", "0");     // 지원종료
-                jedis.hset("L-Upbit", "TRIG", "0");    // 지원종료
-                jedis.hset("L-Upbit", "SAFEX", "0");   // 지원종료
-                jedis.hset("L-Upbit", "SNGLS", "0");   // 지원종료
-                jedis.hset("L-Upbit", "XAUR", "0");    // 지원종료
-                jedis.hset("L-Upbit", "ZRX", "0");
-                jedis.hset("L-Upbit", "VEE", "0");
-                jedis.hset("L-Upbit", "BCPT", "0");
-                jedis.hset("L-Upbit", "TRX", "0");
-                jedis.hset("L-Upbit", "DRGN", "0");
-                jedis.hset("L-Upbit", "LRC", "0");
-                jedis.hset("L-Upbit", "TUSD", "0");
-                jedis.hset("L-Upbit", "RVR", "0");
-                jedis.hset("L-Upbit", "UP", "0");
-                jedis.hset("L-Upbit", "ICX", "0");
-                jedis.hset("L-Upbit", "STORM", "0");
-                jedis.hset("L-Upbit", "EOS", "0");
-            }
+        Jedis jedis;
+        jedis = customJedis.getResource();
+        if (!jedis.exists("L-Upbit")) {
+            LOGGER.info("@#@#@# L-Upbit is null");
+            jedis.hset("L-Upbit", "BTC", "0");
+            jedis.hset("L-Upbit", "WAX", "0");
+            jedis.hset("L-Upbit", "LTC", "0");
+            jedis.hset("L-Upbit", "XRP", "0");
+            jedis.hset("L-Upbit", "ETH", "0");
+            jedis.hset("L-Upbit", "ETC", "0");
+            jedis.hset("L-Upbit", "NBT", "0");
+            jedis.hset("L-Upbit", "ADA", "0");
+            jedis.hset("L-Upbit", "XLM", "0");
+            jedis.hset("L-Upbit", "NEO", "0");
+            jedis.hset("L-Upbit", "BCC", "0");
+            jedis.hset("L-Upbit", "SRN", "0");
+            jedis.hset("L-Upbit", "BCC", "0");
+            jedis.hset("L-Upbit", "LSK", "0");
+            jedis.hset("L-Upbit", "WAVES", "0");
+            jedis.hset("L-Upbit", "DOGE", "0");
+            jedis.hset("L-Upbit", "SC", "0");
+            jedis.hset("L-Upbit", "XVG", "0");
+            jedis.hset("L-Upbit", "STRAT", "0");
+            jedis.hset("L-Upbit", "QTUM", "0");
+            jedis.hset("L-Upbit", "XEM", "0");
+            jedis.hset("L-Upbit", "KMD", "0");
+            jedis.hset("L-Upbit", "OMG", "0");
+            jedis.hset("L-Upbit", "ZEC", "0");
+            jedis.hset("L-Upbit", "DGB", "0");
+            jedis.hset("L-Upbit", "NXS", "0");
+            jedis.hset("L-Upbit", "XMR", "0");
+            jedis.hset("L-Upbit", "DASH", "0");
+            jedis.hset("L-Upbit", "BTG", "0");
+            jedis.hset("L-Upbit", "STEEM", "0");
+            jedis.hset("L-Upbit", "RDD", "0");
+            jedis.hset("L-Upbit", "IGNIS", "0");
+            jedis.hset("L-Upbit", "SYS", "0");
+            jedis.hset("L-Upbit", "NXT", "0");
+            jedis.hset("L-Upbit", "PIVX", "0");
+            jedis.hset("L-Upbit", "SALT", "0");
+            jedis.hset("L-Upbit", "GMT", "0");
+            jedis.hset("L-Upbit", "POWR", "0");
+            jedis.hset("L-Upbit", "ARK", "0");
+            jedis.hset("L-Upbit", "MONA", "0");
+            jedis.hset("L-Upbit", "VTC", "0");
+            jedis.hset("L-Upbit", "XDN", "0");
+            jedis.hset("L-Upbit", "MANA", "0");
+            jedis.hset("L-Upbit", "GUP", "0");
+            jedis.hset("L-Upbit", "ARDR", "0");
+            jedis.hset("L-Upbit", "GBYTE", "0");
+            jedis.hset("L-Upbit", "VOX", "0");
+            jedis.hset("L-Upbit", "ZEN", "0");
+            jedis.hset("L-Upbit", "BITB", "0");
+            jedis.hset("L-Upbit", "UKG", "0");
+            jedis.hset("L-Upbit", "SBD", "0");
+            jedis.hset("L-Upbit", "BAT", "0");
+            jedis.hset("L-Upbit", "SNT", "0");
+            jedis.hset("L-Upbit", "EDG", "0");
+            jedis.hset("L-Upbit", "REP", "0");
+            jedis.hset("L-Upbit", "EMC2", "0");
+            jedis.hset("L-Upbit", "ION", "0");
+            jedis.hset("L-Upbit", "PAY", "0");
+            jedis.hset("L-Upbit", "ADT", "0");
+            jedis.hset("L-Upbit", "XZC", "0");
+            jedis.hset("L-Upbit", "BAY", "0");
+            jedis.hset("L-Upbit", "ENG", "0");
+            jedis.hset("L-Upbit", "DNT", "0");
+            jedis.hset("L-Upbit", "VIA", "0");
+            jedis.hset("L-Upbit", "ADX", "0");
+            jedis.hset("L-Upbit", "CVC", "0");
+            jedis.hset("L-Upbit", "DCR", "0");
+            jedis.hset("L-Upbit", "QRL", "0");
+            jedis.hset("L-Upbit", "BURST", "0");
+            jedis.hset("L-Upbit", "RCN", "0");
+            jedis.hset("L-Upbit", "RLC", "0");
+            jedis.hset("L-Upbit", "MAID", "0");
+            jedis.hset("L-Upbit", "STORJ", "0");
+            jedis.hset("L-Upbit", "MCO", "0");
+            jedis.hset("L-Upbit", "LBC", "0");
+            jedis.hset("L-Upbit", "VIB", "0");
+            jedis.hset("L-Upbit", "GRS", "0");
+            jedis.hset("L-Upbit", "FCT", "0");
+            jedis.hset("L-Upbit", "BLOCK", "0");
+            jedis.hset("L-Upbit", "ANT", "0");
+            jedis.hset("L-Upbit", "AMP", "0");
+            jedis.hset("L-Upbit", "HMQ", "0");
+            jedis.hset("L-Upbit", "BNT", "0");
+            jedis.hset("L-Upbit", "SYNX", "0");
+            jedis.hset("L-Upbit", "SWT", "0");
+            jedis.hset("L-Upbit", "EXP", "0");
+            jedis.hset("L-Upbit", "GAME", "0");
+            jedis.hset("L-Upbit", "OK", "0");
+            jedis.hset("L-Upbit", "KORE", "0");
+            jedis.hset("L-Upbit", "NMR", "0");
+            jedis.hset("L-Upbit", "1ST", "0");
+            jedis.hset("L-Upbit", "WINGS", "0");
+            jedis.hset("L-Upbit", "UBQ", "0");
+            jedis.hset("L-Upbit", "NAV", "0");
+            jedis.hset("L-Upbit", "MER", "0");
+            jedis.hset("L-Upbit", "IOP", "0");
+            jedis.hset("L-Upbit", "PTOY", "0");
+            jedis.hset("L-Upbit", "VRC", "0");
+            jedis.hset("L-Upbit", "XEL", "0");
+            jedis.hset("L-Upbit", "PART", "0");
+            jedis.hset("L-Upbit", "BLK", "0");
+            jedis.hset("L-Upbit", "DYN", "0");
+            jedis.hset("L-Upbit", "TX", "0");
+            jedis.hset("L-Upbit", "SHIFT", "0");
+            jedis.hset("L-Upbit", "CFI", "0");
+            jedis.hset("L-Upbit", "TIX", "0");
+            jedis.hset("L-Upbit", "CLOAK", "0");
+            jedis.hset("L-Upbit", "AGRS", "0");
+            jedis.hset("L-Upbit", "GNO", "0");
+            jedis.hset("L-Upbit", "UNB", "0");
+            jedis.hset("L-Upbit", "RADS", "0");
+            jedis.hset("L-Upbit", "BSD", "0");
+            jedis.hset("L-Upbit", "DCT", "0");
+            jedis.hset("L-Upbit", "SLS", "0");
+            jedis.hset("L-Upbit", "MEME", "0");
+            jedis.hset("L-Upbit", "FTC", "0");
+            jedis.hset("L-Upbit", "SPHR", "0");
+            jedis.hset("L-Upbit", "SIB", "0");
+            jedis.hset("L-Upbit", "MUE", "0");
+            jedis.hset("L-Upbit", "EXCL", "0");
+            jedis.hset("L-Upbit", "MTL", "0");
+            jedis.hset("L-Upbit", "GNT", "0");
+            jedis.hset("L-Upbit", "DOPE", "0");
+            jedis.hset("L-Upbit", "MYST", "0");    // 지원종료
+            jedis.hset("L-Upbit", "RISE", "0");    // 지원종료
+            jedis.hset("L-Upbit", "DGD", "0");     // 지원종료
+            jedis.hset("L-Upbit", "FUN", "0");     // 지원종료
+            jedis.hset("L-Upbit", "TRIG", "0");    // 지원종료
+            jedis.hset("L-Upbit", "SAFEX", "0");   // 지원종료
+            jedis.hset("L-Upbit", "SNGLS", "0");   // 지원종료
+            jedis.hset("L-Upbit", "XAUR", "0");    // 지원종료
+            jedis.hset("L-Upbit", "ZRX", "0");
+            jedis.hset("L-Upbit", "VEE", "0");
+            jedis.hset("L-Upbit", "BCPT", "0");
+            jedis.hset("L-Upbit", "TRX", "0");
+            jedis.hset("L-Upbit", "DRGN", "0");
+            jedis.hset("L-Upbit", "LRC", "0");
+            jedis.hset("L-Upbit", "TUSD", "0");
+            jedis.hset("L-Upbit", "RVR", "0");
+            jedis.hset("L-Upbit", "UP", "0");
+            jedis.hset("L-Upbit", "ICX", "0");
+            jedis.hset("L-Upbit", "STORM", "0");
+            jedis.hset("L-Upbit", "EOS", "0");
         }
+        jedis.close();
 
     }
 
     public void kucoin() throws IOException {
-        synchronized (jedis) {
-            if (!jedis.exists("L-Kucoin")) {
-                LOGGER.info("@#@#@# L-Kucoin is null");
+        Jedis jedis;
+        jedis = customJedis.getResource();
+        if (!jedis.exists("L-Kucoin")) {
+            LOGGER.info("@#@#@# L-Kucoin is null");
 
-                jedis.hset("L-Kucoin", "USDT", "0");
+            jedis.hset("L-Kucoin", "USDT", "0");
 
-                JSONObject jsonObject = httpUtils.getResponseByObject("https://api.kucoin.com/v1/open/tick");
-                JSONArray list = jsonObject.getJSONArray("data");
+            JSONObject jsonObject = httpUtils.getResponseByObject("https://api.kucoin.com/v1/open/tick");
+            JSONArray list = jsonObject.getJSONArray("data");
 
-                for (int i = 0; i < list.length(); i++) {
-                    jedis.hset("L-Kucoin", list.getJSONObject(i).getString("coinType"), "0");
-                }
+            for (int i = 0; i < list.length(); i++) {
+                jedis.hset("L-Kucoin", list.getJSONObject(i).getString("coinType"), "0");
             }
         }
+        jedis.close();
     }
 
     public void bittrex() throws IOException {
-        synchronized (jedis) {
-            if (!jedis.exists("L-Bittrex")) {
-                LOGGER.info("@#@#@# L-Bittrex is null");
+        Jedis jedis;
+        jedis = customJedis.getResource();
+        if (!jedis.exists("L-Bittrex")) {
+            LOGGER.info("@#@#@# L-Bittrex is null");
 
 
-                JSONObject jsonObject = httpUtils.getResponseByObject("https://bittrex.com/api/v2.0/pub/markets/GetMarketSummaries");
-                JSONArray list = jsonObject.getJSONArray("result");
+            JSONObject jsonObject = httpUtils.getResponseByObject("https://bittrex.com/api/v2.0/pub/markets/GetMarketSummaries");
+            JSONArray list = jsonObject.getJSONArray("result");
 
-                for (int i = 0; i < list.length(); i++) {
-                    jedis.hset("L-Bittrex", list.getJSONObject(i).getJSONObject("Market").getString("MarketCurrency"), "1");
-                }
+            for (int i = 0; i < list.length(); i++) {
+                jedis.hset("L-Bittrex", list.getJSONObject(i).getJSONObject("Market").getString("MarketCurrency"), "1");
             }
         }
+        jedis.close();
 
     }
 }

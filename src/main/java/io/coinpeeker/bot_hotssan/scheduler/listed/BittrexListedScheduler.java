@@ -2,6 +2,7 @@ package io.coinpeeker.bot_hotssan.scheduler.listed;
 
 import com.google.common.collect.Maps;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
+import io.coinpeeker.bot_hotssan.common.CustomJedis;
 import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.scheduler.Listing;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
@@ -33,7 +34,7 @@ public class BittrexListedScheduler implements Listing {
     HttpUtils httpUtils;
 
     @Autowired
-    Jedis jedis;
+    CustomJedis customJedis;
 
     @Autowired
     MessageUtils messageUtils;
@@ -47,36 +48,40 @@ public class BittrexListedScheduler implements Listing {
     private static final Logger LOGGER = LoggerFactory.getLogger(BittrexListedScheduler.class);
 
     @Override
-    @Scheduled(initialDelay = 1000 * 40, fixedDelay = 1000 * 3)
+    @Scheduled(initialDelay = 1000 * 10, fixedDelay = 1000 * 3)
     public void inspectListedCoin() throws IOException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
             return;
         }
 
+        Jedis jedis;
         int listingCount = 0;
         String endPoint = "https://bittrex.com/api/v2.0/pub/markets/GetMarketSummaries";
         JSONObject jsonObject = httpUtils.getResponseByObject(endPoint);
         JSONArray list = jsonObject.getJSONArray("result");
         Map<String, Integer> deDuplicationMap = Maps.newHashMap();
 
-        for(int i = 0; i < list.length(); i++){
+        for (int i = 0; i < list.length(); i++) {
             deDuplicationMap.put(list.getJSONObject(i).getJSONObject("Market").getString("MarketCurrency"), 1);
         }
 
-        synchronized (jedis) {
-            listingCount = Math.toIntExact(jedis.hlen("L-Bittrex"));
-        }
+        jedis = customJedis.getResource();
+        listingCount = Math.toIntExact(jedis.hlen("L-Bittrex"));
+        jedis.close();
+
+        System.out.println(listingCount);
+        System.out.println(deDuplicationMap.size());
 
         if (deDuplicationMap.size() != listingCount) {
-            for (String item : deDuplicationMap.keySet()){
+            for (String item : deDuplicationMap.keySet()) {
                 boolean isExist = true;
 
-                synchronized (jedis) {
-                    if (!jedis.hexists("L-Bittrex", item)) {
-                        isExist = false;
-                    }
+                jedis = customJedis.getResource();
+                if (!jedis.hexists("L-Bittrex", item)) {
+                    isExist = false;
                 }
+                jedis.close();
 
                 if (!isExist) {
                     StringBuilder messageContent = new StringBuilder();
@@ -94,9 +99,9 @@ public class BittrexListedScheduler implements Listing {
                     messageContent.append("\n확인방법 : List");
                     messageContent.append("\n코인정보 : ");
 
-                    synchronized (jedis) {
-                        messageContent.append(jedis.hget("I-CoinMarketCap", item));
-                    }
+                    jedis = customJedis.getResource();
+                    messageContent.append(jedis.hget("I-CoinMarketCap", item));
+                    jedis.close();
 
                     messageContent.append(" (");
                     messageContent.append(item);
@@ -108,9 +113,9 @@ public class BittrexListedScheduler implements Listing {
                     messageUtils.sendMessage(url, -300048567L, messageContent.toString());
                     messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
-                    synchronized (jedis) {
-                        jedis.hset("L-Bittrex", item, "1");
-                    }
+                    jedis = customJedis.getResource();
+                    jedis.hset("L-Bittrex", item, "1");
+                    jedis.close();
 
                     LOGGER.info("Bittrex 상장 : " + item + " (" + simpleDateFormat.format(nowDate).toString() + ")");
                 }

@@ -1,6 +1,7 @@
 package io.coinpeeker.bot_hotssan.scheduler.listed;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
+import io.coinpeeker.bot_hotssan.common.CustomJedis;
 import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.scheduler.Listing;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
@@ -33,13 +34,15 @@ public class BinanceListedScheduler implements Listing {
     MessageUtils messageUtils;
 
     @Autowired
-    private Jedis jedis;
+    private CustomJedis customJedis;
 
     @Value("${property.hotssan_id}")
     private String apiKey;
 
     @Value("${property.env}")
     private String env;
+
+    private int articleCount = 0;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BinanceListedScheduler.class);
 
@@ -52,25 +55,26 @@ public class BinanceListedScheduler implements Listing {
             return;
         }
 
+        Jedis jedis;
         int listingCount = 0;
         String endPoint = "https://www.binance.com/dictionary/getAssetPic.html";
 
         JSONObject jsonObject = httpUtils.getPostResponseByObject(endPoint);
         JSONArray jsonArray = jsonObject.getJSONArray("data");
 
-        synchronized (jedis) {
-            listingCount = Math.toIntExact(jedis.hlen("L-Binance"));
-        }
+        jedis = customJedis.getResource();
+        listingCount = Math.toIntExact(jedis.hlen("L-Binance"));
+        jedis.close();
 
         if (listingCount != jsonArray.length()) {
             for (int i = 0; i < jsonArray.length(); i++) {
                 boolean isExist = true;
 
-                synchronized (jedis) {
-                    if (!jedis.hexists("L-Binance", jsonArray.getJSONObject(i).getString("asset"))) {
-                        isExist = false;
-                    }
+                jedis = customJedis.getResource();
+                if (!jedis.hexists("L-Binance", jsonArray.getJSONObject(i).getString("asset"))) {
+                    isExist = false;
                 }
+                jedis.close();
 
                 if (!isExist) {
                     String asset = jsonArray.getJSONObject(i).getString("asset");
@@ -103,9 +107,9 @@ public class BinanceListedScheduler implements Listing {
                     messageContent.append("\n확인방법 : Image");
                     messageContent.append("\n코인정보 : ");
 
-                    synchronized (jedis) {
-                        messageContent.append(jedis.hget("I-CoinMarketCap", asset));
-                    }
+                    jedis = customJedis.getResource();
+                    messageContent.append(jedis.hget("I-CoinMarketCap", asset));
+                    jedis.close();
 
                     messageContent.append(" (");
                     messageContent.append(asset);
@@ -122,11 +126,11 @@ public class BinanceListedScheduler implements Listing {
                     messageUtils.sendMessage(url, -300048567L, messageContent.toString());
                     messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
-                    synchronized (jedis) {
-                        jedis.hset("L-Binance", asset, pic);
-                    }
+                    jedis = customJedis.getResource();
+                    jedis.hset("L-Binance", asset, pic);
+                    jedis.close();
 
-                    LOGGER.info("Binance 상장 : " + asset + " (" + simpleDateFormat.format(nowDate) + ")");
+                    LOGGER.info("Binance 상장(Image) : " + asset + " (" + simpleDateFormat.format(nowDate) + ")");
                     LOGGER.info("이미지상 상장시간 : " + asset + " (" + simpleDateFormat.format(imageTimeStamp) + ")");
                 }
             }
@@ -140,7 +144,81 @@ public class BinanceListedScheduler implements Listing {
             e.printStackTrace();
         }
     }
+
+
+    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 2)
+    public void articleCheck() throws IOException {
+        /** env validation check.**/
+        if (!StringUtils.equals("real", env)) {
+            return;
+        }
+
+        Jedis jedis;
+        String endPoint = "https://support.binance.com/hc/api/internal/recent_activities?locale=en-us&page=1&per_page=1&locale=en-us";
+
+        JSONObject jsonObject = httpUtils.getResponseByObject(endPoint);
+        String type = jsonObject.getJSONArray("activities").getJSONObject(0).getJSONArray("breadcrumbs").getJSONObject(0).getString("name");
+        int lastCount = jsonObject.getInt("count");
+        LOGGER.info("@#@#@# articleCount");
+
+        if (articleCount == 0) {
+            LOGGER.info("@#@#@# articleCount is null");
+            articleCount = lastCount;
+        }
+
+        if (articleCount != lastCount) {
+            if ("New Listings".equals(type)) {
+                String title = jsonObject.getJSONArray("activities").getJSONObject(0).getString("title");
+                String asset = "";
+                int begin = title.lastIndexOf("(");
+                int end = title.indexOf(")");
+
+                for (int idx = begin + 1; idx < end; idx++) {
+                    asset += title.charAt(idx);
+                }
+
+                Date nowDate = new Date();
+                StringBuilder messageContent = new StringBuilder();
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
+                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+
+                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                messageContent.append(" [ Binance ] 상장 정보 ");
+                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                messageContent.append("\n");
+                messageContent.append(simpleDateFormat.format(nowDate));
+                messageContent.append("\n확인방법 : InternalAPI");
+                messageContent.append("\n코인정보 : ");
+
+                jedis = customJedis.getResource();
+                messageContent.append(jedis.hget("I-CoinMarketCap", asset));
+                jedis.close();
+
+                messageContent.append(" (");
+                messageContent.append(asset);
+                messageContent.append(")");
+                messageContent.append("\n구매가능 거래소 : ");
+                messageContent.append(marketInfo.availableMarketList(asset));
+
+
+                String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
+                messageUtils.sendMessage(url, -300048567L, messageContent.toString());
+                messageUtils.sendMessage(url, -277619118L, messageContent.toString());
+
+                jedis = customJedis.getResource();
+                jedis.hset("L-Binance-A", asset, "0");
+                jedis.close();
+
+                LOGGER.info("Binance 상장(Article) : " + asset + " (" + simpleDateFormat.format(nowDate) + ")");
+                LOGGER.info(messageContent.toString());
+            }
+            articleCount = lastCount;
+        }
+    }
 }
+
 
 //    // 지갑으로 찾기
 //    @Override

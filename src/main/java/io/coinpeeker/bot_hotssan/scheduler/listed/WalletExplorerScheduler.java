@@ -2,6 +2,7 @@ package io.coinpeeker.bot_hotssan.scheduler.listed;
 
 import com.google.common.collect.Maps;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
+import io.coinpeeker.bot_hotssan.common.CustomJedis;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +30,7 @@ public class WalletExplorerScheduler {
     HttpUtils httpUtils;
 
     @Autowired
-    Jedis jedis;
+    CustomJedis customJedis;
 
     @Autowired
     MessageUtils messageUtils;
@@ -62,12 +63,14 @@ public class WalletExplorerScheduler {
     }
 
 
-    @Scheduled(initialDelay = 1000 * 120, fixedDelay = 1000)
+//    @Scheduled(initialDelay = 1000 * 120, fixedDelay = 1000)
     public void searchWallet() throws IOException, InterruptedException {
         /** env validation check.**/
         if (!StringUtils.equals("dev", env)) {
             return;
         }
+
+        Jedis jedis;
 
         Map<String, String> marketWalletMap = getMarketWallet();
         String explorerApiAddress = "https://api.ethplorer.io/";
@@ -107,16 +110,17 @@ public class WalletExplorerScheduler {
                     toJsonArray.put(checkJsonObject);
                 }
             }
-            synchronized (jedis) {
-                if (jedis.exists("W-" + item)) {
-                    isExistWallet = true;
-                }
+
+            jedis = customJedis.getResource();
+            if (jedis.exists("W-" + item)) {
+                isExistWallet = true;
             }
+            jedis.close();
 
             if (isExistWallet) {
-                synchronized (jedis) {
-                    jedisCount = Math.toIntExact(jedis.hlen("W-" + item));
-                }
+                jedis = customJedis.getResource();
+                jedisCount = Math.toIntExact(jedis.hlen("W-" + item));
+                jedis.close();
 
                 if (jedisCount != toJsonArray.length()) {
                     for (int i = 0; i < toJsonArray.length(); i++) {
@@ -124,11 +128,11 @@ public class WalletExplorerScheduler {
                         String address = toJsonArray.getJSONObject(i).getString("address");
                         boolean isExistSymbol = true;
 
-                        synchronized (jedis) {
-                            if (!jedis.hexists("W-" + item, symbol)) {
-                                isExistSymbol = false;
-                            }
+                        jedis = customJedis.getResource();
+                        if (!jedis.hexists("W-" + item, symbol)) {
+                            isExistSymbol = false;
                         }
+                        jedis.close();
 
                         if (!isExistSymbol) {
                             StringBuilder messageContent = new StringBuilder();
@@ -149,9 +153,9 @@ public class WalletExplorerScheduler {
 
                             LOGGER.info("W-" + item + " : " + symbol + " 심볼 생성");
 
-                            synchronized (jedis) {
-                                jedis.hset("W-" + item, symbol, "0");
-                            }
+                            jedis = customJedis.getResource();
+                            jedis.hset("W-" + item, symbol, "0");
+                            jedis.close();
                         }
                     }
                 }
@@ -159,9 +163,9 @@ public class WalletExplorerScheduler {
                 for (int i = 0; i < toJsonArray.length(); i++) {
                     String symbol = toJsonArray.getJSONObject(i).getString("symbol");
 
-                    synchronized (jedis) {
-                        jedis.hset("W-" + item, symbol, "0");
-                    }
+                    jedis = customJedis.getResource();
+                    jedis.hset("W-" + item, symbol, "0");
+                    jedis.close();
                 }
             }
 
