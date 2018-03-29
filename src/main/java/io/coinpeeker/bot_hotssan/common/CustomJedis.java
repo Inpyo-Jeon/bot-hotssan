@@ -9,16 +9,16 @@ import redis.clients.jedis.JedisPool;
 @Component
 public class CustomJedis {
 
+    @Value("${spring.redis.host}")
+    private String redisHost;
+
     @Value("${spring.redis.port}")
     private int redisPort;
-
-    @Value("${spring.redis.password}")
-    private String redisPassword;
 
     private JedisPool jedisPool;
 
     public CustomJedis(){
-        jedisPool = new JedisPool();
+        jedisPool = new JedisPool(redisHost, redisPort);
     }
 
     public Jedis getResource(){
