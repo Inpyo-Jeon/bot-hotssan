@@ -176,11 +176,11 @@ public class Commander {
         } else if ("PP".equals(coinSymbol)) {
             try {
                 double krwRate = 0.0;
-                try {
-                    krwRate = exchangeApi.lastPrice();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    krwRate = exchangeApi.lastPrice();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
                 result.append("----- 한국 프리미엄 계산 -----");
                 result.append("\n기준환율 : ");
                 result.append(krwRate);
@@ -204,11 +204,11 @@ public class Commander {
     private List<CoinPrice> getCoinPriceList(String symbol, List<ApiClient> apiClientList) {
         List<CoinPrice> resultList = Lists.newArrayList();
         double krwRate = 0.0;
-        try {
-            krwRate = exchangeApi.lastPrice();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            krwRate = exchangeApi.lastPrice();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
 
         for (ApiClient apiClient : apiClientList) {
