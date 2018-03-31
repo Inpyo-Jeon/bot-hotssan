@@ -62,7 +62,7 @@ public class HuobiListedScheduler implements Listing {
     @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 3)
     public void inspectListedCoin() throws IOException, NoSuchAlgorithmException, InvalidKeyException {
         /** env validation check.**/
-        if (!StringUtils.equals("local", env)) {
+        if (!StringUtils.equals("dev", env)) {
             return;
         }
 
