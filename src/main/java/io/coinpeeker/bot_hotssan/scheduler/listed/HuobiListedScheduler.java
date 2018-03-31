@@ -146,7 +146,6 @@ public class HuobiListedScheduler implements Listing {
                     simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
 
                     StringBuilder messageContent = new StringBuilder();
-                    messageContent.append("----가짜데이터!!---");
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(" [ Huobi-Pro ] 상장 정보 ");
@@ -166,7 +165,6 @@ public class HuobiListedScheduler implements Listing {
                     messageContent.append(")");
                     messageContent.append("\n구매가능 거래소 : ");
                     messageContent.append(marketInfo.availableMarketList(item.toUpperCase()));
-                    messageContent.append("----임시로 날려봄---");
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
                     messageUtils.sendMessage(url, -294606763L, messageContent.toString());
