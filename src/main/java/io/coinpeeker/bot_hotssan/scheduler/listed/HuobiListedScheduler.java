@@ -1,0 +1,193 @@
+package io.coinpeeker.bot_hotssan.scheduler.listed;
+
+import com.google.common.collect.Maps;
+import io.coinpeeker.bot_hotssan.common.CommonConstant;
+import io.coinpeeker.bot_hotssan.common.SecretKey;
+import io.coinpeeker.bot_hotssan.feature.MarketInfo;
+import io.coinpeeker.bot_hotssan.scheduler.Listing;
+import io.coinpeeker.bot_hotssan.utils.HttpUtils;
+import io.coinpeeker.bot_hotssan.utils.MessageUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import redis.clients.jedis.Jedis;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Component
+public class HuobiListedScheduler implements Listing {
+
+    @Autowired
+    HttpUtils httpUtils;
+
+    @Autowired
+    MessageUtils messageUtils;
+
+    @Autowired
+    MarketInfo marketInfo;
+
+    @Autowired
+    Jedis jedis;
+
+    @Value("${property.hotssan_id}")
+    private String apiKey;
+
+    @Value("${property.env}")
+    private String env;
+
+    int lastCount = 0;
+
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(HuobiListedScheduler.class);
+
+    @Override
+    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 3)
+    public void inspectListedCoin() throws IOException, NoSuchAlgorithmException, InvalidKeyException {
+        /** env validation check.**/
+        if (!StringUtils.equals("local", env)) {
+            return;
+        }
+
+        int listingCount = 0;
+        String timeStamp = Instant.ofEpochSecond(Instant.now().getEpochSecond()).atZone(ZoneId.of("Z")).format(DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss"));
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("GET");
+        sb.append('\n');
+        sb.append("api.huobi.pro");
+        sb.append('\n');
+        sb.append("/v1/account/accounts/2610066/balance");
+        sb.append('\n');
+
+        Map<String, String> params = new HashMap<>();
+        params.put("AccessKeyId", SecretKey.getApiKeyHuobi());
+        params.put("SignatureVersion", "2");
+        params.put("SignatureMethod", "HmacSHA256");
+        params.put("account-id", "2610066"); // 후오비프로
+//        params.put("account-id", "105360"); // 후오비코리아
+        params.put("Timestamp", timeStamp);
+
+        // build signature:
+        SortedMap<String, String> map = new TreeMap<>(params);
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            sb.append(key).append('=').append(urlEncode(value)).append('&');
+        }
+        // remove last '&':
+        sb.deleteCharAt(sb.length() - 1);
+
+        Mac hmacSha256 = null;
+        hmacSha256 = Mac.getInstance("HmacSHA256");
+        SecretKeySpec secKey = new SecretKeySpec(SecretKey.getSecretKeyHuobi().getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        hmacSha256.init(secKey);
+
+        String payload = sb.toString();
+        byte[] hash = hmacSha256.doFinal(payload.getBytes(StandardCharsets.UTF_8));
+        String actualSign = Base64.getEncoder().encodeToString(hash);
+
+        params.put("Signature", actualSign);
+
+        StringBuilder finalURL = new StringBuilder();
+        finalURL.append("https://api.huobi.pro/v1/account/accounts/2610066/balance?");
+        finalURL.append(String.join("&", params.entrySet().stream().map((entry) -> {
+            return entry.getKey() + "=" + urlEncode(entry.getValue());
+        }).collect(Collectors.toList())));
+
+
+        JSONObject jsonObject = httpUtils.getResponseByObject(finalURL.toString());
+
+        int currentCount = jsonObject.getJSONObject("data").getJSONArray("list").length();
+
+        synchronized (jedis) {
+            listingCount = Math.toIntExact(jedis.hlen("L-HuobiPro"));
+        }
+
+        if ((listingCount * 2) != currentCount) {
+            JSONArray array = jsonObject.getJSONObject("data").getJSONArray("list");
+
+            HashMap<String, Integer> deDuplicationListMap = Maps.newHashMap();
+
+            for(int i = 0; i < array.length(); i++){
+                JSONObject item = array.getJSONObject(i);
+                deDuplicationListMap.put(item.getString("currency"), 0);
+            }
+
+            for(String item : deDuplicationListMap.keySet()){
+                boolean isExist = true;
+
+                synchronized (jedis) {
+                    if (!jedis.hexists("L-HuobiPro", item.toUpperCase())) {
+                        isExist = false;
+                    }
+                }
+
+                if(!isExist){
+                    Date nowDate = new Date();
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
+                    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+
+                    StringBuilder messageContent = new StringBuilder();
+                    messageContent.append("----가짜데이터!!---");
+                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                    messageContent.append(" [ Huobi-Pro ] 상장 정보 ");
+                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                    messageContent.append("\n");
+                    messageContent.append(simpleDateFormat.format(nowDate));
+                    messageContent.append("\n확인방법 : List");
+                    messageContent.append("\n코인정보 : ");
+
+                    synchronized (jedis) {
+                        messageContent.append(jedis.hget("I-CoinMarketCap", item.toUpperCase()));
+                    }
+
+                    messageContent.append(" (");
+                    messageContent.append(item.toUpperCase());
+                    messageContent.append(")");
+                    messageContent.append("\n구매가능 거래소 : ");
+                    messageContent.append(marketInfo.availableMarketList(item.toUpperCase()));
+                    messageContent.append("----임시로 날려봄---");
+
+                    String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
+                    messageUtils.sendMessage(url, -294606763L, messageContent.toString());
+
+                    synchronized (jedis) {
+                        jedis.hset("L-HuobiPro", item.toUpperCase(), "1");
+                    }
+
+                    LOGGER.info("Huobi-Pro 상장 : " + item.toUpperCase() + " (" + simpleDateFormat.format(nowDate).toString() + ")");
+                }
+            }
+        }
+    }
+
+
+    public String urlEncode(String string) {
+        try {
+            return URLEncoder.encode(string, "UTF-8").replaceAll("\\+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalArgumentException("UTF-8 encoding not supported!");
+        }
+    }
+}
+

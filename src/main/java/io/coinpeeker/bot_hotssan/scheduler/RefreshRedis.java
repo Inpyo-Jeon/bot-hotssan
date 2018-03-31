@@ -44,6 +44,7 @@ public class RefreshRedis {
         upbit();
         kucoin();
         bittrex();
+        huobiPro();
 
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -303,6 +304,21 @@ public class RefreshRedis {
 
                 for (int i = 0; i < list.length(); i++) {
                     jedis.hset("L-Bittrex", list.getJSONObject(i).getJSONObject("Market").getString("MarketCurrency"), "1");
+                }
+            }
+        }
+    }
+
+    public void huobiPro() throws IOException {
+        synchronized (jedis){
+            if(!jedis.exists("L-HuobiPro")){
+                LOGGER.info("@#@#@# L-HuobiPro is null");
+
+                JSONObject jsonObject = httpUtils.getResponseByObject("https://api.huobi.pro/v1/common/currencys");
+                JSONArray list = jsonObject.getJSONArray("data");
+
+                for(int i = 0; i < list.length(); i++){
+                    jedis.hset("L-HuobiPro", list.getString(i).toUpperCase(), "0");
                 }
             }
         }

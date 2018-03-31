@@ -16,6 +16,17 @@ public class SecretKey {
     private static final String API_KEY_BITTREX = "07cabf10847743ec9a1ebd9f765ff355";
     private static final String SECRET_KEY_BITTREX = "78dc556147c7490d807190c73d731426";
 
+    private static final String API_KEY_HUOBI = "059e6335-ecfa7141-e0480a04-d885c";
+    private static final String SECRET_KEY_HUOBI = "749c5797-4a2dda23-5213682e-ed8c5";
+
+    public static String getApiKeyHuobi() {
+        return API_KEY_HUOBI;
+    }
+
+    public static String getSecretKeyHuobi() {
+        return SECRET_KEY_HUOBI;
+    }
+
     public static String getApiKeyBittrex() {
         return API_KEY_BITTREX;
     }
