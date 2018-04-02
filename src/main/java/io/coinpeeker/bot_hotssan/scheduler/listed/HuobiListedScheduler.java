@@ -62,7 +62,7 @@ public class HuobiListedScheduler implements Listing {
     @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 3)
     public void inspectListedCoin() throws IOException, NoSuchAlgorithmException, InvalidKeyException {
         /** env validation check.**/
-        if (!StringUtils.equals("dev", env)) {
+        if (!StringUtils.equals("real", env)) {
             return;
         }
 
@@ -126,12 +126,12 @@ public class HuobiListedScheduler implements Listing {
 
             HashMap<String, Integer> deDuplicationListMap = Maps.newHashMap();
 
-            for(int i = 0; i < array.length(); i++){
+            for (int i = 0; i < array.length(); i++) {
                 JSONObject item = array.getJSONObject(i);
                 deDuplicationListMap.put(item.getString("currency"), 0);
             }
 
-            for(String item : deDuplicationListMap.keySet()){
+            for (String item : deDuplicationListMap.keySet()) {
                 boolean isExist = true;
 
                 synchronized (jedis) {
@@ -140,7 +140,7 @@ public class HuobiListedScheduler implements Listing {
                     }
                 }
 
-                if(!isExist){
+                if (!isExist) {
                     Date nowDate = new Date();
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
                     simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
@@ -167,7 +167,8 @@ public class HuobiListedScheduler implements Listing {
                     messageContent.append(marketInfo.availableMarketList(item.toUpperCase()));
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                    messageUtils.sendMessage(url, -294606763L, messageContent.toString());
+                    messageUtils.sendMessage(url, -300048567L, messageContent.toString());
+                    messageUtils.sendMessage(url, -277619118L, messageContent.toString());
 
                     synchronized (jedis) {
                         jedis.hset("L-HuobiPro", item.toUpperCase(), "1");

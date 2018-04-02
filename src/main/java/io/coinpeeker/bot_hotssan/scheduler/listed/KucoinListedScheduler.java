@@ -59,6 +59,7 @@ public class KucoinListedScheduler implements Listing {
         if (!StringUtils.equals("real", env)) {
             return;
         }
+        LOGGER.info("Kucoin 시작");
 
         List<String> noListedCoinList = new ArrayList<>();
         List<String> capList = new ArrayList<>();

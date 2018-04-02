@@ -20,6 +20,7 @@ import redis.clients.jedis.Jedis;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class RefreshRedis {
@@ -45,6 +46,7 @@ public class RefreshRedis {
         kucoin();
         bittrex();
         huobiPro();
+        bithumb();
 
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -320,6 +322,23 @@ public class RefreshRedis {
                 for(int i = 0; i < list.length(); i++){
                     jedis.hset("L-HuobiPro", list.getString(i).toUpperCase(), "0");
                 }
+            }
+        }
+    }
+
+    public void bithumb() throws IOException {
+        synchronized (jedis){
+            if(!jedis.exists("L-Bithumb")){
+                JSONObject jsonObject = httpUtils.getResponseByObject("https://api.bithumb.com/public/ticker/all");
+
+                jsonObject.getJSONObject("data").keySet().remove("date");
+                Set keySet = jsonObject.getJSONObject("data").keySet();
+
+                keySet.stream().forEach((key) -> {
+                    synchronized (jedis){
+                        jedis.hset("L-Bithumb", String.valueOf(key), "0");
+                    }
+                });
             }
         }
     }

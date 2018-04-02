@@ -1,11 +1,11 @@
 package io.coinpeeker.bot_hotssan.scheduler.listed;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
-import io.coinpeeker.bot_hotssan.common.CustomJedis;
 import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.scheduler.Listing;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
+import io.coinpeeker.bot_hotssan.utils.bithumb.Api_Client;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -18,22 +18,22 @@ import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 @Component
-public class UpbitListedScheduler implements Listing {
+public class BithumbListedScheduler implements Listing {
+
     @Autowired
-    MarketInfo marketInfo;
+    HttpUtils httpUtils;
 
     @Autowired
     MessageUtils messageUtils;
 
     @Autowired
-    HttpUtils httpUtils;
+    MarketInfo marketInfo;
 
     @Autowired
     Jedis jedis;
@@ -44,37 +44,49 @@ public class UpbitListedScheduler implements Listing {
     @Value("${property.env}")
     private String env;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UpbitListedScheduler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BithumbListedScheduler.class);
 
     @Override
-    @Scheduled(initialDelay = 1000 * 70, fixedDelay = 1000 * 10)
-    public void inspectListedCoin() throws IOException {
+    @Scheduled(initialDelay = 1000 * 30, fixedDelay = 1000)
+    public void inspectListedCoin() throws IOException, NoSuchAlgorithmException, InvalidKeyException {
         /** env validation check.**/
-        if (!StringUtils.equals("real", env)) {
+        if (!StringUtils.equals("dev", env)) {
             return;
         }
-        LOGGER.info("Upbit 시작");
+        LOGGER.info("Bithumb 시작");
 
         List<String> noListedCoinList = new ArrayList<>();
         List<String> capList = new ArrayList<>();
         capList.addAll(CommonConstant.getCapList());
 
-        for (String item : capList) {
-            synchronized (jedis) {
-                if (!jedis.hexists("L-Upbit", item)) {
-                    noListedCoinList.add(item);
-                }
-            }
-        }
+        capList.stream()
+                .forEach((key) -> {
+                    synchronized (jedis) {
+                        if (!jedis.hexists("L-Bithumb", key)) {
+                            noListedCoinList.add(key);
+                        }
+                    }
+                });
 
         for (String item : noListedCoinList) {
+            Api_Client api = new Api_Client("1dc81ffb56788858690afb7b72bef9dd", "5ed812f9bfdf8fc23fd422742706947a");
 
-            String tempURL = "https://ccx.upbit.com/api/v1/market_status?market=BTC-" + item;
+            HashMap<String, String> rgParams = new HashMap<>();
+            rgParams.put("currency", item);
 
-            JSONObject jsonObject = httpUtils.getResponseByObject(tempURL);
+            String result = "";
+            JSONObject jsonObject = null;
 
-            // 일단 market value 체크가 된 애들만!
-            if (jsonObject.has("id") || !(jsonObject.getJSONObject("error").getString("message").equals("market does not have a valid value"))) {
+            try{
+                result = api.callApi("/info/wallet_address", rgParams);
+                jsonObject = new JSONObject(result);
+            }catch (Exception e){
+                continue;
+            }
+
+            if (jsonObject.has("data")) {
+                String status = jsonObject.getString("status");
+                String currency = jsonObject.getJSONObject("data").getString("currency");
 
                 StringBuilder messageContent = new StringBuilder();
                 Date nowDate = new Date();
@@ -83,45 +95,40 @@ public class UpbitListedScheduler implements Listing {
 
                 messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                 messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                messageContent.append(" [ Upbit ] 상장 정보 ");
+                messageContent.append(" [ Bithumb ] 상장 정보 ");
                 messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                 messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                 messageContent.append("\n");
                 messageContent.append(simpleDateFormat.format(nowDate));
+                messageContent.append("\n확인방법 : Address");
                 messageContent.append("\n코인정보 : ");
 
                 synchronized (jedis) {
-                    messageContent.append(jedis.hget("I-CoinMarketCap", item));
+                    messageContent.append(jedis.hget("I-CoinMarketCap", currency));
                 }
 
                 messageContent.append(" (");
-                messageContent.append(item);
+                messageContent.append(currency);
                 messageContent.append(")");
                 messageContent.append("\n구매가능 거래소 : ");
-                messageContent.append(marketInfo.availableMarketList(item));
-
-                // 정확한 정보 완료일 경우 / 아닐 경우
-                if (!jsonObject.has("id")) {
-                    messageContent.append("\n!! 관리자의 확인이 필요한 코인 !!\n");
-                    messageContent.append(jsonObject.toString());
-                }
+                messageContent.append(marketInfo.availableMarketList(currency));
 
                 String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                messageUtils.sendMessage(url, -300048567L, messageContent.toString());
-                messageUtils.sendMessage(url, -277619118L, messageContent.toString());
+                messageUtils.sendMessage(url, -294606763L, messageContent.toString());
 
                 synchronized (jedis) {
-                    jedis.hset("L-Upbit", item, "0");
+                    jedis.hset("L-Bithumb", currency, "1");
                 }
-                LOGGER.info("Upbit 상장 : " + item + " (" + nowDate + ")");
 
+                LOGGER.info("Bithumb 상장 : " + currency + " (" + simpleDateFormat.format(nowDate).toString() + ")");
             }
 
             try {
-                Thread.sleep(1000);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
         }
     }
 }
