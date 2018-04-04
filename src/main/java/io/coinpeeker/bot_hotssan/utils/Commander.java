@@ -155,10 +155,10 @@ public class Commander {
 
         if(instruction.contains("@")){
             int atIndex = instruction.indexOf("@");
-            for(int idx = 0; idx < atIndex; idx++){
+            for(int idx = 0; idx < atIndex-1; idx++){
                 coinSymbol += instruction.charAt(idx);
             }
-            coinSymbol.replace("/", "").toUpperCase();
+            coinSymbol = coinSymbol.replace("/", "").toUpperCase();
         } else {
             coinSymbol = instruction.replace("/", "").toUpperCase();
         }
