@@ -156,7 +156,7 @@ public class Commander {
         String coinSymbol = "";
 
         if(instruction.contains("@")){
-            int atIndex = instruction.lastIndexOf("@");
+            int atIndex = instruction.indexOf("@");
             for(int idx = 0; idx > atIndex - 1; idx++){
                 coinSymbol += instruction.charAt(idx);
             }
