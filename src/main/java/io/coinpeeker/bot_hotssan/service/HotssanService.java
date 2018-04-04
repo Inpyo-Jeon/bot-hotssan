@@ -89,7 +89,7 @@ public class HotssanService implements HotssanUpdateHandler {
             message.append(chatId);
         } else {
             message.append(commander.execute(instruction));
-            messageUtils.sendMessage(url, chatId, message.toString());
         }
+        messageUtils.sendMessage(url, chatId, message.toString());
     }
 }
