@@ -39,7 +39,7 @@ public class ApplicationStartup implements ApplicationListener<ContextRefreshedE
                 messageUtils.sendMessage(url, -300048567L, "새로운 Build 가 감지되었습니다.");
 
                 // 인표친구들
-                messageUtils.sendMessage(url, -277619118L, "새로운 Build 가 감지되었습니다.");
+                messageUtils.sendMessage(url, -319177275L, "새로운 Build 가 감지되었습니다.");
                 break;
         }
     }

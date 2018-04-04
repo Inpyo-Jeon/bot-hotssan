@@ -110,7 +110,7 @@ public class BittrexListedScheduler implements Listing {
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
                     messageUtils.sendMessage(url, -300048567L, messageContent.toString());
-                    messageUtils.sendMessage(url, -277619118L, messageContent.toString());
+                    messageUtils.sendMessage(url, -319177275L, messageContent.toString());
 
                     synchronized (jedis) {
                         jedis.hset("L-Bittrex", item, "1");
