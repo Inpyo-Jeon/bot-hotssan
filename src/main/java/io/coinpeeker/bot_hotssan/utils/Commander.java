@@ -158,6 +158,7 @@ public class Commander {
             for(int idx = 0; idx < atIndex; idx++){
                 coinSymbol += instruction.charAt(idx);
             }
+            coinSymbol.replace("/", "").toUpperCase();
         } else {
             coinSymbol = instruction.replace("/", "").toUpperCase();
         }
