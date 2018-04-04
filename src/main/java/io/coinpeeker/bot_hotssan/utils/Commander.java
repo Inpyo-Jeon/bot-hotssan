@@ -153,7 +153,16 @@ public class Commander {
         StringBuilder result = new StringBuilder();
         System.out.println("---------");
         System.out.println(instruction);
-        String coinSymbol = instruction.replace("/", "").toUpperCase();
+        String coinSymbol = "";
+
+        if(instruction.contains("@")){
+            int atIndex = instruction.lastIndexOf("@");
+            for(int idx = 0; idx < atIndex - 1; idx++){
+                coinSymbol += instruction.charAt(idx);
+            }
+        } else {
+            coinSymbol = instruction.replace("/", "").toUpperCase();
+        }
 
         if (StringUtils.equals("test", instruction)) {
             try {
