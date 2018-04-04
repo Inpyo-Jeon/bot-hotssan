@@ -84,12 +84,14 @@ public class HotssanService implements HotssanUpdateHandler {
         String instruction = update.getMessage().getText();
         StringBuilder message = new StringBuilder();
 
-        if (!authUtils.isAuthenticated(chatId)) {
-            message.append("등록되지 않은 사용자입니다.\n사용자 아이디 등록을 요청하세요 : ");
-            message.append(chatId);
-        } else {
-            message.append(commander.execute(instruction));
+        if(instruction != null){
+            if (!authUtils.isAuthenticated(chatId)) {
+                message.append("등록되지 않은 사용자입니다.\n사용자 아이디 등록을 요청하세요 : ");
+                message.append(chatId);
+            } else {
+                message.append(commander.execute(instruction));
+            }
+            messageUtils.sendMessage(url, chatId, message.toString());
         }
-        messageUtils.sendMessage(url, chatId, message.toString());
     }
 }
