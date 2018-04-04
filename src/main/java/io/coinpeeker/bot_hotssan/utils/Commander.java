@@ -164,6 +164,8 @@ public class Commander {
             coinSymbol = instruction.replace("/", "").toUpperCase();
         }
 
+        System.out.println(coinSymbol);
+
         if (StringUtils.equals("test", instruction)) {
             try {
                 Double testResult = xgoxApiClient.getLastBalance();
