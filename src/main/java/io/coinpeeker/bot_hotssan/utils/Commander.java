@@ -151,6 +151,8 @@ public class Commander {
         premiumInit();
 
         StringBuilder result = new StringBuilder();
+        System.out.println("---------");
+        System.out.println(instruction);
         String coinSymbol = instruction.replace("/", "").toUpperCase();
 
         if (StringUtils.equals("test", instruction)) {
