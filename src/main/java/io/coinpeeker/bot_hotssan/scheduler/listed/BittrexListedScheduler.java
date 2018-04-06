@@ -69,9 +69,6 @@ public class BittrexListedScheduler implements Listing {
             listingCount = Math.toIntExact(jedis.hlen("L-Bittrex"));
         }
 
-        System.out.println(listingCount);
-        System.out.println(deDuplicationMap.size());
-
         if (deDuplicationMap.size() != listingCount) {
             for (String item : deDuplicationMap.keySet()) {
                 boolean isExist = true;

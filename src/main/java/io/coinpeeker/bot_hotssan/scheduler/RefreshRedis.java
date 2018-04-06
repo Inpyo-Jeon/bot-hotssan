@@ -6,7 +6,9 @@ import io.coinpeeker.bot_hotssan.common.SecretKey;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -47,6 +49,7 @@ public class RefreshRedis {
         bittrex();
         huobiPro();
         bithumb();
+        binanceVer2();
 
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -312,14 +315,14 @@ public class RefreshRedis {
     }
 
     public void huobiPro() throws IOException {
-        synchronized (jedis){
-            if(!jedis.exists("L-HuobiPro")){
+        synchronized (jedis) {
+            if (!jedis.exists("L-HuobiPro")) {
                 LOGGER.info("@#@#@# L-HuobiPro is null");
 
                 JSONObject jsonObject = httpUtils.getResponseByObject("https://api.huobi.pro/v1/common/currencys");
                 JSONArray list = jsonObject.getJSONArray("data");
 
-                for(int i = 0; i < list.length(); i++){
+                for (int i = 0; i < list.length(); i++) {
                     jedis.hset("L-HuobiPro", list.getString(i).toUpperCase(), "0");
                 }
             }
@@ -327,18 +330,35 @@ public class RefreshRedis {
     }
 
     public void bithumb() throws IOException {
-        synchronized (jedis){
-            if(!jedis.exists("L-Bithumb")){
+        synchronized (jedis) {
+            if (!jedis.exists("L-Bithumb")) {
                 JSONObject jsonObject = httpUtils.getResponseByObject("https://api.bithumb.com/public/ticker/all");
 
                 jsonObject.getJSONObject("data").keySet().remove("date");
                 Set keySet = jsonObject.getJSONObject("data").keySet();
 
                 keySet.stream().forEach((key) -> {
-                    synchronized (jedis){
+                    synchronized (jedis) {
                         jedis.hset("L-Bithumb", String.valueOf(key), "0");
                     }
                 });
+            }
+        }
+    }
+
+    public void binanceVer2() throws IOException {
+        synchronized (jedis) {
+            if (!jedis.exists("L-Binance-InternalAPI")) {
+                CloseableHttpResponse response = httpUtils.get("https://support.binance.com/api/v2/help_center/en-us/sections/115000106672/articles.json?page=2&per_page=1");
+
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    LOGGER.info("Binance-Internal-OK");
+                    JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+
+                    synchronized (jedis) {
+                        jedis.hset("L-Binance-InternalAPI", "count", String.valueOf(jsonObject.getInt("count")));
+                    }
+                }
             }
         }
     }

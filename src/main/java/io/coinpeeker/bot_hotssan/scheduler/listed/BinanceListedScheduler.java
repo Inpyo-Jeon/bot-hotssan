@@ -8,6 +8,9 @@ import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -214,6 +217,108 @@ public class BinanceListedScheduler implements Listing {
                 LOGGER.info(messageContent.toString());
             }
             articleCount = lastCount;
+        }
+
+
+    }
+
+    @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 60)
+    public void articleCheckVer2() throws IOException {
+        /** env validation check.**/
+        if (!StringUtils.equals("dev", env)) {
+            return;
+        }
+
+        String endPoint = "https://support.binance.com/api/v2/help_center/en-us/sections/115000106672/articles.json?page=1&per_page=1";
+
+        CloseableHttpResponse response = httpUtils.get(endPoint);
+
+        if (response.getStatusLine().getStatusCode() == 200) {
+            JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+            String title = jsonObject.getJSONArray("articles").getJSONObject(0).getString("title");
+            int count = jsonObject.getInt("count");
+            int listingCount = 0;
+            synchronized (jedis) {
+                listingCount = Integer.valueOf(jedis.hget("L-Binance-InternalAPI", "count"));
+            }
+
+            if (listingCount != count) {
+                if (title.contains("Binance Lists")) {
+                    String asset = "";
+                    int begin = title.lastIndexOf("(");
+                    int end = title.indexOf(")");
+
+                    for (int idx = begin + 1; idx < end; idx++) {
+                        asset += title.charAt(idx);
+                    }
+
+                    Date nowDate = new Date();
+                    StringBuilder messageContent = new StringBuilder();
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
+                    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+
+                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                    messageContent.append(" [ Binance ] 상장 정보 ");
+                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                    messageContent.append("\n");
+                    messageContent.append(simpleDateFormat.format(nowDate));
+                    messageContent.append("\n확인방법 : InternalAPI-Test");
+                    messageContent.append("\n코인정보 : ");
+
+                    synchronized (jedis) {
+                        messageContent.append(jedis.hget("I-CoinMarketCap", asset));
+                    }
+
+                    messageContent.append(" (");
+                    messageContent.append(asset);
+                    messageContent.append(")");
+                    messageContent.append("\n구매가능 거래소 : ");
+                    messageContent.append(marketInfo.availableMarketList(asset));
+
+
+                    String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
+                    messageUtils.sendMessage(url, -294606763L, messageContent.toString());
+
+                    LOGGER.info("Binance 상장(InternalAPI-Test) : " + asset + " (" + simpleDateFormat.format(nowDate) + ")");
+                    LOGGER.info(messageContent.toString());
+                }
+
+                synchronized (jedis) {
+                    jedis.hset("L-Binance-InternalAPI", "count", String.valueOf(count));
+                }
+
+            }
+        }
+
+
+        if (response.getStatusLine().getStatusCode() == 429) {
+            int delay = 0;
+            Header[] headers = response.getAllHeaders();
+            for (Header header : headers) {
+                if (header.getName().equals("Retry-After")) {
+                    LOGGER.info(response.getStatusLine().getStatusCode() + " Key : " + header.getName() + " ,Value : " + header.getValue());
+                    delay = Integer.valueOf(header.getValue());
+                }
+            }
+
+            try {
+                if (response.getStatusLine().getStatusCode() == 429) {
+                    Thread.sleep((1000 * delay) + (1000 * 1));
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (response.getStatusLine().getStatusCode() == 418) {
+            try {
+                LOGGER.info(String.valueOf(response.getStatusLine().getStatusCode()));
+                Thread.sleep(1000 * 60 * 60 * 24);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
