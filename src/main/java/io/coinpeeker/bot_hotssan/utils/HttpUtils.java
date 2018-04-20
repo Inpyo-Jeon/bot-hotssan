@@ -95,7 +95,7 @@ public class HttpUtils {
      * @return
      * @throws IOException
      */
-    public CloseableHttpResponse post(String url, List<NameValuePair> params) throws IOException {
+    public CloseableHttpResponse post(String url, List<NameValuePair> params, String type) throws IOException {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(url);
 
@@ -107,7 +107,14 @@ public class HttpUtils {
 
         httpPost.setConfig(requestConfig);
 
-        httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+        if (type.equals("binanceTrade")) {
+            for (NameValuePair item : params) {
+                httpPost.setHeader(item.getName(), item.getValue());
+            }
+        } else {
+            httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+        }
+
         CloseableHttpResponse response = httpClient.execute(httpPost);
 
         return response;
@@ -129,6 +136,7 @@ public class HttpUtils {
 
         return response;
     }
+
 
     /**
      * API 호출결과를 JSONObject 로 리턴받는 메소드, apiResponse 의 최상단이 Array 인 경우
@@ -171,14 +179,13 @@ public class HttpUtils {
             JSONObject jsonObject = new JSONObject(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
             return jsonObject;
         } else {
-            System.out.println(url);
             return new JSONObject("{'ContentLengthZero':'true'}");
         }
 
     }
 
-    public JSONObject getPostResponseByObject(String url, List<NameValuePair> param) throws IOException {
-        CloseableHttpResponse httpResponse = post(url, param);
+    public JSONObject getPostResponseByObject(String url, List<NameValuePair> param, String type) throws IOException {
+        CloseableHttpResponse httpResponse = post(url, param, type);
         JSONObject jsonObject = new JSONObject(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
         return jsonObject;
     }

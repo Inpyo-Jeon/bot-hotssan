@@ -2,9 +2,9 @@ package io.coinpeeker.bot_hotssan.scheduler.listed;
 
 import com.google.common.collect.Maps;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
-import io.coinpeeker.bot_hotssan.common.CustomJedis;
 import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.scheduler.Listing;
+import io.coinpeeker.bot_hotssan.trade.TradeAgency;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -20,8 +20,11 @@ import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -45,11 +48,14 @@ public class BittrexListedScheduler implements Listing {
     @Value("${property.env}")
     private String env;
 
+    @Autowired
+    private TradeAgency tradeAgency;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(BittrexListedScheduler.class);
 
     @Override
     @Scheduled(initialDelay = 1000 * 10, fixedDelay = 1000 * 3)
-    public void inspectListedCoin() throws IOException {
+    public void inspectListedCoin() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
             return;
@@ -80,6 +86,7 @@ public class BittrexListedScheduler implements Listing {
                 }
 
                 if (!isExist) {
+                    Map<String, List<String>> marketList = marketInfo.availableMarketList(item);
                     StringBuilder messageContent = new StringBuilder();
                     Date nowDate = new Date();
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
@@ -103,17 +110,20 @@ public class BittrexListedScheduler implements Listing {
                     messageContent.append(item);
                     messageContent.append(")");
                     messageContent.append("\n구매가능 거래소 : ");
-                    messageContent.append(marketInfo.availableMarketList(item));
+                    messageContent.append(marketInfo.marketInfo(marketList));
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
                     messageUtils.sendMessage(url, -300048567L, messageContent.toString());
                     messageUtils.sendMessage(url, -319177275L, messageContent.toString());
 
+                    LOGGER.info(messageContent.toString());
+                    tradeAgency.list("Bittrex", item.toUpperCase(), marketList);
+
                     synchronized (jedis) {
                         jedis.hset("L-Bittrex", item, "1");
                     }
 
-                    LOGGER.info("Bittrex 상장 : " + item + " (" + simpleDateFormat.format(nowDate).toString() + ")");
+
                 }
             }
         }

@@ -1,10 +1,10 @@
 package io.coinpeeker.bot_hotssan.scheduler.listed;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
-import io.coinpeeker.bot_hotssan.common.CustomJedis;
 import io.coinpeeker.bot_hotssan.common.SecretKey;
 import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.scheduler.Listing;
+import io.coinpeeker.bot_hotssan.trade.TradeAgency;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
 import org.apache.commons.codec.binary.Hex;
@@ -49,6 +49,9 @@ public class KucoinListedScheduler implements Listing {
 
     @Value("${property.env}")
     private String env;
+
+    @Autowired
+    private TradeAgency tradeAgency;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KucoinListedScheduler.class);
 
@@ -113,6 +116,7 @@ public class KucoinListedScheduler implements Listing {
             }
 
             if (jsonObject.has("data") && !jsonObject.get("data").equals("null")) {
+                Map<String, List<String>> marketList = marketInfo.availableMarketList(item);
                 Date nowDate = new Date();
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
                 simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
@@ -136,18 +140,22 @@ public class KucoinListedScheduler implements Listing {
                 messageContent.append(item);
                 messageContent.append(")");
                 messageContent.append("\n구매가능 거래소 : ");
-                messageContent.append(marketInfo.availableMarketList(item));
+                messageContent.append(marketInfo.marketInfo(marketList));
 
 
                 String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
                 messageUtils.sendMessage(url, -300048567L, messageContent.toString());
                 messageUtils.sendMessage(url, -319177275L, messageContent.toString());
 
+
+                LOGGER.info(messageContent.toString());
+                tradeAgency.list("Kucoin", item, marketList);
+
+
                 synchronized (jedis) {
                     jedis.hset("L-Kucoin", item, "0");
                 }
 
-                LOGGER.info("Kucoin 상장 : " + item + " (" + simpleDateFormat.format(nowDate).toString() + ")");
             } else if ((jsonObject.has("error") && jsonObject.getString("error").equals("Not Found"))) {
 
             } else {

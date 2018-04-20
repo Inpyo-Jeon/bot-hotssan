@@ -2,7 +2,6 @@ package io.coinpeeker.bot_hotssan.scheduler.listed;
 
 import com.google.common.collect.Maps;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
-import io.coinpeeker.bot_hotssan.common.CustomJedis;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 
@@ -63,7 +61,7 @@ public class WalletExplorerScheduler {
     }
 
 
-//    @Scheduled(initialDelay = 1000 * 120, fixedDelay = 1000)
+    //    @Scheduled(initialDelay = 1000 * 120, fixedDelay = 1000)
     public void searchWallet() throws IOException, InterruptedException {
         /** env validation check.**/
         if (!StringUtils.equals("dev", env)) {

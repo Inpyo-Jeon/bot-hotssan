@@ -5,6 +5,7 @@ import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.common.SecretKey;
 import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.scheduler.Listing;
+import io.coinpeeker.bot_hotssan.trade.TradeAgency;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -53,6 +54,9 @@ public class HuobiListedScheduler implements Listing {
 
     @Value("${property.env}")
     private String env;
+
+    @Autowired
+    private TradeAgency tradeAgency;
 
     int lastCount = 0;
 
@@ -141,6 +145,7 @@ public class HuobiListedScheduler implements Listing {
                 }
 
                 if (!isExist) {
+                    Map<String, List<String>> marketList = marketInfo.availableMarketList(item.toUpperCase());
                     Date nowDate = new Date();
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
                     simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
@@ -164,17 +169,18 @@ public class HuobiListedScheduler implements Listing {
                     messageContent.append(item.toUpperCase());
                     messageContent.append(")");
                     messageContent.append("\n구매가능 거래소 : ");
-                    messageContent.append(marketInfo.availableMarketList(item.toUpperCase()));
+                    messageContent.append(marketInfo.marketInfo(marketList));
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
                     messageUtils.sendMessage(url, -300048567L, messageContent.toString());
                     messageUtils.sendMessage(url, -319177275L, messageContent.toString());
 
+                    LOGGER.info(messageContent.toString());
+                    tradeAgency.list("Huobi", item.toUpperCase(), marketList);
+
                     synchronized (jedis) {
                         jedis.hset("L-HuobiPro", item.toUpperCase(), "1");
                     }
-
-                    LOGGER.info("Huobi-Pro 상장 : " + item.toUpperCase() + " (" + simpleDateFormat.format(nowDate).toString() + ")");
                 }
             }
         }

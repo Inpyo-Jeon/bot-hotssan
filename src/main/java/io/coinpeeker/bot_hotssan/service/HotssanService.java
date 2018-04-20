@@ -62,7 +62,7 @@ public class HotssanService implements HotssanUpdateHandler {
         params.add(new BasicNameValuePair("url", url + "/webhook"));
 
         try {
-            httpUtils.post(setWebhookUrl, params);
+            httpUtils.post(setWebhookUrl, params, "");
         } catch (IOException ioException) {
             ioException.printStackTrace();
             return false;

@@ -1,7 +1,6 @@
 package io.coinpeeker.bot_hotssan.scheduler.listed;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
-import io.coinpeeker.bot_hotssan.common.CustomJedis;
 import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.scheduler.Listing;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
@@ -13,16 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 @Component
 public class UpbitListedScheduler implements Listing {
@@ -48,7 +45,7 @@ public class UpbitListedScheduler implements Listing {
 
     @Override
 //    @Scheduled(initialDelay = 1000 * 70, fixedDelay = 1000 * 10)
-    public void inspectListedCoin() throws IOException {
+    public void inspectListedCoin() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
             return;
@@ -76,6 +73,7 @@ public class UpbitListedScheduler implements Listing {
             // 일단 market value 체크가 된 애들만!
             if (jsonObject.has("id") || !(jsonObject.getJSONObject("error").getString("message").equals("market does not have a valid value"))) {
 
+                Map<String, List<String>> marketList = marketInfo.availableMarketList(item);
                 StringBuilder messageContent = new StringBuilder();
                 Date nowDate = new Date();
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
@@ -98,7 +96,7 @@ public class UpbitListedScheduler implements Listing {
                 messageContent.append(item);
                 messageContent.append(")");
                 messageContent.append("\n구매가능 거래소 : ");
-                messageContent.append(marketInfo.availableMarketList(item));
+                messageContent.append(marketInfo.marketInfo(marketList));
 
                 // 정확한 정보 완료일 경우 / 아닐 경우
                 if (!jsonObject.has("id")) {
@@ -110,11 +108,10 @@ public class UpbitListedScheduler implements Listing {
                 messageUtils.sendMessage(url, -300048567L, messageContent.toString());
                 messageUtils.sendMessage(url, -319177275L, messageContent.toString());
 
+
                 synchronized (jedis) {
                     jedis.hset("L-Upbit", item, "0");
                 }
-                LOGGER.info("Upbit 상장 : " + item + " (" + nowDate + ")");
-
             }
 
             try {

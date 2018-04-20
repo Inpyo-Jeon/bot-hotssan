@@ -120,7 +120,7 @@ public class RefreshRedis {
                 params.add(new BasicNameValuePair("api_key", SecretKey.getApiKeyOkex()));
                 params.add(new BasicNameValuePair("sign", SecretKey.getSignOkex()));
 
-                JSONObject jsonObject = httpUtils.getPostResponseByObject(SecretKey.getUrlOkex(), params);
+                JSONObject jsonObject = httpUtils.getPostResponseByObject(SecretKey.getUrlOkex(), params, "");
                 JSONObject list = jsonObject.getJSONObject("info").getJSONObject("funds").getJSONObject("free");
 
                 for (Object item : list.keySet()) {

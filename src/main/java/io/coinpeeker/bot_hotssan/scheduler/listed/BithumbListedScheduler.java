@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 
@@ -47,10 +46,10 @@ public class BithumbListedScheduler implements Listing {
     private static final Logger LOGGER = LoggerFactory.getLogger(BithumbListedScheduler.class);
 
     @Override
-    @Scheduled(initialDelay = 1000 * 30, fixedDelay = 1000)
+//    @Scheduled(initialDelay = 1000 * 30, fixedDelay = 1000)
     public void inspectListedCoin() throws IOException, NoSuchAlgorithmException, InvalidKeyException {
         /** env validation check.**/
-        if (!StringUtils.equals("dev", env)) {
+        if (!StringUtils.equals("real", env)) {
             return;
         }
         LOGGER.info("Bithumb 시작");
@@ -77,16 +76,17 @@ public class BithumbListedScheduler implements Listing {
             String result = "";
             JSONObject jsonObject = null;
 
-            try{
+            try {
                 result = api.callApi("/info/wallet_address", rgParams);
                 jsonObject = new JSONObject(result);
-            }catch (Exception e){
+            } catch (Exception e) {
                 continue;
             }
 
             if (jsonObject.has("data")) {
                 String status = jsonObject.getString("status");
                 String currency = jsonObject.getJSONObject("data").getString("currency");
+                Map<String, List<String>> marketList = marketInfo.availableMarketList(currency);
 
                 StringBuilder messageContent = new StringBuilder();
                 Date nowDate = new Date();
@@ -111,7 +111,7 @@ public class BithumbListedScheduler implements Listing {
                 messageContent.append(currency);
                 messageContent.append(")");
                 messageContent.append("\n구매가능 거래소 : ");
-                messageContent.append(marketInfo.availableMarketList(currency));
+                messageContent.append(marketInfo.marketInfo(marketList));
 
                 String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
                 messageUtils.sendMessage(url, -294606763L, messageContent.toString());

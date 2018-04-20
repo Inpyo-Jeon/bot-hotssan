@@ -28,7 +28,7 @@ public class MessageUtils {
         params.add(new BasicNameValuePair("text", text));
 
         try {
-            httpUtils.post(url, params);
+            httpUtils.post(url, params, "");
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }

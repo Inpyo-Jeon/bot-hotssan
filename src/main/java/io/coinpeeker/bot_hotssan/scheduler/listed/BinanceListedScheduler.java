@@ -1,7 +1,6 @@
 package io.coinpeeker.bot_hotssan.scheduler.listed;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
-import io.coinpeeker.bot_hotssan.common.CustomJedis;
 import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.scheduler.Listing;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
@@ -93,6 +92,7 @@ public class BinanceListedScheduler implements Listing {
                         fileName.append(pic.charAt(index));
                     }
 
+                    Map<String, List<String>> marketList = marketInfo.availableMarketList(asset);
                     Date nowDate = new Date();
                     Date imageTimeStamp = new Date(Long.valueOf(fileName.toString().replaceAll("\\D", "")));
                     StringBuilder messageContent = new StringBuilder();
@@ -121,7 +121,7 @@ public class BinanceListedScheduler implements Listing {
                     messageContent.append("\n변환시간 : ");
                     messageContent.append(simpleDateFormat.format(imageTimeStamp));
                     messageContent.append("\n구매가능 거래소 : ");
-                    messageContent.append(marketInfo.availableMarketList(asset));
+                    messageContent.append(marketInfo.marketInfo(marketList));
 
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
@@ -179,6 +179,7 @@ public class BinanceListedScheduler implements Listing {
                     asset += title.charAt(idx);
                 }
 
+                Map<String, List<String>> marketList = marketInfo.availableMarketList(asset);
                 Date nowDate = new Date();
                 StringBuilder messageContent = new StringBuilder();
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
@@ -202,7 +203,7 @@ public class BinanceListedScheduler implements Listing {
                 messageContent.append(asset);
                 messageContent.append(")");
                 messageContent.append("\n구매가능 거래소 : ");
-                messageContent.append(marketInfo.availableMarketList(asset));
+                messageContent.append(marketInfo.marketInfo(marketList));
 
 
                 String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
@@ -252,6 +253,7 @@ public class BinanceListedScheduler implements Listing {
                         asset += title.charAt(idx);
                     }
 
+                    Map<String, List<String>> marketList = marketInfo.availableMarketList(asset);
                     Date nowDate = new Date();
                     StringBuilder messageContent = new StringBuilder();
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
@@ -275,7 +277,7 @@ public class BinanceListedScheduler implements Listing {
                     messageContent.append(asset);
                     messageContent.append(")");
                     messageContent.append("\n구매가능 거래소 : ");
-                    messageContent.append(marketInfo.availableMarketList(asset));
+                    messageContent.append(marketInfo.marketInfo(marketList));
 
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
@@ -288,7 +290,6 @@ public class BinanceListedScheduler implements Listing {
                 synchronized (jedis) {
                     jedis.hset("L-Binance-InternalAPI", "count", String.valueOf(count));
                 }
-
             }
         }
 
