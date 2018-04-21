@@ -67,7 +67,7 @@ public class BithumbListedScheduler implements Listing {
         for (Element item : items) {
             if (item.getElementsByTag("title").get(0).text().contains("상장")) {
                 String text = item.getElementsByTag("title").get(0).text();
-                String link = item.getElementsByTag("link").get(0).text();
+                String link = item.getElementsByTag("guid").get(0).text();
                 String pubDate = item.getElementsByTag("pubDate").get(0).text();
                 boolean check = false;
 
@@ -91,9 +91,11 @@ public class BithumbListedScheduler implements Listing {
                     messageContent.append("\n");
                     messageContent.append(simpleDateFormat.format(nowDate));
                     messageContent.append("\n확인방법 : Blog-Internal API");
-                    messageContent.append("\n");
+                    messageContent.append("\n내용 : ");
                     messageContent.append(text);
+                    messageContent.append("\n링크 : ");
                     messageContent.append(link);
+                    messageContent.append("\n등록시간 : ");
                     messageContent.append(pubDate);
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
