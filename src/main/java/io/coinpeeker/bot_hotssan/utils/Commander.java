@@ -112,7 +112,7 @@ public class Commander {
             tradeInfoMap.put(CoinType.valueOf("MED"), Arrays.asList(coinrailApiClient));
 
             // TRX - 바이낸스, 코인네스트, 코인레일
-            tradeInfoMap.put(CoinType.valueOf("TRX"), Arrays.asList(binanceApiClient, coinnestApiClient, coinrailApiClient));
+            tradeInfoMap.put(CoinType.valueOf("TRX"), Arrays.asList(binanceApiClient, coinnestApiClient, coinrailApiClient, upbitApiClient));
 
             // XGOX - 크립토피아
             tradeInfoMap.put(CoinType.valueOf("XGOX"), Arrays.asList(crytopiaApiClient));
