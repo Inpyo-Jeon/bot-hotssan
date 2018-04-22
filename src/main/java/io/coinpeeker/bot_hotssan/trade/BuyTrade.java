@@ -23,24 +23,17 @@ public class BuyTrade implements AutoTrade {
     @Override
     public void orderBinance(String axisCoin, String buyCoin) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         Binance binance = new Binance("m6yQuY6E1BscKqlxIHMhqzkSEa7l9vMKWEQTusyzN9Ozslq3k023x3ou6wxWlJGk", "ZR80HbvYPlckwsbEiyMHNT6nu5SHmLZU3TF95n2uqxloLUmSAz4Rd1yEIooPIbXF", httpUtils);
-        int loopCount = 1;
         Boolean check = true;
         String buyCoinSymbol = buyCoin + axisCoin;
 
-
         while (check) {
-            if (loopCount < 10) {
-                ++loopCount;
-                BigDecimal myAxisCoinAmount = new BigDecimal(Double.valueOf(binance.getHaveCoinAmount(axisCoin)));
-                BigDecimal buyCoinMarketPrice = new BigDecimal(Double.valueOf(binance.getCurrentCoinMarketPrice(buyCoinSymbol)));
-                int buyAmount = (int) (myAxisCoinAmount.doubleValue() / buyCoinMarketPrice.doubleValue());
-                Double minQuantity = Double.valueOf(binance.getQuantityMinOrder(buyCoinSymbol));
+            BigDecimal myAxisCoinAmount = new BigDecimal(Double.valueOf(binance.getHaveCoinAmount(axisCoin)));
+            BigDecimal buyCoinMarketPrice = new BigDecimal(Double.valueOf(binance.getCurrentCoinMarketPrice(buyCoinSymbol)));
+            int buyAmount = (int) (myAxisCoinAmount.doubleValue() / buyCoinMarketPrice.doubleValue());
+            Double minQuantity = Double.valueOf(binance.getQuantityMinOrder(buyCoinSymbol));
 
-                if (buyAmount > minQuantity) {
-                    binance.sendOrder(buyCoinSymbol, "BUY", "MARKET", String.valueOf(buyAmount));
-                } else {
-                    check = false;
-                }
+            if (buyAmount > minQuantity) {
+                binance.sendOrder(buyCoinSymbol, "BUY", "MARKET", String.valueOf(buyAmount));
             } else {
                 check = false;
             }
