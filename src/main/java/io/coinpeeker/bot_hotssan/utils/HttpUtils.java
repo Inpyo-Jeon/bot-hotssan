@@ -120,6 +120,31 @@ public class HttpUtils {
         return response;
     }
 
+    public CloseableHttpResponse post(String url, List<NameValuePair> header, List<NameValuePair> params, String type) throws IOException {
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(url);
+
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setSocketTimeout(1000 * 10)
+                .setConnectTimeout(1000 * 10)
+                .setConnectionRequestTimeout(1000 * 10)
+                .build();
+
+        httpPost.setConfig(requestConfig);
+
+
+            for (NameValuePair item : params) {
+                httpPost.setHeader(item.getName(), item.getValue());
+            }
+
+            httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+
+
+        CloseableHttpResponse response = httpClient.execute(httpPost);
+
+        return response;
+    }
+
     public CloseableHttpResponse post(String url) throws IOException {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(url);
@@ -139,7 +164,7 @@ public class HttpUtils {
 
 
     /**
-     * API 호출결과를 JSONObject 로 리턴받는 메소드, apiResponse 의 최상단이 Array 인 경우
+     * api 호출결과를 JSONObject 로 리턴받는 메소드, apiResponse 의 최상단이 Array 인 경우
      *
      * @param url
      * @return
@@ -160,7 +185,7 @@ public class HttpUtils {
     }
 
     /**
-     * API 호출결과를 JSONObject 로 리턴받는 메소드, apiResponse 의 최상단이 Object 인 경우
+     * api 호출결과를 JSONObject 로 리턴받는 메소드, apiResponse 의 최상단이 Object 인 경우
      *
      * @param url
      * @return
@@ -182,6 +207,12 @@ public class HttpUtils {
             return new JSONObject("{'ContentLengthZero':'true'}");
         }
 
+    }
+
+    public JSONObject getPostResponseByObject(String url, List<NameValuePair> header, List<NameValuePair> params, String type) throws IOException {
+        CloseableHttpResponse httpResponse = post(url, header, params, type);
+        JSONObject jsonObject = new JSONObject(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
+        return jsonObject;
     }
 
     public JSONObject getPostResponseByObject(String url, List<NameValuePair> param, String type) throws IOException {
