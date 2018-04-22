@@ -80,8 +80,8 @@ public class KucoinListedScheduler implements Listing {
         for (String item : noListedCoinList) {
 
             String host = "https://api.kucoin.com";
-            String endpoint = "/v1/account/" + item + "/wallet/address";  // API endpoint
-            String secret = SecretKey.getSecretKeyKucoin(); //The secret assigned when the API created
+            String endpoint = "/v1/account/" + item + "/wallet/address";  // api endpoint
+            String secret = SecretKey.getSecretKeyKucoin(); //The secret assigned when the api created
 
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             long nonce = timestamp.getTime();
@@ -96,13 +96,13 @@ public class KucoinListedScheduler implements Listing {
             SecretKeySpec secretKeySpec = new SecretKeySpec(secret.getBytes("UTF-8"), "HmacSHA256");
             sha256_HMAC.init(secretKeySpec);
 
-            //KC-API-SIGNATURE in header
+            //KC-api-SIGNATURE in header
             String signatureResult = Hex.encodeHexString(sha256_HMAC.doFinal(signatureStr.getBytes("UTF-8")));
 
             List<NameValuePair> header = new ArrayList<>();
-            header.add(new BasicNameValuePair("KC-API-KEY", SecretKey.getApiKeyKucoin()));
-            header.add(new BasicNameValuePair("KC-API-NONCE", String.valueOf(nonce)));
-            header.add(new BasicNameValuePair("KC-API-SIGNATURE", signatureResult));
+            header.add(new BasicNameValuePair("KC-api-KEY", SecretKey.getApiKeyKucoin()));
+            header.add(new BasicNameValuePair("KC-api-NONCE", String.valueOf(nonce)));
+            header.add(new BasicNameValuePair("KC-api-SIGNATURE", signatureResult));
 
             JSONObject jsonObject = httpUtils.getResponseByObject(host + endpoint, header);
 

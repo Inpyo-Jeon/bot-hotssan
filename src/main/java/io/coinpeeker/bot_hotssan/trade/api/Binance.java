@@ -1,6 +1,5 @@
-package io.coinpeeker.bot_hotssan.trade.API;
+package io.coinpeeker.bot_hotssan.trade.api;
 
-import io.coinpeeker.bot_hotssan.trade.BuyTrade;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;

@@ -90,7 +90,7 @@ public class BithumbListedScheduler implements Listing {
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append("\n");
                     messageContent.append(simpleDateFormat.format(nowDate));
-                    messageContent.append("\n확인방법 : Blog-Internal API");
+                    messageContent.append("\n확인방법 : Blog-Internal api");
                     messageContent.append("\n내용 : ");
                     messageContent.append(text);
                     messageContent.append("\n링크 : ");
