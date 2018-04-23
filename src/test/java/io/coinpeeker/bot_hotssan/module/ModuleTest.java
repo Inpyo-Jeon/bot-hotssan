@@ -1,5 +1,6 @@
 package io.coinpeeker.bot_hotssan.module;
 
+import io.coinpeeker.bot_hotssan.trade.API.Binance;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -43,19 +44,25 @@ public class ModuleTest {
         Binance binance = new Binance("m6yQuY6E1BscKqlxIHMhqzkSEa7l9vMKWEQTusyzN9Ozslq3k023x3ou6wxWlJGk", "ZR80HbvYPlckwsbEiyMHNT6nu5SHmLZU3TF95n2uqxloLUmSAz4Rd1yEIooPIbXF");
         Boolean check = true;
 
+        String buyCoin = "IOST";
+        String axisCoin = "BTC";
+        String buyCoinSymbol = buyCoin + axisCoin;
 
-        while (check) {
-            BigDecimal myAxisCoinAmount = new BigDecimal(Double.valueOf(binance.getHaveCoinAmount("BTC")));
-            BigDecimal buyCoinMarketPrice = new BigDecimal(Double.valueOf(binance.getCurrentCoinMarketPrice("IOSTBTC")));
-            int buyAmount = (int) (myAxisCoinAmount.doubleValue() / buyCoinMarketPrice.doubleValue());
-            Double minQuantity = Double.valueOf(binance.getQuantityMinOrder("IOSTBTC"));
+        BigDecimal myAxisCoinAmount = new BigDecimal(Double.valueOf(binance.getHaveCoinAmount(axisCoin)));
+        BigDecimal buyCoinMarketPrice = new BigDecimal(Double.valueOf(binance.getCurrentCoinMarketPrice(buyCoinSymbol)));
+        BigDecimal buyAmount = new BigDecimal((myAxisCoinAmount.doubleValue() / buyCoinMarketPrice.doubleValue()) * 0.9);
 
-            if (buyAmount > minQuantity) {
-                binance.sendOrder("IOSTBTC", "BUY", "MARKET", "1");
-            } else {
-                check = false;
-            }
-        }
+
+        System.out.println(myAxisCoinAmount);
+        System.out.println(buyCoinMarketPrice);
+        System.out.println(buyAmount);
+
+        System.out.println(myAxisCoinAmount.setScale(8, BigDecimal.ROUND_DOWN));
+        System.out.println(buyCoinMarketPrice.setScale(8, BigDecimal.ROUND_DOWN));
+        System.out.println(buyAmount.setScale(2, BigDecimal.ROUND_DOWN));
+
+
+
     }
 
 
