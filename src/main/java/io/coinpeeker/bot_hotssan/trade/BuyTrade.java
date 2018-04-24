@@ -1,6 +1,6 @@
 package io.coinpeeker.bot_hotssan.trade;
 
-import io.coinpeeker.bot_hotssan.trade.API.Binance;
+import io.coinpeeker.bot_hotssan.trade.api.Binance;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
