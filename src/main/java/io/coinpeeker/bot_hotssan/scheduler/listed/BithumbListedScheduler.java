@@ -52,7 +52,7 @@ public class BithumbListedScheduler implements Listing {
     private static final Logger LOGGER = LoggerFactory.getLogger(BithumbListedScheduler.class);
 
     @Override
-    @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 2)
+//    @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 2)
     public void inspectListedCoin() throws IOException {
         /** env validation check.**/
         if (!StringUtils.equals("dev", env)) {
@@ -63,7 +63,7 @@ public class BithumbListedScheduler implements Listing {
         String convertData = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
 
         LOGGER.info(convertData);
-        
+
         Elements items = Jsoup.parseBodyFragment(convertData).body().getElementsByTag("item");
 
         for (Element item : items) {
