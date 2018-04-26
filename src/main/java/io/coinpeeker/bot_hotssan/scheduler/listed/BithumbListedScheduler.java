@@ -62,6 +62,8 @@ public class BithumbListedScheduler implements Listing {
         CloseableHttpResponse httpResponse = httpUtils.get("https://bithumb.cafe/feed");
         String convertData = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
 
+        LOGGER.info(convertData);
+        
         Elements items = Jsoup.parseBodyFragment(convertData).body().getElementsByTag("item");
 
         for (Element item : items) {
