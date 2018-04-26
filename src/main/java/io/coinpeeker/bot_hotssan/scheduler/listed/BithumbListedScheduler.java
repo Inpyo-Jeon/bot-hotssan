@@ -52,62 +52,62 @@ public class BithumbListedScheduler implements Listing {
     private static final Logger LOGGER = LoggerFactory.getLogger(BithumbListedScheduler.class);
 
     @Override
-//    @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 2)
+    @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 2)
     public void inspectListedCoin() throws IOException {
         /** env validation check.**/
         if (!StringUtils.equals("dev", env)) {
             return;
         }
 
-        CloseableHttpResponse httpResponse = httpUtils.get("https://bithumb.cafe/feed");
+        CloseableHttpResponse httpResponse = httpUtils.get("http://bithumb.cafe/wp-json/wp/v2/media");
         String convertData = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
 
         LOGGER.info(convertData);
 
-        Elements items = Jsoup.parseBodyFragment(convertData).body().getElementsByTag("item");
-
-        for (Element item : items) {
-            if (item.getElementsByTag("title").get(0).text().contains("상장")) {
-                String text = item.getElementsByTag("title").get(0).text();
-                String link = item.getElementsByTag("guid").get(0).text();
-                String pubDate = item.getElementsByTag("pubDate").get(0).text();
-                boolean check = false;
-
-                synchronized (jedis) {
-                    if (!jedis.hexists("L-Bithumb-Private", text)) {
-                        check = true;
-                    }
-                }
-
-                if (check) {
-                    StringBuilder messageContent = new StringBuilder();
-                    Date nowDate = new Date();
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
-                    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                    messageContent.append(" [ Bithumb ] 상장 정보 - Test");
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                    messageContent.append("\n");
-                    messageContent.append(simpleDateFormat.format(nowDate));
-                    messageContent.append("\n확인방법 : Blog-Internal api");
-                    messageContent.append("\n내용 : ");
-                    messageContent.append(text);
-                    messageContent.append("\n링크 : ");
-                    messageContent.append(link);
-                    messageContent.append("\n등록시간 : ");
-                    messageContent.append(pubDate);
-
-                    String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                    messageUtils.sendMessage(url, -294606763L, messageContent.toString());
-
-                    LOGGER.info(text + " | " + link + " | " + pubDate);
-
-                    synchronized (jedis) {
-                        jedis.hset("L-Bithumb-Private", text, "0");
-                    }
+//        Elements items = Jsoup.parseBodyFragment(convertData).body().getElementsByTag("item");
+//
+//        for (Element item : items) {
+//            if (item.getElementsByTag("title").get(0).text().contains("상장")) {
+//                String text = item.getElementsByTag("title").get(0).text();
+//                String link = item.getElementsByTag("guid").get(0).text();
+//                String pubDate = item.getElementsByTag("pubDate").get(0).text();
+//                boolean check = false;
+//
+//                synchronized (jedis) {
+//                    if (!jedis.hexists("L-Bithumb-Private", text)) {
+//                        check = true;
+//                    }
+//                }
+//
+//                if (check) {
+//                    StringBuilder messageContent = new StringBuilder();
+//                    Date nowDate = new Date();
+//                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
+//                    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+//
+//                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+//                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+//                    messageContent.append(" [ Bithumb ] 상장 정보 - Test");
+//                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+//                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+//                    messageContent.append("\n");
+//                    messageContent.append(simpleDateFormat.format(nowDate));
+//                    messageContent.append("\n확인방법 : Blog-Internal api");
+//                    messageContent.append("\n내용 : ");
+//                    messageContent.append(text);
+//                    messageContent.append("\n링크 : ");
+//                    messageContent.append(link);
+//                    messageContent.append("\n등록시간 : ");
+//                    messageContent.append(pubDate);
+//
+//                    String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
+//                    messageUtils.sendMessage(url, -294606763L, messageContent.toString());
+//
+//                    LOGGER.info(text + " | " + link + " | " + pubDate);
+//
+//                    synchronized (jedis) {
+//                        jedis.hset("L-Bithumb-Private", text, "0");
+//                    }
 
 //                    messageContent.append("\n코인정보 : ");
 //
@@ -129,9 +129,9 @@ public class BithumbListedScheduler implements Listing {
 //                    }
 //
 //                    LOGGER.info("Bithumb 상장 : " + currency + " (" + simpleDateFormat.format(nowDate).toString() + ")");
-                }
-            }
-        }
+//                }
+//            }
+//        }
     }
 //    @Override
 //    @Scheduled(initialDelay = 1000 * 30, fixedDelay = 1000)
