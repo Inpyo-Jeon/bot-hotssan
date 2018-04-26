@@ -56,31 +56,35 @@ public class KucoinListedScheduler implements Listing {
     private static final Logger LOGGER = LoggerFactory.getLogger(KucoinListedScheduler.class);
 
     @Override
-    @Scheduled(initialDelay = 1000 * 50, fixedDelay = 1000 * 10)
+    @Scheduled(initialDelay = 1000 * 10, fixedDelay = 1000 * 10)
     public void inspectListedCoin() throws IOException, NoSuchAlgorithmException, InvalidKeyException {
         /** env validation check.**/
-        if (!StringUtils.equals("real", env)) {
+        if (!StringUtils.equals("local", env)) {
             return;
         }
         LOGGER.info("Kucoin 시작");
 
+//        List<String> noListedCoinList = new ArrayList<>();
+//        List<String> capList = new ArrayList<>();
+//        capList.addAll(CommonConstant.getCapList());
+//
+//
+//        for (String item : capList) {
+//            synchronized (jedis) {
+//                if (!jedis.hexists("L-Kucoin", item)) {
+//                    noListedCoinList.add(item);
+//                }
+//            }
+//        }
+
         List<String> noListedCoinList = new ArrayList<>();
-        List<String> capList = new ArrayList<>();
-        capList.addAll(CommonConstant.getCapList());
-
-
-        for (String item : capList) {
-            synchronized (jedis) {
-                if (!jedis.hexists("L-Kucoin", item)) {
-                    noListedCoinList.add(item);
-                }
-            }
-        }
+        noListedCoinList.add("GALA");
+        noListedCoinList.add("DOCK");
 
         for (String item : noListedCoinList) {
-
+//            https://api.kucoin.com/v1/account/balances
             String host = "https://api.kucoin.com";
-            String endpoint = "/v1/account/" + item + "/wallet/address";  // api endpoint
+            String endpoint = "/v1/account/balances";  // api endpoint
             String secret = SecretKey.getSecretKeyKucoin(); //The secret assigned when the api created
 
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -104,65 +108,68 @@ public class KucoinListedScheduler implements Listing {
             header.add(new BasicNameValuePair("KC-api-NONCE", String.valueOf(nonce)));
             header.add(new BasicNameValuePair("KC-api-SIGNATURE", signatureResult));
 
+            endpoint += "?limit=12&page=2";
+
             JSONObject jsonObject = httpUtils.getResponseByObject(host + endpoint, header);
+            System.out.println(jsonObject.toString());
 
-            if (jsonObject.has("ContentLengthZero")) {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                continue;
-            }
-
-            if (jsonObject.has("data") && !jsonObject.get("data").equals("null")) {
-                Map<String, List<String>> marketList = marketInfo.availableMarketList(item);
-                Date nowDate = new Date();
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
-                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-                StringBuilder messageContent = new StringBuilder();
-
-                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                messageContent.append(" [ Kucoin ] 상장 정보 ");
-                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                messageContent.append("\n");
-                messageContent.append(simpleDateFormat.format(nowDate));
-                messageContent.append("\n확인방법 : Address");
-                messageContent.append("\n코인정보 : ");
-
-                synchronized (jedis) {
-                    messageContent.append(jedis.hget("I-CoinMarketCap", item));
-                }
-
-                messageContent.append(" (");
-                messageContent.append(item);
-                messageContent.append(")");
-                messageContent.append("\n구매가능 거래소 : ");
-                messageContent.append(marketInfo.marketInfo(marketList));
-
-
-                String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                messageUtils.sendMessage(url, -300048567L, messageContent.toString());
-                messageUtils.sendMessage(url, -319177275L, messageContent.toString());
-
-
-                LOGGER.info(messageContent.toString());
-                tradeAgency.list("Kucoin", item, marketList);
-
-
-                synchronized (jedis) {
-                    jedis.hset("L-Kucoin", item, "0");
-                }
-
-            } else if ((jsonObject.has("error") && jsonObject.getString("error").equals("Not Found"))) {
-
-            } else {
-                LOGGER.info(" [ Kucoin ] 상장 정보 이상발생");
-                LOGGER.info("코인 정보 : " + item);
-                LOGGER.info("에러내용 : " + jsonObject.toString());
-            }
+//            if (jsonObject.has("ContentLengthZero")) {
+//                try {
+//                    Thread.sleep(500);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                continue;
+//            }
+//
+//            if (jsonObject.has("data") && !jsonObject.get("data").equals("null")) {
+//                Map<String, List<String>> marketList = marketInfo.availableMarketList(item);
+//                Date nowDate = new Date();
+//                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
+//                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+//                StringBuilder messageContent = new StringBuilder();
+//
+//                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+//                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+//                messageContent.append(" [ Kucoin ] 상장 정보 ");
+//                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+//                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+//                messageContent.append("\n");
+//                messageContent.append(simpleDateFormat.format(nowDate));
+//                messageContent.append("\n확인방법 : Address");
+//                messageContent.append("\n코인정보 : ");
+//
+//                synchronized (jedis) {
+//                    messageContent.append(jedis.hget("I-CoinMarketCap", item));
+//                }
+//
+//                messageContent.append(" (");
+//                messageContent.append(item);
+//                messageContent.append(")");
+//                messageContent.append("\n구매가능 거래소 : ");
+//                messageContent.append(marketInfo.marketInfo(marketList));
+//
+//
+//                String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
+//                messageUtils.sendMessage(url, -300048567L, messageContent.toString());
+//                messageUtils.sendMessage(url, -319177275L, messageContent.toString());
+//
+//
+//                LOGGER.info(messageContent.toString());
+//                tradeAgency.list("Kucoin", item, marketList);
+//
+//
+//                synchronized (jedis) {
+//                    jedis.hset("L-Kucoin", item, "0");
+//                }
+//
+//            } else if ((jsonObject.has("error") && jsonObject.getString("error").equals("Not Found"))) {
+//
+//            } else {
+//                LOGGER.info(" [ Kucoin ] 상장 정보 이상발생");
+//                LOGGER.info("코인 정보 : " + item);
+//                LOGGER.info("에러내용 : " + jsonObject.toString());
+//            }
 
             try {
                 Thread.sleep(500);
