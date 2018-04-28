@@ -151,7 +151,7 @@ public class BinanceListedScheduler implements Listing {
     @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 2)
     public void articleCheck() throws IOException {
         /** env validation check.**/
-        if (!StringUtils.equals("real", env)) {
+        if (!StringUtils.equals("dev", env)) {
             return;
         }
 
