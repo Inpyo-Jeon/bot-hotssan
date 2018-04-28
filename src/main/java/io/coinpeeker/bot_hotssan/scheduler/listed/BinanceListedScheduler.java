@@ -151,7 +151,7 @@ public class BinanceListedScheduler implements Listing {
     @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 2)
     public void articleCheck() throws IOException {
         /** env validation check.**/
-        if (!StringUtils.equals("dev", env)) {
+        if (!StringUtils.equals("real", env)) {
             return;
         }
 
@@ -165,10 +165,6 @@ public class BinanceListedScheduler implements Listing {
             LOGGER.info("@#@#@# articleCount is null");
             articleCount = lastCount;
         }
-
-        LOGGER.info(jsonObject.toString());
-        LOGGER.info(String.valueOf(articleCount));
-        LOGGER.info(String.valueOf(lastCount));
 
         if (articleCount != lastCount) {
             String type = jsonObject.getJSONArray("activities").getJSONObject(0).getJSONArray("breadcrumbs").getJSONObject(0).getString("name");
