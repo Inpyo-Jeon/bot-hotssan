@@ -32,7 +32,13 @@ public class BuyTrade implements AutoTrade {
         BigDecimal buyCoinMarketPrice = new BigDecimal(Double.valueOf(binance.getCurrentCoinMarketPrice(buyCoinSymbol))).setScale(8, BigDecimal.ROUND_DOWN);
         BigDecimal buyAmount = new BigDecimal((myAxisCoinAmount.doubleValue() / buyCoinMarketPrice.doubleValue()) * 0.9).setScale(2, BigDecimal.ROUND_DOWN);
 
-        binance.sendOrder(buyCoinSymbol, "BUY", "MARKET", String.valueOf(buyAmount));
+        binance.sendOrder(buyCoinSymbol, "BUY", "MARKET", String.valueOf(buyAmount.intValue()));
+
+        LOGGER.info("Total BTC Amount : " + myAxisCoinAmount.toString());
+        LOGGER.info("Select Satoshi : " + buyCoinMarketPrice.toString());
+        LOGGER.info("Buy Amount : " + buyAmount.intValue());
+
+
 
 
 
