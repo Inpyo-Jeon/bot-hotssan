@@ -99,11 +99,9 @@ public class KucoinListedScheduler implements Listing {
             String signatureResult = Hex.encodeHexString(sha256_HMAC.doFinal(signatureStr.getBytes("UTF-8")));
 
             List<NameValuePair> header = new ArrayList<>();
-            header.add(new BasicNameValuePair("KC-api-KEY", SecretKey.getApiKeyKucoin()));
-            header.add(new BasicNameValuePair("KC-api-NONCE", String.valueOf(nonce)));
-            header.add(new BasicNameValuePair("KC-api-SIGNATURE", signatureResult));
-
-            endpoint += "?limit=12&page=2";
+            header.add(new BasicNameValuePair("KC-API-KEY", SecretKey.getApiKeyKucoin()));
+            header.add(new BasicNameValuePair("KC-API-NONCE", String.valueOf(nonce)));
+            header.add(new BasicNameValuePair("KC-API-SIGNATURE", signatureResult));
 
             JSONObject jsonObject = httpUtils.getResponseByObject(host + endpoint, header);
             System.out.println(jsonObject.toString());
