@@ -107,6 +107,8 @@ public class UpbitWalletExplorerScheduler {
                 messageUtils.sendMessage(botUrl, -294606763L, messageContent.toString());
 
                 jedis.hset("W-Upbit-Tx", jsonArray.getJSONObject(i).getString("transactionHash"), "0");
+
+                LOGGER.info("W-Upbit-Tx 감지" + " | " + coinName + "( " + coinSymbol + " ) | " + link);
             }
         }
     }
