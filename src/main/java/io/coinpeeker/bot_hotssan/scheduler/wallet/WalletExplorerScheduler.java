@@ -1,4 +1,4 @@
-package io.coinpeeker.bot_hotssan.scheduler.listed;
+package io.coinpeeker.bot_hotssan.scheduler.wallet;
 
 import com.google.common.collect.Maps;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
