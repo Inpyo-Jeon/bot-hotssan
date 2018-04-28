@@ -243,13 +243,6 @@ public class BinanceListedScheduler implements Listing {
                 listingCount = Integer.valueOf(jedis.hget("L-Binance-InternalAPI", "count"));
             }
 
-
-            LOGGER.info(jsonObject.toString());
-            LOGGER.info(String.valueOf(listingCount));
-            LOGGER.info(String.valueOf(count));
-            LOGGER.info(title);
-
-
             if (listingCount != count) {
                 if (title.contains("Binance Lists")) {
                     String asset = "";
