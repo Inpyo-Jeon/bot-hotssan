@@ -1,9 +1,11 @@
 package io.coinpeeker.bot_hotssan.trade.api;
 
+import io.coinpeeker.bot_hotssan.trade.BuyTrade;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,26 +34,36 @@ public class KucoinTest {
     @Autowired
     HttpUtils httpUtils;
 
+    @Autowired
+    BuyTrade buyTrade;
+
     @Test
-    public void kucoinTest() throws NoSuchAlgorithmException, InvalidKeyException, IOException {
-        KucoinModule kucoinModule = new KucoinModule("5adf48b73f705c289cc5753d", "97aa6445-f7ea-465b-86f6-ccd9c48461c0", httpUtils);
-
-//        BigDecimal myAxisCoinAmount = new BigDecimal(Double.valueOf(kucoinModule.getBalanceOfCoin("BTC"))).setScale(8, BigDecimal.ROUND_DOWN);
-//        BigDecimal buyCoinMarketPrice = new BigDecimal(Double.valueOf(kucoinModule.getTick("KCS", "BTC"))).setScale(8, BigDecimal.ROUND_DOWN);
-//        System.out.println(myAxisCoinAmount);
-//        System.out.println(buyCoinMarketPrice);
-//        int buyAmount = (int) (myAxisCoinAmount.doubleValue() / buyCoinMarketPrice.doubleValue());
-//        System.out.println(buyAmount);
-
-        System.out.println(kucoinModule.getCoinList());
+    public void Test() throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+        LOGGER.info("-- Kucoin 자동 매수 시작 --");
+        buyTrade.orderKucoin("BTC", "SNC");
+        LOGGER.info("-- Kucoin 자동 매수 종료 --");
 
     }
+
+//    public void kucoinTest() throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+//        Kucoin kucoin = new Kucoin("5ae43b72a57c577d638b807a", "5416d149-136c-447e-9fda-e0a0b1946ad7", httpUtils);
+//        String buyCoinSymbol = buyCoin + "-" + axisCoin;
+//
+//        BigDecimal myAxisCoinAmount = new BigDecimal(Double.valueOf(kucoin.getBalanceOfCoin(axisCoin))).setScale(8, BigDecimal.ROUND_DOWN);
+//        BigDecimal selectSatoshi = kucoin.calcBestSellOrderBook(2, kucoin.getSellOrderBooks(buyCoinSymbol, "50"), myAxisCoinAmount.doubleValue());
+//        BigDecimal buyAmount = new BigDecimal((myAxisCoinAmount.doubleValue() / selectSatoshi.doubleValue()) * 0.9).setScale(2, BigDecimal.ROUND_DOWN);
+//
+//        kucoin.requestOrder(buyCoinSymbol, "BUY", selectSatoshi.toString(), buyAmount.toString());
+//
+//        LOGGER.info("Total BTC Amount : " + myAxisCoinAmount.toString());
+//        LOGGER.info("Select Satoshi : " + selectSatoshi.toString());
+//        LOGGER.info("Buy Amount : " + buyAmount.toString());
+//    }
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Binance.class);
 
     class KucoinModule {
-
         String standardUrl = "https://api.kucoin.com";
         String apiKey = "";
         String secretKey = "";
@@ -61,7 +73,75 @@ public class KucoinTest {
             this.apiKey = apiKey;
             this.secretKey = secretKey;
             this.httpUtils = httpUtils;
+        }
 
+        public BigDecimal calcBestSellOrderBook(int sequence, JSONObject sellOrderBook, Double myAxisCoinAmount) {
+            JSONArray dataArray = sellOrderBook.getJSONArray("data");
+            Double totalBtcAmount = 0.0;
+            Double selectSatoshi = 0.0;
+
+
+            for (int i = sequence; i < dataArray.length(); i++) {
+
+                if (myAxisCoinAmount < totalBtcAmount) {
+                    break;
+                }
+
+                String replaceData = dataArray.getJSONArray(i).toString().replace("[", "").replace("]", "");
+                String[] splitData = replaceData.split(",");
+                String satoshi = splitData[0];
+                String sellBtcAmount = splitData[2];
+
+                totalBtcAmount += Double.parseDouble(sellBtcAmount);
+                selectSatoshi = Double.parseDouble(satoshi);
+            }
+            return new BigDecimal(Double.valueOf(selectSatoshi)).setScale(8, BigDecimal.ROUND_DOWN);
+
+        }
+
+        public void requestOrder(String buyCoin, String type, String price, String amount) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+            String endPoint = "/v1/order";
+
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            long nonce = timestamp.getTime();
+
+            StringBuilder queryString = new StringBuilder();
+            queryString.append("amount=");
+            queryString.append(amount);
+            queryString.append("&price=");
+            queryString.append(price);
+            queryString.append("&symbol=");
+            queryString.append(buyCoin);
+            queryString.append("&type=");
+            queryString.append(type);
+
+
+            String strForSign = endPoint + "/" + nonce + "/" + queryString.toString();
+            String signatureResult = signature(strForSign);
+
+            endPoint += "?amount=" + amount;
+            endPoint += "&price=" + price;
+            endPoint += "&symbol=" + buyCoin;
+            endPoint += "&type=" + type;
+
+
+            requestPostHeader(endPoint, nonce, signatureResult);
+        }
+
+        public JSONObject getSellOrderBooks(String buySymbol, String limit) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+            String endPoint = "/v1/open/orders-sell";
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            long nonce = timestamp.getTime();
+
+            String strForSign = endPoint + "/" + nonce + "/";
+            String signatureResult = signature(strForSign);
+
+            endPoint += "?symbol=" + buySymbol;
+            endPoint += "&limit=" + limit;
+
+            JSONObject jsonObject = requestGetHeader(endPoint, nonce, signatureResult);
+
+            return jsonObject;
         }
 
         public String getBalanceOfCoin(String symbol) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
@@ -77,25 +157,28 @@ public class KucoinTest {
             return jsonObject.getJSONObject("data").getString("balanceStr");
         }
 
-        public String getCoinList() throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+        public String getCoinList(String limit) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
             String endPoint = "/v1/account/balances";
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             long nonce = timestamp.getTime();
 
-            String strForSign = endPoint + "/" + nonce + "/";
+            StringBuilder queryString = new StringBuilder();
+            queryString.append("limit=");
+            queryString.append(limit);
+
+            String strForSign = endPoint + "/" + nonce + "/" + queryString.toString();
             String signatureResult = signature(strForSign);
 
-            endPoint += "?limit=20&page=1";
+            endPoint += "?limit=" + limit;
 
             JSONObject jsonObject = requestGetHeader(endPoint, nonce, signatureResult);
-            //            System.out.println(jsonObject.getJSONObject("data").getDouble("buy"));
 
             return String.valueOf(jsonObject);
 
 
         }
 
-        public String getTick(String targetSymbol, String axisSymbol) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+        public String getTick(String selectCoin) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
             String endPoint = "/v1/open/tick";
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             long nonce = timestamp.getTime();
@@ -103,10 +186,9 @@ public class KucoinTest {
             String strForSign = endPoint + "/" + nonce + "/";
             String signatureResult = signature(strForSign);
 
-            endPoint += "?symbol=" + targetSymbol + "-" + axisSymbol;
+            endPoint += "?symbol=" + selectCoin;
 
-            JSONObject jsonObject = requestGetParam(endPoint, nonce, signatureResult);
-            //            System.out.println(jsonObject.getJSONObject("data").getDouble("buy"));
+            JSONObject jsonObject = requestGetHeader(endPoint, nonce, signatureResult);
 
             return String.valueOf(jsonObject.getJSONObject("data").getDouble("lastDealPrice"));
 
@@ -125,17 +207,26 @@ public class KucoinTest {
 
         public JSONObject requestGetHeader(String endPoint, long nonce, String signatureResult) throws IOException {
             List<NameValuePair> header = new ArrayList<>();
-            header.add(new BasicNameValuePair("KC-api-KEY", apiKey));
-            header.add(new BasicNameValuePair("KC-api-NONCE", String.valueOf(nonce)));
-            header.add(new BasicNameValuePair("KC-api-SIGNATURE", signatureResult));
+            header.add(new BasicNameValuePair("KC-API-KEY", apiKey));
+            header.add(new BasicNameValuePair("KC-API-NONCE", String.valueOf(nonce)));
+            header.add(new BasicNameValuePair("KC-API-SIGNATURE", signatureResult));
 
             return httpUtils.getResponseByObject(standardUrl + endPoint, header);
         }
 
-        public JSONObject requestGetParam(String endPoint, long nonce, String signatureResult) throws IOException {
+        public JSONObject requestPostHeader(String endPoint, long nonce, String signatureResult) throws IOException {
+            List<NameValuePair> header = new ArrayList<>();
+            header.add(new BasicNameValuePair("Content-Type", "x-www-form-urlencoded"));
+            header.add(new BasicNameValuePair("KC-API-KEY", apiKey));
+            header.add(new BasicNameValuePair("KC-API-NONCE", String.valueOf(nonce)));
+            header.add(new BasicNameValuePair("KC-API-SIGNATURE", signatureResult));
 
-            return httpUtils.getResponseByObject(standardUrl + endPoint);
+            JSONObject jsonObject = httpUtils.getPostResponseByObject(standardUrl + endPoint, header, "kucoinTrade");
+            LOGGER.info(jsonObject.toString());
+
+            return jsonObject;
         }
+
     }
 
 

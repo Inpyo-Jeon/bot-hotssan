@@ -7,4 +7,6 @@ import java.security.NoSuchAlgorithmException;
 public interface AutoTrade {
 
     void orderBinance(String axisCoin, String buyCoin) throws NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException;
+
+    void orderKucoin(String axisCoin, String buyCoin) throws NoSuchAlgorithmException, InvalidKeyException, IOException;
 }

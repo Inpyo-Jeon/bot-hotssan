@@ -107,7 +107,7 @@ public class HttpUtils {
 
         httpPost.setConfig(requestConfig);
 
-        if (type.equals("binanceTrade")) {
+        if (type.equals("binanceTrade") || type.equals("kucoinTrade")) {
             for (NameValuePair item : params) {
                 httpPost.setHeader(item.getName(), item.getValue());
             }
@@ -133,11 +133,11 @@ public class HttpUtils {
         httpPost.setConfig(requestConfig);
 
 
-            for (NameValuePair item : params) {
-                httpPost.setHeader(item.getName(), item.getValue());
-            }
+        for (NameValuePair item : params) {
+            httpPost.setHeader(item.getName(), item.getValue());
+        }
 
-            httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+        httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
 
 
         CloseableHttpResponse response = httpClient.execute(httpPost);

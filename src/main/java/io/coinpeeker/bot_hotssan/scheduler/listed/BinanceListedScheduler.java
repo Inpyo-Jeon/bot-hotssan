@@ -192,7 +192,7 @@ public class BinanceListedScheduler implements Listing {
                 messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                 messageContent.append("\n");
                 messageContent.append(simpleDateFormat.format(nowDate));
-                messageContent.append("\n확인방법 : InternalAPI");
+                messageContent.append("\n확인방법 : InternalAPI(activities)");
                 messageContent.append("\n코인정보 : ");
 
                 synchronized (jedis) {
@@ -226,7 +226,7 @@ public class BinanceListedScheduler implements Listing {
     @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 60)
     public void articleCheckVer2() throws IOException {
         /** env validation check.**/
-        if (!StringUtils.equals("dev", env)) {
+        if (!StringUtils.equals("real", env)) {
             return;
         }
 
@@ -242,6 +242,13 @@ public class BinanceListedScheduler implements Listing {
             synchronized (jedis) {
                 listingCount = Integer.valueOf(jedis.hget("L-Binance-InternalAPI", "count"));
             }
+
+
+            LOGGER.info(jsonObject.toString());
+            LOGGER.info(String.valueOf(listingCount));
+            LOGGER.info(String.valueOf(count));
+            LOGGER.info(title);
+
 
             if (listingCount != count) {
                 if (title.contains("Binance Lists")) {
@@ -266,7 +273,7 @@ public class BinanceListedScheduler implements Listing {
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append("\n");
                     messageContent.append(simpleDateFormat.format(nowDate));
-                    messageContent.append("\n확인방법 : InternalAPI-Test");
+                    messageContent.append("\n확인방법 : InternalAPI(articles)");
                     messageContent.append("\n코인정보 : ");
 
                     synchronized (jedis) {
@@ -281,9 +288,10 @@ public class BinanceListedScheduler implements Listing {
 
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                    messageUtils.sendMessage(url, -294606763L, messageContent.toString());
+                    messageUtils.sendMessage(url, -300048567L, messageContent.toString());
+                    messageUtils.sendMessage(url, -319177275L, messageContent.toString());
 
-                    LOGGER.info("Binance 상장(InternalAPI-Test) : " + asset + " (" + simpleDateFormat.format(nowDate) + ")");
+                    LOGGER.info("Binance 상장(InternalAPI-articles) : " + asset + " (" + simpleDateFormat.format(nowDate) + ")");
                     LOGGER.info(messageContent.toString());
                 }
 
@@ -299,7 +307,6 @@ public class BinanceListedScheduler implements Listing {
             Header[] headers = response.getAllHeaders();
             for (Header header : headers) {
                 if (header.getName().equals("Retry-After")) {
-                    LOGGER.info(response.getStatusLine().getStatusCode() + " Key : " + header.getName() + " ,Value : " + header.getValue());
                     delay = Integer.valueOf(header.getValue());
                 }
             }
@@ -315,7 +322,6 @@ public class BinanceListedScheduler implements Listing {
 
         if (response.getStatusLine().getStatusCode() == 418) {
             try {
-                LOGGER.info(String.valueOf(response.getStatusLine().getStatusCode()));
                 Thread.sleep(1000 * 60 * 60 * 24);
             } catch (InterruptedException e) {
                 e.printStackTrace();
