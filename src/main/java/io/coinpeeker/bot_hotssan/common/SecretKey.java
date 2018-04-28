@@ -19,6 +19,12 @@ public class SecretKey {
     private static final String API_KEY_HUOBI = "059e6335-ecfa7141-e0480a04-d885c";
     private static final String SECRET_KEY_HUOBI = "749c5797-4a2dda23-5213682e-ed8c5";
 
+    private static final String API_KEY_ETHPLORER = "brjbj9641HSPIf105";
+
+    public static String getApiKeyEthplorer() {
+        return API_KEY_ETHPLORER;
+    }
+
     public static String getApiKeyHuobi() {
         return API_KEY_HUOBI;
     }
