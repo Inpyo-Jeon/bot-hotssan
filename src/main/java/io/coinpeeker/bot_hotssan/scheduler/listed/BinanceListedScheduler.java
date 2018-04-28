@@ -166,6 +166,10 @@ public class BinanceListedScheduler implements Listing {
             articleCount = lastCount;
         }
 
+        LOGGER.info(jsonObject.toString());
+        LOGGER.info(String.valueOf(articleCount));
+        LOGGER.info(String.valueOf(lastCount));
+
         if (articleCount != lastCount) {
             String type = jsonObject.getJSONArray("activities").getJSONObject(0).getJSONArray("breadcrumbs").getJSONObject(0).getString("name");
             String title = jsonObject.getJSONArray("activities").getJSONObject(0).getString("title");
