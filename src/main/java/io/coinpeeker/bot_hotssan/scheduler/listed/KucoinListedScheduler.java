@@ -117,6 +117,8 @@ public class KucoinListedScheduler implements Listing {
 
             if (jsonObject.has("data") && !jsonObject.get("data").equals("null")) {
                 Map<String, List<String>> marketList = marketInfo.availableMarketList(item);
+                tradeAgency.list("Kucoin", item, marketList);
+
                 Date nowDate = new Date();
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
                 simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
@@ -147,10 +149,7 @@ public class KucoinListedScheduler implements Listing {
                 messageUtils.sendMessage(url, -300048567L, messageContent.toString());
                 messageUtils.sendMessage(url, -319177275L, messageContent.toString());
 
-
                 LOGGER.info(messageContent.toString());
-                tradeAgency.list("Kucoin", item, marketList);
-
 
                 synchronized (jedis) {
                     jedis.hset("L-Kucoin", item, "0");

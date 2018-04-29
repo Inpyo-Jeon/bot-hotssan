@@ -90,6 +90,8 @@ public class OkexListedScheduler implements Listing {
 
                 if (!isExist) {
                     Map<String, List<String>> marketList = marketInfo.availableMarketList(toStringItem.toUpperCase());
+//                    tradeAgency.list("OKEx", toStringItem.toUpperCase(), marketList);
+
                     StringBuilder messageContent = new StringBuilder();
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
@@ -116,7 +118,6 @@ public class OkexListedScheduler implements Listing {
                     messageUtils.sendMessage(url, -319177275L, messageContent.toString());
 
                     LOGGER.info(messageContent.toString());
-                    tradeAgency.list("OKEx", toStringItem.toUpperCase(), marketList);
 
                     synchronized (jedis) {
                         jedis.hset("L-OKEx", toStringItem, "1");

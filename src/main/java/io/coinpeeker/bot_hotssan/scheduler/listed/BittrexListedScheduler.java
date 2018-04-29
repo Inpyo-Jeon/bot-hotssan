@@ -87,6 +87,8 @@ public class BittrexListedScheduler implements Listing {
 
                 if (!isExist) {
                     Map<String, List<String>> marketList = marketInfo.availableMarketList(item);
+                    tradeAgency.list("Bittrex", item.toUpperCase(), marketList);
+
                     StringBuilder messageContent = new StringBuilder();
                     Date nowDate = new Date();
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
@@ -117,7 +119,6 @@ public class BittrexListedScheduler implements Listing {
                     messageUtils.sendMessage(url, -319177275L, messageContent.toString());
 
                     LOGGER.info(messageContent.toString());
-                    tradeAgency.list("Bittrex", item.toUpperCase(), marketList);
 
                     synchronized (jedis) {
                         jedis.hset("L-Bittrex", item, "1");

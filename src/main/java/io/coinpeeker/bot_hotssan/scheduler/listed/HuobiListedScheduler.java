@@ -146,6 +146,8 @@ public class HuobiListedScheduler implements Listing {
 
                 if (!isExist) {
                     Map<String, List<String>> marketList = marketInfo.availableMarketList(item.toUpperCase());
+                    tradeAgency.list("Huobi", item.toUpperCase(), marketList);
+
                     Date nowDate = new Date();
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
                     simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
@@ -176,7 +178,6 @@ public class HuobiListedScheduler implements Listing {
                     messageUtils.sendMessage(url, -319177275L, messageContent.toString());
 
                     LOGGER.info(messageContent.toString());
-                    tradeAgency.list("Huobi", item.toUpperCase(), marketList);
 
                     synchronized (jedis) {
                         jedis.hset("L-HuobiPro", item.toUpperCase(), "1");
