@@ -184,6 +184,12 @@ public class HttpUtils {
         return jsonArrays;
     }
 
+    public JSONArray getResponseByArrays(String url, List<NameValuePair> header) throws IOException {
+        CloseableHttpResponse httpResponse = get(url);
+        JSONArray jsonArrays = new JSONArray(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
+        return jsonArrays;
+    }
+
     /**
      * api 호출결과를 JSONObject 로 리턴받는 메소드, apiResponse 의 최상단이 Object 인 경우
      *
@@ -206,7 +212,6 @@ public class HttpUtils {
         } else {
             return new JSONObject("{'ContentLengthZero':'true'}");
         }
-
     }
 
     public JSONObject getPostResponseByObject(String url, List<NameValuePair> header, List<NameValuePair> params, String type) throws IOException {

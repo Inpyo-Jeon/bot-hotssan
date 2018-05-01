@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -50,6 +51,7 @@ public class RefreshRedis {
         huobiPro();
         bithumb();
         binanceVer2();
+        upbitS3();
 
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -357,6 +359,32 @@ public class RefreshRedis {
 
                     synchronized (jedis) {
                         jedis.hset("L-Binance-InternalAPI", "count", String.valueOf(jsonObject.getInt("count")));
+                    }
+                }
+            }
+        }
+    }
+
+    public void upbitS3() throws IOException {
+        synchronized (jedis) {
+            if (!jedis.exists("L-Upbit-S3")) {
+                List<NameValuePair> header = new ArrayList<>();
+                header.add(new BasicNameValuePair("Accept", "*/*"));
+                header.add(new BasicNameValuePair("Accept-Encoding", "gzip, deflate, br"));
+                header.add(new BasicNameValuePair("Accept-Language", "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7"));
+                header.add(new BasicNameValuePair("Connection", "keep-alive"));
+                header.add(new BasicNameValuePair("Host", "s3.ap-northeast-2.amazonaws.com"));
+                header.add(new BasicNameValuePair("Origin", "https://upbit.com"));
+                header.add(new BasicNameValuePair("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36"));
+
+                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                String callUrl = "https://s3.ap-northeast-2.amazonaws.com/crix-production/crix_master?nonce" + timestamp.getTime();
+
+                JSONArray jsonArray = httpUtils.getResponseByArrays(callUrl, header);
+
+                for(int i = 0; i < jsonArray.length(); i++){
+                    synchronized (jedis){
+                        jedis.hset("L-Upbit-S3", jsonArray.getJSONObject(i).getString("code"), jsonArray.getJSONObject(i).getString("baseCurrencyCode"));
                     }
                 }
             }
