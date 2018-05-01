@@ -136,6 +136,8 @@ public class UpbitListedScheduler implements Listing {
             return;
         }
 
+        LOGGER.info("-- Upbit S3 시작 --");
+
         int redisCount = 0;
         List<NameValuePair> header = new ArrayList<>();
         header.add(new BasicNameValuePair("Accept", "*/*"));
@@ -148,7 +150,6 @@ public class UpbitListedScheduler implements Listing {
 
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         String callUrl = "https://s3.ap-northeast-2.amazonaws.com/crix-production/crix_master?nonce" + timestamp.getTime();
-        System.out.println(timestamp.getTime());
 
         JSONArray jsonArray = httpUtils.getResponseByArrays(callUrl, header);
 
