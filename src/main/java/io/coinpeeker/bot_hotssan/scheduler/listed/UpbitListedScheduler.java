@@ -129,7 +129,7 @@ public class UpbitListedScheduler implements Listing {
     }
 
 
-    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 60 * 5)
+    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 60 * 1)
     public void checkListedFromBtc() throws IOException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
