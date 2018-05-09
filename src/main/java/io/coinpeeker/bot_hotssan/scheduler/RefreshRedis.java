@@ -52,6 +52,7 @@ public class RefreshRedis {
         bithumb();
         binanceVer2();
         upbitS3();
+        upbitNotice();
 
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -382,10 +383,25 @@ public class RefreshRedis {
 
                 JSONArray jsonArray = httpUtils.getResponseByArrays(callUrl, header);
 
-                for(int i = 0; i < jsonArray.length(); i++){
-                    synchronized (jedis){
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    synchronized (jedis) {
                         jedis.hset("L-Upbit-S3", jsonArray.getJSONObject(i).getString("code"), jsonArray.getJSONObject(i).getString("baseCurrencyCode"));
                     }
+                }
+            }
+        }
+    }
+
+    public void upbitNotice() throws IOException {
+        synchronized (jedis) {
+            if (!jedis.exists("L-Upbit-Notice")) {
+                String callUrl = "https://api-manager.upbit.com/api/v1/notices?page=1&per_page=1";
+
+                JSONObject jsonObject = httpUtils.getResponseByObject(callUrl);
+                int currentNoticeCount = jsonObject.getJSONObject("data").getInt("total_count");
+
+                synchronized (jedis) {
+                    jedis.hset("L-Upbit-Notice", "totalCount", String.valueOf(currentNoticeCount));
                 }
             }
         }
