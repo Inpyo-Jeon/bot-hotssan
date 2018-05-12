@@ -23,7 +23,9 @@ public class TradeAgency {
     public void list(String exchangeName, String symbol, Map<String, List<String>> market) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
 
         if (market.containsKey(exchangeName)) {
-            return;
+            if (!exchangeName.equals("Upbit")) {
+                return;
+            }
         }
 
         if (market.containsKey("Binance")) {
