@@ -1,6 +1,7 @@
 package io.coinpeeker.bot_hotssan.trade;
 
 import io.coinpeeker.bot_hotssan.trade.api.Binance;
+import io.coinpeeker.bot_hotssan.trade.api.Bittrex;
 import io.coinpeeker.bot_hotssan.trade.api.Kucoin;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.slf4j.Logger;
@@ -70,7 +71,7 @@ public class BuyTrade implements AutoTrade {
         String buyCoinSymbol = buyCoin + "-" + axisCoin;
 
         BigDecimal myAxisCoinAmount = new BigDecimal(Double.valueOf(kucoin.getBalanceOfCoin(axisCoin))).setScale(8, BigDecimal.ROUND_DOWN);
-        BigDecimal selectSatoshi = kucoin.calcBestSellOrderBook(5, kucoin.getSellOrderBooks(buyCoinSymbol, "50"), myAxisCoinAmount.doubleValue());
+        BigDecimal selectSatoshi = kucoin.calcBestSellOrderBook(3, kucoin.getSellOrderBooks(buyCoinSymbol, "30"), myAxisCoinAmount.doubleValue());
         BigDecimal buyAmount = new BigDecimal((myAxisCoinAmount.doubleValue() / selectSatoshi.doubleValue()) * 0.9).setScale(2, BigDecimal.ROUND_DOWN);
 
         kucoin.requestOrder(buyCoinSymbol, "BUY", selectSatoshi.toString(), buyAmount.toString());
@@ -81,5 +82,19 @@ public class BuyTrade implements AutoTrade {
 
     }
 
+    @Override
+    public void orderBittrex(String axisCoin, String buyCoin) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+        Bittrex bittrex = new Bittrex("d88cf2bb52c842c9962b6c00ee425fed", "c0f422f5587d48f39204bb3f4af2612e", httpUtils);
+        String buyCoinSymbol = axisCoin + "-" + buyCoin;
 
+        BigDecimal myAxisCoinAmount = new BigDecimal(Double.valueOf(bittrex.getBalanceOfCoin(axisCoin))).setScale(8, BigDecimal.ROUND_DOWN);
+        BigDecimal selectSatoshi = bittrex.calcBestSellOrderBook(3, bittrex.getOrderBook(buyCoinSymbol, "sell"), myAxisCoinAmount.doubleValue());
+        BigDecimal buyAmount = new BigDecimal((myAxisCoinAmount.doubleValue() / selectSatoshi.doubleValue()) * 0.9).setScale(2, BigDecimal.ROUND_DOWN);
+
+        bittrex.sendOrder(buyCoinSymbol, buyAmount.toString(), selectSatoshi.toString());
+
+        LOGGER.info("Total BTC Amount : " + myAxisCoinAmount.toString());
+        LOGGER.info("Select Satoshi : " + selectSatoshi.toString());
+        LOGGER.info("Buy Amount : " + buyAmount.toString());
+    }
 }
