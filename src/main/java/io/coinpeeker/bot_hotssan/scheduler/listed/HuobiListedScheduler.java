@@ -146,7 +146,7 @@ public class HuobiListedScheduler implements Listing {
 
                 if (!isExist) {
                     Map<String, List<String>> marketList = marketInfo.availableMarketList(item.toUpperCase());
-                    tradeAgency.list("Huobi", item.toUpperCase(), marketList);
+//                    tradeAgency.list("Huobi", item.toUpperCase(), marketList);
 
                     Date nowDate = new Date();
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
