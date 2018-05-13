@@ -3,6 +3,7 @@ package io.coinpeeker.bot_hotssan.scheduler.listed;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.scheduler.Listing;
+import io.coinpeeker.bot_hotssan.trade.TradeAgency;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import io.coinpeeker.bot_hotssan.utils.MessageUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -46,6 +47,9 @@ public class UpbitListedScheduler implements Listing {
 
     @Value("${property.env}")
     private String env;
+
+    @Autowired
+    private TradeAgency tradeAgency;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpbitListedScheduler.class);
 
@@ -149,7 +153,7 @@ public class UpbitListedScheduler implements Listing {
         }
     }
 
-//    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 60 * 1)
+    //    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 60 * 1)
     public void checkListedFromBtc() throws IOException {
         /** env validation check.**/
         if (!StringUtils.equals("dev", env)) {
@@ -233,7 +237,7 @@ public class UpbitListedScheduler implements Listing {
     }
 
     @Scheduled(initialDelay = 1000 * 10, fixedDelay = 1)
-    public void checkNotice() throws IOException {
+    public void checkNotice() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
             return;
@@ -263,20 +267,7 @@ public class UpbitListedScheduler implements Listing {
         if (preNoticeCount != currentNoticeCount) {
             LOGGER.info(jsonObject.toString());
             String title = jsonObject.getJSONObject("data").getJSONArray("list").getJSONObject(0).getString("title");
-            StringBuilder messageContent = new StringBuilder();
-            Date nowDate = new Date();
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
-            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-
-            messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\udce3"));
-            messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\udce3"));
-            messageContent.append(" [ Upbit ] 공지사항 ");
-            messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\udce3"));
-            messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\udce3"));
-            messageContent.append("\n");
-            messageContent.append(simpleDateFormat.format(nowDate));
-            messageContent.append("\n");
-            messageContent.append(title);
+            boolean autoTrade = false;
 
             if ((title.contains("[이벤트]") && title.contains("상장")) || (title.contains("[거래]") && title.contains("원화") && ((title.contains("추가")) || title.contains("상장")))) {
                 int bracketCount = StringUtils.countMatches(title, "(");
@@ -294,10 +285,32 @@ public class UpbitListedScheduler implements Listing {
                     if (!isExist) {
                         // 실제 매수 봇
                         LOGGER.info("심볼 : " + symbol);
-                        messageContent.append("\n봇 매수 완료");
+                        Map<String, List<String>> marketList = marketInfo.availableMarketList(symbol);
+                        tradeAgency.list("Upbit", symbol, marketList);
+                        autoTrade = true;
                     }
                 }
             }
+
+            StringBuilder messageContent = new StringBuilder();
+            Date nowDate = new Date();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+
+            messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\udce3"));
+            messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\udce3"));
+            messageContent.append(" [ Upbit ] 공지사항 ");
+            messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\udce3"));
+            messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\udce3"));
+            messageContent.append("\n");
+            messageContent.append(simpleDateFormat.format(nowDate));
+            messageContent.append("\n");
+            messageContent.append(title);
+
+            if (autoTrade) {
+                messageContent.append("\n-- 봇 자동매수 완료 --");
+            }
+
             LOGGER.info(messageContent.toString());
 
             String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;

@@ -108,7 +108,7 @@ public class KucoinListedScheduler implements Listing {
 
             if (jsonObject.has("ContentLengthZero")) {
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -164,7 +164,7 @@ public class KucoinListedScheduler implements Listing {
             }
 
             try {
-                Thread.sleep(500);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
