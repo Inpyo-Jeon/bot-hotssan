@@ -28,6 +28,12 @@ public class TradeAgency {
             }
         }
 
+        if (market.containsKey("Bittrex")){
+            LOGGER.info("-- Kucoin 자동 매수 시작 --");
+            buyTrade.orderBittrex("BTC", symbol);
+            LOGGER.info("-- Kucoin 자동 매수 종료 --");
+        }
+
         if (market.containsKey("Binance")) {
             LOGGER.info("-- Binance 자동 매수 시작 --");
             buyTrade.orderBinance("BTC", symbol);
@@ -37,12 +43,6 @@ public class TradeAgency {
         if (market.containsKey("Kucoin")) {
             LOGGER.info("-- Kucoin 자동 매수 시작 --");
             buyTrade.orderKucoin("BTC", symbol);
-            LOGGER.info("-- Kucoin 자동 매수 종료 --");
-        }
-
-        if (market.containsKey("Bittrex")){
-            LOGGER.info("-- Kucoin 자동 매수 시작 --");
-            buyTrade.orderBittrex("BTC", symbol);
             LOGGER.info("-- Kucoin 자동 매수 종료 --");
         }
     }

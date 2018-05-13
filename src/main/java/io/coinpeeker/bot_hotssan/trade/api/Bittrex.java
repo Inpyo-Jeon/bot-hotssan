@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -29,8 +28,6 @@ public class Bittrex {
     String apiKey = "";
     String secretKey = "";
     HttpUtils httpUtils;
-    List<NameValuePair> header = new ArrayList<>();
-
 
     public Bittrex(String apiKey, String secretKey, HttpUtils httpUtils) {
         this.httpUtils = httpUtils;
@@ -53,7 +50,6 @@ public class Bittrex {
 
 
         LOGGER.info(getPrivateRequest("/market/buylimit", sb.toString()).toString());
-
     }
 
     public BigDecimal calcBestSellOrderBook(int sequence, JSONObject sellOrderBook, Double myAxisCoinAmount) {
@@ -76,10 +72,10 @@ public class Bittrex {
             totalBtcAmount += sellBtcAmount;
             selectSatoshi = satoshi;
         }
-        return new BigDecimal(Double.valueOf(selectSatoshi)).setScale(8, BigDecimal.ROUND_DOWN);
+        return new BigDecimal(Double.valueOf(selectSatoshi)).setScale(8, BigDecimal.ROUND_UP);
     }
 
-    public String getBalanceOfCoin(String coin) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public Double getBalanceOfCoin(String coin) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         StringBuilder sb = new StringBuilder();
         sb.append("?apikey=");
         sb.append(this.apiKey);
@@ -88,14 +84,9 @@ public class Bittrex {
         sb.append("&nonce=");
         sb.append(generateNonce());
 
-
         JSONObject jsonObject = getPrivateRequest("/account/getbalance", sb.toString());
-        return jsonObject.getJSONObject("result").getString("Available");
-
-
-
+        return jsonObject.getJSONObject("result").getDouble("Available");
     }
-
 
     public JSONObject getPrivateRequest(String endPoint, String queryString) throws InvalidKeyException, NoSuchAlgorithmException, IOException {
         StringBuilder sb = new StringBuilder();

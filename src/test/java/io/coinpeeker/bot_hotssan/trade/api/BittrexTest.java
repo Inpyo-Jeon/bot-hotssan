@@ -45,15 +45,15 @@ public class BittrexTest {
     public void AA() throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         Bittrex bittrex = new Bittrex("d88cf2bb52c842c9962b6c00ee425fed", "c0f422f5587d48f39204bb3f4af2612e", httpUtils);
 
-//        BigDecimal myAxisCoinAmount = new BigDecimal(Double.valueOf(bittrex.getBalanceOfCoin("BTC"))).setScale(8, BigDecimal.ROUND_DOWN);
-//        BigDecimal selectSatoshi = bittrex.calcBestSellOrderBook(0, bittrex.getOrderBook("BTC-2GIVE", "sell"), myAxisCoinAmount.doubleValue());
-//        BigDecimal buyAmount = new BigDecimal((myAxisCoinAmount.doubleValue() / selectSatoshi.doubleValue()) * 0.9).setScale(2, BigDecimal.ROUND_DOWN);
+        BigDecimal myAxisCoinAmount = new BigDecimal(bittrex.getBalanceOfCoin("BTC")).setScale(8, BigDecimal.ROUND_DOWN);
+        BigDecimal selectSatoshi = bittrex.calcBestSellOrderBook(5, bittrex.getOrderBook("BTC-2GIVE", "sell"), myAxisCoinAmount.doubleValue());
+        BigDecimal buyAmount = new BigDecimal((myAxisCoinAmount.doubleValue() / selectSatoshi.doubleValue()) * 1.0).setScale(2, BigDecimal.ROUND_DOWN);
 //
-//        bittrex.sendOrder("BTC-2GIVE", buyAmount.toString(), selectSatoshi.toString());
-//
-//        LOGGER.info("Total BTC Amount : " + myAxisCoinAmount.toString());
-//        LOGGER.info("Select Satoshi : " + selectSatoshi.toString());
-//        LOGGER.info("Buy Amount : " + buyAmount.toString());
+        bittrex.sendOrder("BTC-2GIVE", buyAmount.toString(), selectSatoshi.toString());
+
+        LOGGER.info("Total BTC Amount : " + myAxisCoinAmount.toString());
+        LOGGER.info("Select Satoshi : " + selectSatoshi.toString());
+        LOGGER.info("Buy Amount : " + buyAmount.toString());
     }
 
     public class Bittrex {
@@ -111,10 +111,10 @@ public class BittrexTest {
                 totalBtcAmount += sellBtcAmount;
                 selectSatoshi = satoshi;
             }
-            return new BigDecimal(Double.valueOf(selectSatoshi)).setScale(8, BigDecimal.ROUND_DOWN);
+            return new BigDecimal(Double.valueOf(selectSatoshi)).setScale(8, BigDecimal.ROUND_UP);
         }
 
-        public String getBalanceOfCoin(String coin) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+        public Double getBalanceOfCoin(String coin) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
             StringBuilder sb = new StringBuilder();
             sb.append("?apikey=");
             sb.append(this.apiKey);
@@ -125,7 +125,7 @@ public class BittrexTest {
 
 
             JSONObject jsonObject = getPrivateRequest("/account/getbalance", sb.toString());
-            return jsonObject.getJSONObject("result").getString("Available");
+            return jsonObject.getJSONObject("result").getDouble("Available");
 
 
 

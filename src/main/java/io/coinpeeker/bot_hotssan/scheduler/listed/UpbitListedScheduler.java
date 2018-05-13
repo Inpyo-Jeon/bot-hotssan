@@ -284,7 +284,6 @@ public class UpbitListedScheduler implements Listing {
 
                     if (!isExist) {
                         // 실제 매수 봇
-                        LOGGER.info("심볼 : " + symbol);
                         Map<String, List<String>> marketList = marketInfo.availableMarketList(symbol);
                         tradeAgency.list("Upbit", symbol, marketList);
                         autoTrade = true;

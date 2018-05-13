@@ -74,7 +74,7 @@ public class BuyTrade implements AutoTrade {
         BigDecimal selectSatoshi = kucoin.calcBestSellOrderBook(3, kucoin.getSellOrderBooks(buyCoinSymbol, "30"), myAxisCoinAmount.doubleValue());
         BigDecimal buyAmount = new BigDecimal((myAxisCoinAmount.doubleValue() / selectSatoshi.doubleValue()) * 0.9).setScale(2, BigDecimal.ROUND_DOWN);
 
-        kucoin.requestOrder(buyCoinSymbol, "BUY", selectSatoshi.toString(), buyAmount.toString());
+        kucoin.requestOrder(buyCoinSymbol, "BUY", selectSatoshi.toString(), String.valueOf(buyAmount.intValue()));
 
         LOGGER.info("Total BTC Amount : " + myAxisCoinAmount.toString());
         LOGGER.info("Select Satoshi : " + selectSatoshi.toString());
@@ -91,7 +91,7 @@ public class BuyTrade implements AutoTrade {
         BigDecimal selectSatoshi = bittrex.calcBestSellOrderBook(3, bittrex.getOrderBook(buyCoinSymbol, "sell"), myAxisCoinAmount.doubleValue());
         BigDecimal buyAmount = new BigDecimal((myAxisCoinAmount.doubleValue() / selectSatoshi.doubleValue()) * 0.9).setScale(2, BigDecimal.ROUND_DOWN);
 
-        bittrex.sendOrder(buyCoinSymbol, buyAmount.toString(), selectSatoshi.toString());
+        bittrex.sendOrder(buyCoinSymbol, String.valueOf(buyAmount.intValue()), selectSatoshi.toString());
 
         LOGGER.info("Total BTC Amount : " + myAxisCoinAmount.toString());
         LOGGER.info("Select Satoshi : " + selectSatoshi.toString());
