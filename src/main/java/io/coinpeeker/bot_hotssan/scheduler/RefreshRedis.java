@@ -53,6 +53,8 @@ public class RefreshRedis {
         binanceVer2();
         upbitS3();
         upbitNotice();
+        huobiKorAssetInfo();
+        huobiEngAssetInfo();
 
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -402,6 +404,42 @@ public class RefreshRedis {
 
                 synchronized (jedis) {
                     jedis.hset("L-Upbit-Notice", "totalCount", String.valueOf(currentNoticeCount));
+                }
+            }
+        }
+    }
+
+    public void huobiKorAssetInfo() throws IOException {
+        synchronized (jedis){
+            if(!jedis.exists("L-Huobi-Kor-Asset")){
+                String callUrl = "https://www.huobi.com/p/api/contents/pro/single_page?lang=ko-kr&pageType=1";
+
+                JSONObject jsonObject = httpUtils.getResponseByObject(callUrl);
+                JSONArray jsonArray = jsonObject.getJSONArray("data");
+                int currentAssetInfoCount = jsonArray.length();
+
+                for(int i = 0; i < currentAssetInfoCount; i++){
+                    synchronized (jedis) {
+                        jedis.hset("L-Huobi-Kor-Asset", jsonArray.getJSONObject(i).getString("pageIdentifier"), jsonArray.getJSONObject(i).getString("title"));
+                    }
+                }
+            }
+        }
+    }
+
+    public void huobiEngAssetInfo() throws IOException {
+        synchronized (jedis){
+            if(!jedis.exists("L-Huobi-Eng-Asset")){
+                String callUrl = "https://www.huobi.com/p/api/contents/pro/single_page?lang=en-us&pageType=1";
+
+                JSONObject jsonObject = httpUtils.getResponseByObject(callUrl);
+                JSONArray jsonArray = jsonObject.getJSONArray("data");
+                int currentAssetInfoCount = jsonArray.length();
+
+                for(int i = 0; i < currentAssetInfoCount; i++){
+                    synchronized (jedis) {
+                        jedis.hset("L-Huobi-Eng-Asset", jsonArray.getJSONObject(i).getString("pageIdentifier"), jsonArray.getJSONObject(i).getString("title"));
+                    }
                 }
             }
         }

@@ -63,7 +63,7 @@ public class HuobiListedScheduler implements Listing {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(HuobiListedScheduler.class);
 
     @Override
-    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 3)
+//    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 3)
     public void inspectListedCoin() throws IOException, NoSuchAlgorithmException, InvalidKeyException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -187,6 +187,126 @@ public class HuobiListedScheduler implements Listing {
         }
     }
 
+    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 5)
+    public void huobiKorAssetInfo() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+        if (!StringUtils.equals("real", env)) {
+            return;
+        }
+
+        String checkUrl = "https://www.huobi.com/p/api/contents/pro/single_page?lang=ko-kr&pageType=1";
+
+        JSONObject jsonObject = httpUtils.getResponseByObject(checkUrl);
+        JSONArray jsonArray = jsonObject.getJSONArray("data");
+        int currentCount = 0;
+        LOGGER.info(jsonObject.toString());
+
+        synchronized (jedis) {
+            currentCount = Math.toIntExact(jedis.hlen("L-Huobi-Kor-Asset"));
+        }
+
+        if (jsonArray.length() != currentCount) {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                boolean isExist = true;
+
+                synchronized (jedis) {
+                    if (!jedis.hexists("L-Huobi-Kor-Asset", jsonArray.getJSONObject(i).getString("pageIdentifier"))) {
+                        isExist = false;
+                    }
+                }
+
+                if (!isExist) {
+                    String symbol = jsonArray.getJSONObject(i).getString("pageIdentifier").toUpperCase();
+                    Map<String, List<String>> marketList = marketInfo.availableMarketList(symbol);
+                    tradeAgency.list("Huobi", symbol, marketList);
+
+                    sendMessage("Huobi(Kor)", symbol, marketList);
+
+                    synchronized (jedis) {
+                        jedis.hset("L-Huobi-Kor-Asset", jsonArray.getJSONObject(i).getString("pageIdentifier"), jsonArray.getJSONObject(i).getString("title"));
+                    }
+                }
+            }
+        }
+    }
+
+    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 5)
+    public void huobiEngAssetInfo() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+        if (!StringUtils.equals("real", env)) {
+            return;
+        }
+
+        String checkUrl = "https://www.huobi.com/p/api/contents/pro/single_page?lang=en-us&pageType=1";
+
+        JSONObject jsonObject = httpUtils.getResponseByObject(checkUrl);
+        JSONArray jsonArray = jsonObject.getJSONArray("data");
+        int currentCount = 0;
+        LOGGER.info(jsonObject.toString());
+
+        synchronized (jedis) {
+            currentCount = Math.toIntExact(jedis.hlen("L-Huobi-Eng-Asset"));
+        }
+
+        if (jsonArray.length() != currentCount) {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                boolean isExist = true;
+
+                synchronized (jedis) {
+                    if (!jedis.hexists("L-Huobi-Eng-Asset", jsonArray.getJSONObject(i).getString("pageIdentifier"))) {
+                        isExist = false;
+                    }
+                }
+
+                if (!isExist) {
+                    String symbol = jsonArray.getJSONObject(i).getString("pageIdentifier").toUpperCase();
+                    Map<String, List<String>> marketList = marketInfo.availableMarketList(symbol);
+                    tradeAgency.list("Huobi", symbol, marketList);
+
+                    sendMessage("Huobi(Pro/Hadax)", symbol, marketList);
+
+                    synchronized (jedis) {
+                        jedis.hset("L-Huobi-Eng-Asset", jsonArray.getJSONObject(i).getString("pageIdentifier"), jsonArray.getJSONObject(i).getString("title"));
+                    }
+                }
+            }
+        }
+    }
+
+
+    public void sendMessage(String exchangeType, String symbol, Map<String, List<String>> marketList) {
+        Date nowDate = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
+        StringBuilder messageContent = new StringBuilder();
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+
+        messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+        messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+        messageContent.append("[ ");
+        messageContent.append(exchangeType);
+        messageContent.append(" ] ");
+        messageContent.append("상장정보");
+        messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+        messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+        messageContent.append("\n");
+        messageContent.append(simpleDateFormat.format(nowDate));
+        messageContent.append("\n코인정보 : ");
+
+        synchronized (jedis) {
+            messageContent.append(jedis.hget("I-CoinMarketCap", symbol));
+        }
+
+        messageContent.append(" (");
+        messageContent.append(symbol);
+        messageContent.append(")");
+        messageContent.append("\n구매가능 거래소 : ");
+        messageContent.append(marketInfo.marketInfo(marketList));
+
+        System.out.println(messageContent.toString());
+
+        String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
+        messageUtils.sendMessage(url, -300048567L, messageContent.toString());
+        messageUtils.sendMessage(url, -319177275L, messageContent.toString());
+
+    }
 
     public String urlEncode(String string) {
         try {

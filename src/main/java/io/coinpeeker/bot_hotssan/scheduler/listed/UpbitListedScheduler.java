@@ -323,7 +323,7 @@ public class UpbitListedScheduler implements Listing {
 
         try {
             Random random = new Random();
-            int randomDelayTime = random.nextInt(5) + 1;
+            int randomDelayTime = random.nextInt(3) + 1;
             Thread.sleep(1000 * randomDelayTime);
         } catch (InterruptedException e) {
             e.printStackTrace();
