@@ -198,7 +198,6 @@ public class HuobiListedScheduler implements Listing {
         JSONObject jsonObject = httpUtils.getResponseByObject(checkUrl);
         JSONArray jsonArray = jsonObject.getJSONArray("data");
         int currentCount = 0;
-        LOGGER.info(jsonObject.toString());
 
         synchronized (jedis) {
             currentCount = Math.toIntExact(jedis.hlen("L-Huobi-Kor-Asset"));
@@ -240,7 +239,6 @@ public class HuobiListedScheduler implements Listing {
         JSONObject jsonObject = httpUtils.getResponseByObject(checkUrl);
         JSONArray jsonArray = jsonObject.getJSONArray("data");
         int currentCount = 0;
-        LOGGER.info(jsonObject.toString());
 
         synchronized (jedis) {
             currentCount = Math.toIntExact(jedis.hlen("L-Huobi-Eng-Asset"));
@@ -300,7 +298,7 @@ public class HuobiListedScheduler implements Listing {
         messageContent.append("\n구매가능 거래소 : ");
         messageContent.append(marketInfo.marketInfo(marketList));
 
-        System.out.println(messageContent.toString());
+        LOGGER.info(messageContent.toString());
 
         String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
         messageUtils.sendMessage(url, -300048567L, messageContent.toString());
