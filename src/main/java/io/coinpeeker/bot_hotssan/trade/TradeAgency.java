@@ -35,9 +35,9 @@ public class TradeAgency {
         }
 
         if (market.containsKey("Bittrex")){
-            LOGGER.info("-- Kucoin 자동 매수 시작 --");
+            LOGGER.info("-- Bittrex 자동 매수 시작 --");
             buyTrade.orderBittrex("BTC", symbol);
-            LOGGER.info("-- Kucoin 자동 매수 종료 --");
+            LOGGER.info("-- Bittrex 자동 매수 종료 --");
         }
 
         if (market.containsKey("Kucoin")) {
