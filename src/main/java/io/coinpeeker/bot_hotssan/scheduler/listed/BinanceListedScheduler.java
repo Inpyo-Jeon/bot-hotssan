@@ -68,6 +68,7 @@ public class BinanceListedScheduler implements Listing {
 
         JSONObject jsonObject = httpUtils.getPostResponseByObject(endPoint);
         JSONArray jsonArray = jsonObject.getJSONArray("data");
+        System.out.println(jsonObject.toString());
 
         synchronized (jedis) {
             listingCount = Math.toIntExact(jedis.hlen("L-Binance"));
@@ -166,6 +167,7 @@ public class BinanceListedScheduler implements Listing {
         String endPoint = "https://support.binance.com/hc/api/internal/recent_activities?locale=en-us&page=1&per_page=1&locale=en-us";
 
         JSONObject jsonObject = httpUtils.getResponseByObject(endPoint);
+        System.out.println(jsonObject.toString());
 
         int lastCount = jsonObject.getInt("count");
 
@@ -260,6 +262,7 @@ public class BinanceListedScheduler implements Listing {
             String title = jsonObject.getJSONArray("articles").getJSONObject(0).getString("title");
             int count = jsonObject.getInt("count");
             int listingCount = 0;
+            System.out.println(jsonObject.toString());
             synchronized (jedis) {
                 listingCount = Integer.valueOf(jedis.hget("L-Binance-InternalAPI", "count"));
             }
