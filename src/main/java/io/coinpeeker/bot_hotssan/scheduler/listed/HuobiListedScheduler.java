@@ -216,7 +216,7 @@ public class HuobiListedScheduler implements Listing {
                 if (!isExist) {
                     String symbol = jsonArray.getJSONObject(i).getString("pageIdentifier").toUpperCase();
                     Map<String, List<String>> marketList = marketInfo.availableMarketList(symbol);
-                    tradeAgency.list("Huobi", symbol, marketList);
+//                    tradeAgency.list("Huobi", symbol, marketList);
 
                     sendMessage("Huobi(Kor)", symbol, marketList);
 

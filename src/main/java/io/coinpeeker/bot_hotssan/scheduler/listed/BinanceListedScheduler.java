@@ -148,8 +148,8 @@ public class BinanceListedScheduler implements Listing {
 
         try {
             Random random = new Random();
-            int randomNum = random.nextInt(10 - 3 + 1) + 3;
-            Thread.sleep(randomNum * 1000);
+            int randomDelayTime = random.nextInt(3) + 1;
+            Thread.sleep(1000 * randomDelayTime);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
