@@ -178,7 +178,7 @@ public class BinanceListedScheduler implements Listing {
             String type = jsonObject.getJSONArray("activities").getJSONObject(0).getJSONArray("breadcrumbs").getJSONObject(0).getString("name");
             String title = jsonObject.getJSONArray("activities").getJSONObject(0).getString("title");
 
-            if ("New Listings".equals(type) && title.contains("Binance Lists")) {
+            if ("New Listings".equals(type) && (title.contains("Binance Lists") || (title.contains("Binance Will List")))) {
                 String asset = "";
                 int begin = title.lastIndexOf("(");
                 int end = title.indexOf(")");
@@ -265,7 +265,7 @@ public class BinanceListedScheduler implements Listing {
             }
 
             if (listingCount != count) {
-                if (title.contains("Binance Lists")) {
+                if (title.contains("Binance Lists") || title.contains("Binance Will List")) {
                     String asset = "";
                     int begin = title.lastIndexOf("(");
                     int end = title.indexOf(")");
