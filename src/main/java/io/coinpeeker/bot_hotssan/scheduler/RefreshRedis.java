@@ -55,6 +55,7 @@ public class RefreshRedis {
         upbitNotice();
         huobiKorAssetInfo();
         huobiEngAssetInfo();
+        bittrexHealth();
 
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -319,6 +320,22 @@ public class RefreshRedis {
         }
     }
 
+    public void bittrexHealth() throws IOException {
+        synchronized (jedis) {
+            if (!jedis.exists("L-Bittrex-Health")) {
+                LOGGER.info("@#@#@# L-Bittrex-Health is null");
+
+
+                JSONObject jsonObject = httpUtils.getResponseByObject("https://bittrex.com/api/v2.0/pub/currencies/GetWalletHealth");
+                JSONArray list = jsonObject.getJSONArray("result");
+
+                for (int i = 0; i < list.length(); i++) {
+                    jedis.hset("L-Bittrex-Health", list.getJSONObject(i).getJSONObject("Currency").getString("Currency"), "1");
+                }
+            }
+        }
+    }
+
     public void huobiPro() throws IOException {
         synchronized (jedis) {
             if (!jedis.exists("L-HuobiPro")) {
@@ -410,15 +427,15 @@ public class RefreshRedis {
     }
 
     public void huobiKorAssetInfo() throws IOException {
-        synchronized (jedis){
-            if(!jedis.exists("L-Huobi-Kor-Asset")){
+        synchronized (jedis) {
+            if (!jedis.exists("L-Huobi-Kor-Asset")) {
                 String callUrl = "https://www.huobi.com/p/api/contents/pro/single_page?lang=ko-kr&pageType=1";
 
                 JSONObject jsonObject = httpUtils.getResponseByObject(callUrl);
                 JSONArray jsonArray = jsonObject.getJSONArray("data");
                 int currentAssetInfoCount = jsonArray.length();
 
-                for(int i = 0; i < currentAssetInfoCount; i++){
+                for (int i = 0; i < currentAssetInfoCount; i++) {
                     synchronized (jedis) {
                         jedis.hset("L-Huobi-Kor-Asset", jsonArray.getJSONObject(i).getString("pageIdentifier"), jsonArray.getJSONObject(i).getString("title"));
                     }
@@ -428,15 +445,15 @@ public class RefreshRedis {
     }
 
     public void huobiEngAssetInfo() throws IOException {
-        synchronized (jedis){
-            if(!jedis.exists("L-Huobi-Eng-Asset")){
+        synchronized (jedis) {
+            if (!jedis.exists("L-Huobi-Eng-Asset")) {
                 String callUrl = "https://www.huobi.com/p/api/contents/pro/single_page?lang=en-us&pageType=1";
 
                 JSONObject jsonObject = httpUtils.getResponseByObject(callUrl);
                 JSONArray jsonArray = jsonObject.getJSONArray("data");
                 int currentAssetInfoCount = jsonArray.length();
 
-                for(int i = 0; i < currentAssetInfoCount; i++){
+                for (int i = 0; i < currentAssetInfoCount; i++) {
                     synchronized (jedis) {
                         jedis.hset("L-Huobi-Eng-Asset", jsonArray.getJSONObject(i).getString("pageIdentifier"), jsonArray.getJSONObject(i).getString("title"));
                     }

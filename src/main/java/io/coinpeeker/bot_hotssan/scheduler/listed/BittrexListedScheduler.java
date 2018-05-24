@@ -123,8 +123,77 @@ public class BittrexListedScheduler implements Listing {
                     synchronized (jedis) {
                         jedis.hset("L-Bittrex", item, "1");
                     }
+                }
+            }
+        }
+    }
 
+//    @Scheduled(initialDelay = 1000 * 10, fixedDelay = 1000 * 3)
+    public void getWalletHealth() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+        /** env validation check.**/
+        if (!StringUtils.equals("local", env)) {
+            return;
+        }
 
+        int listingCount = 0;
+        String endPoint = "https://bittrex.com/api/v2.0/pub/currencies/GetWalletHealth";
+        JSONObject jsonObject = httpUtils.getResponseByObject(endPoint);
+        JSONArray list = jsonObject.getJSONArray("result");
+
+        synchronized (jedis) {
+            listingCount = Math.toIntExact(jedis.hlen("L-Bittrex-Health"));
+        }
+
+        if (listingCount != list.length()) {
+            for (int i = 0; i < list.length(); i++) {
+
+                boolean isExist = true;
+
+                synchronized (jedis) {
+                    if (!jedis.hexists("L-Bittrex-Health", list.getJSONObject(i).getJSONObject("Currency").getString("Currency"))) {
+                        isExist = false;
+                    }
+                }
+
+                if (!isExist) {
+                    String item = list.getJSONObject(i).getJSONObject("Currency").getString("Currency");
+                    Map<String, List<String>> marketList = marketInfo.availableMarketList(item);
+//                    tradeAgency.list("Bittrex", item.toUpperCase(), marketList);
+
+                    StringBuilder messageContent = new StringBuilder();
+                    Date nowDate = new Date();
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
+                    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+
+                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                    messageContent.append(" [ Bittrex ] 상장 정보 ");
+                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                    messageContent.append("\n");
+                    messageContent.append(simpleDateFormat.format(nowDate));
+                    messageContent.append("\n확인방법 : List(Health)");
+                    messageContent.append("\n코인정보 : ");
+
+                    synchronized (jedis) {
+                        messageContent.append(jedis.hget("I-CoinMarketCap", item));
+                    }
+
+                    messageContent.append(" (");
+                    messageContent.append(item);
+                    messageContent.append(")");
+                    messageContent.append("\n구매가능 거래소 : ");
+                    messageContent.append(marketInfo.marketInfo(marketList));
+
+                    String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
+//                    messageUtils.sendMessage(url, -300048567L, messageContent.toString());
+//                    messageUtils.sendMessage(url, -319177275L, messageContent.toString());
+
+                    LOGGER.info(messageContent.toString());
+
+                    synchronized (jedis) {
+                        jedis.hset("L-Bittrex-Health", item, "1");
+                    }
                 }
             }
         }
