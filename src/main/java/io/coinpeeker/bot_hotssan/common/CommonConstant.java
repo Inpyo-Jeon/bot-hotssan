@@ -29,4 +29,7 @@ public class CommonConstant {
     private static List<String> capList = new ArrayList<>();
 
     public static synchronized List<String> getCapList(){ return capList; }
+
+    public static boolean autoTrade = false;
+
 }

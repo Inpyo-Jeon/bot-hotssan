@@ -1,5 +1,6 @@
 package io.coinpeeker.bot_hotssan.trade;
 
+import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.scheduler.listed.OkexListedScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,28 +23,30 @@ public class TradeAgency {
 
     public void list(String exchangeName, String symbol, Map<String, List<String>> market) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
 
-        if (market.containsKey(exchangeName)) {
-            if (!exchangeName.equals("Upbit")) {
-                return;
+        if (CommonConstant.autoTrade) {
+            if (market.containsKey(exchangeName)) {
+                if (!exchangeName.equals("Upbit")) {
+                    return;
+                }
             }
-        }
 
-        if (market.containsKey("Binance")) {
-            LOGGER.info("-- Binance 자동 매수 시작 --");
-            buyTrade.orderBinance("BTC", symbol);
-            LOGGER.info("-- Binance 자동 매수 종료 --");
-        }
+            if (market.containsKey("Binance")) {
+                LOGGER.info("-- Binance 자동 매수 시작 --");
+                buyTrade.orderBinance("BTC", symbol);
+                LOGGER.info("-- Binance 자동 매수 종료 --");
+            }
 
-        if (market.containsKey("Bittrex")){
-            LOGGER.info("-- Bittrex 자동 매수 시작 --");
-            buyTrade.orderBittrex("BTC", symbol);
-            LOGGER.info("-- Bittrex 자동 매수 종료 --");
-        }
+            if (market.containsKey("Bittrex")) {
+                LOGGER.info("-- Bittrex 자동 매수 시작 --");
+                buyTrade.orderBittrex("BTC", symbol);
+                LOGGER.info("-- Bittrex 자동 매수 종료 --");
+            }
 
-        if (market.containsKey("Kucoin")) {
-            LOGGER.info("-- Kucoin 자동 매수 시작 --");
-            buyTrade.orderKucoin("BTC", symbol);
-            LOGGER.info("-- Kucoin 자동 매수 종료 --");
+            if (market.containsKey("Kucoin")) {
+                LOGGER.info("-- Kucoin 자동 매수 시작 --");
+                buyTrade.orderKucoin("BTC", symbol);
+                LOGGER.info("-- Kucoin 자동 매수 종료 --");
+            }
         }
     }
 }
