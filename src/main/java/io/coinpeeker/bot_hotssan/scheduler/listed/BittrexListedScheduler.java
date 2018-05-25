@@ -54,7 +54,7 @@ public class BittrexListedScheduler implements Listing {
     private static final Logger LOGGER = LoggerFactory.getLogger(BittrexListedScheduler.class);
 
     @Override
-    @Scheduled(initialDelay = 1000 * 10, fixedDelay = 1000 * 3)
+    @Scheduled(initialDelay = 1000 * 10, fixedDelay = 1500 * 1)
     public void inspectListedCoin() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
