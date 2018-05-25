@@ -89,14 +89,14 @@ public class HotssanService implements HotssanUpdateHandler {
                 message.append("등록되지 않은 사용자입니다.\n사용자 아이디 등록을 요청하세요 : ");
                 message.append(chatId);
             } else {
-                if ("Auto_Start".equals(instruction) || "Auto_Stop".equals(instruction) || "Auto_Status".equals(instruction)) {
-                    if ("Auto_Status".equals(instruction)) {
+                if ("/Auto_Start".equals(instruction) || "/Auto_Stop".equals(instruction) || "/Auto_Status".equals(instruction)) {
+                    if ("/Auto_Status".equals(instruction)) {
                         message.append("-- 현재 자동 매수기능 : " + CommonConstant.autoTrade);
                     } else {
                         if (!authUtils.isAutoAuthenticated(chatId)) {
                             message.append("- 권한이 없으니 관리자 헬프 -");
                         } else {
-                            if ("Auto_Start".equals(instruction)) {
+                            if ("/Auto_Start".equals(instruction)) {
                                 CommonConstant.autoTrade = true;
                                 message.append("자동 매수기능 ON(" + CommonConstant.autoTrade + ")");
                             } else {
