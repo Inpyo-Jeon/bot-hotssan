@@ -23,7 +23,13 @@ public class AuthUtils {
             , -319177275L // 인표친구들그룹
     );
 
-    public boolean isAuthenticated(Long userId) {
-        return userList.contains(userId);
-    }
+    private List<Long> autoTradeAuthList = Arrays.asList(
+            553929197L // 인표
+    );
+
+    public boolean isAuthenticated(Long userId) { return userList.contains(userId); }
+
+    public boolean isAutoAuthenticated(Long userId){ return autoTradeAuthList.contains(userId); }
+
+
 }
