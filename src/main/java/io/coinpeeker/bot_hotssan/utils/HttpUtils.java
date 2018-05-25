@@ -185,7 +185,7 @@ public class HttpUtils {
     }
 
     public JSONArray getResponseByArrays(String url, List<NameValuePair> header) throws IOException {
-        CloseableHttpResponse httpResponse = get(url);
+        CloseableHttpResponse httpResponse = get(url, header);
         JSONArray jsonArrays = new JSONArray(EntityUtils.toString(httpResponse.getEntity(), "UTF-8"));
         return jsonArrays;
     }
