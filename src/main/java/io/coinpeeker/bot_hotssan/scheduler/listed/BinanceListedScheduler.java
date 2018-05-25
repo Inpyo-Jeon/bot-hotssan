@@ -148,7 +148,7 @@ public class BinanceListedScheduler implements Listing {
 
         try {
             Random random = new Random();
-            int randomDelayTime = random.nextInt(3) + 1;
+            int randomDelayTime = random.nextInt(2) + 1;
             Thread.sleep(1000 * randomDelayTime);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -156,7 +156,7 @@ public class BinanceListedScheduler implements Listing {
     }
 
 
-    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 2)
+    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 1)
     public void articleCheck() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
