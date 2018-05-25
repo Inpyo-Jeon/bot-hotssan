@@ -89,20 +89,22 @@ public class HotssanService implements HotssanUpdateHandler {
                 message.append("등록되지 않은 사용자입니다.\n사용자 아이디 등록을 요청하세요 : ");
                 message.append(chatId);
             } else {
-                if ("/AUTO_START".equals(instruction) || "/AUTO_STOP".equals(instruction) || "/AUTO_STATUS".equals(instruction)) {
-                    if (!authUtils.isAutoAuthenticated(chatId)) {
-                        message.append("자동 트레이드 기능은 관리자에게 물어봐");
+                if ("Auto_Start".equals(instruction) || "Auto_Stop".equals(instruction) || "Auto_Status".equals(instruction)) {
+                    if ("Auto_Status".equals(instruction)) {
+                        message.append("-- 현재 자동 매수기능 : " + CommonConstant.autoTrade);
                     } else {
-                        if ("/AUTO_START".equals(instruction)) {
-                            CommonConstant.autoTrade = true;
-                            message.append("자동 매수기능 ON(" + CommonConstant.autoTrade + ")");
-                        } else if ("/AUTO_STOP".equals(instruction)) {
-                            CommonConstant.autoTrade = false;
-                            message.append("자동 매수기능 OFF(" + CommonConstant.autoTrade + ")");
+                        if (!authUtils.isAutoAuthenticated(chatId)) {
+                            message.append("- 권한이 없으니 관리자 헬프 -");
                         } else {
-                            message.append("-- 현재 자동 매수기능 : " + CommonConstant.autoTrade);
+                            if ("Auto_Start".equals(instruction)) {
+                                CommonConstant.autoTrade = true;
+                                message.append("자동 매수기능 ON(" + CommonConstant.autoTrade + ")");
+                            } else {
+                                CommonConstant.autoTrade = false;
+                                message.append("자동 매수기능 OFF(" + CommonConstant.autoTrade + ")");
+                            }
+                            LOGGER.info("-- 자동 매수기능 : " + CommonConstant.autoTrade + " --");
                         }
-                        LOGGER.info("-- 자동 매수기능 : " + CommonConstant.autoTrade + " --");
                     }
                 } else {
                     message.append(commander.execute(instruction));
