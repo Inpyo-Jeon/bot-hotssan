@@ -30,6 +30,6 @@ public class CommonConstant {
 
     public static synchronized List<String> getCapList(){ return capList; }
 
-    public static boolean autoTrade = false;
+    public static boolean autoTrade = true;
 
 }
