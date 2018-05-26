@@ -152,7 +152,7 @@ public class Upbit {
                 })
                 .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
                 .connect()
-                .sendText("[{\"ticket\":\"gazuatest\"},{\"type\":\"orderbook\",\"codes\":[\"" + pair + "\"]}]")
+                .sendText("[{\"ticket\":\"hotssan\"},{\"type\":\"orderbook\",\"codes\":[\"" + pair + "\"]}]")
                 .disconnect();
     }
 }
