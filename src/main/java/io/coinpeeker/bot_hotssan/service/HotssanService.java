@@ -80,7 +80,14 @@ public class HotssanService implements HotssanUpdateHandler {
         }
 
         String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-        long chatId = update.getMessage().getChatId();
+        long chatId;
+
+        if (update.getEditedMessage() == null) {
+            chatId = update.getMessage().getChatId();
+        } else {
+            chatId = update.getEditedMessage().getChatId();
+        }
+
         String instruction = update.getMessage().getText();
         StringBuilder message = new StringBuilder();
 
