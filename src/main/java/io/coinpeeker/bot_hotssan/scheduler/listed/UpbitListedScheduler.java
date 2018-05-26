@@ -1,5 +1,7 @@
 package io.coinpeeker.bot_hotssan.scheduler.listed;
 
+import com.neovisionaries.ws.client.WebSocketException;
+import com.nimbusds.jose.JOSEException;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.scheduler.Listing;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -237,7 +240,7 @@ public class UpbitListedScheduler implements Listing {
     }
 
     @Scheduled(initialDelay = 1000 * 10, fixedDelay = 1)
-    public void checkNotice() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+    public void checkNotice() throws IOException, InvalidKeyException, NoSuchAlgorithmException, ParseException, JOSEException, WebSocketException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
             return;

@@ -107,7 +107,7 @@ public class HttpUtils {
 
         httpPost.setConfig(requestConfig);
 
-        if (type.equals("binanceTrade") || type.equals("kucoinTrade")) {
+        if (type.equals("binanceTrade") || type.equals("kucoinTrade") || type.equals("upbitTrade")) {
             for (NameValuePair item : params) {
                 httpPost.setHeader(item.getName(), item.getValue());
             }

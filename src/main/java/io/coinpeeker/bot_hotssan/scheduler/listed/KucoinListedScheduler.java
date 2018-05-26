@@ -1,5 +1,7 @@
 package io.coinpeeker.bot_hotssan.scheduler.listed;
 
+import com.neovisionaries.ws.client.WebSocketException;
+import com.nimbusds.jose.JOSEException;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.common.SecretKey;
 import io.coinpeeker.bot_hotssan.feature.MarketInfo;
@@ -27,6 +29,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -57,7 +60,7 @@ public class KucoinListedScheduler implements Listing {
 
     @Override
     @Scheduled(initialDelay = 1000 * 35, fixedDelay = 1000 * 10)
-    public void inspectListedCoin() throws IOException, NoSuchAlgorithmException, InvalidKeyException {
+    public void inspectListedCoin() throws IOException, NoSuchAlgorithmException, InvalidKeyException, ParseException, JOSEException, WebSocketException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
             return;

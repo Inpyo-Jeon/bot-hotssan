@@ -1,9 +1,14 @@
 package io.coinpeeker.bot_hotssan.trade;
 
+import com.neovisionaries.ws.client.WebSocket;
+import com.neovisionaries.ws.client.WebSocketException;
+import com.nimbusds.jose.JOSEException;
 import io.coinpeeker.bot_hotssan.trade.api.Binance;
 import io.coinpeeker.bot_hotssan.trade.api.Bittrex;
 import io.coinpeeker.bot_hotssan.trade.api.Kucoin;
+import io.coinpeeker.bot_hotssan.trade.api.Upbit;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +18,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
 
 @Component
 public class BuyTrade implements AutoTrade {
@@ -38,10 +44,6 @@ public class BuyTrade implements AutoTrade {
         LOGGER.info("Total BTC Amount : " + myAxisCoinAmount.toString());
         LOGGER.info("Select Satoshi : " + buyCoinMarketPrice.toString());
         LOGGER.info("Buy Amount : " + buyAmount.intValue());
-
-
-
-
 
 
 //        //이전 로직, 혹시 몰라 남겨둠 (갯수를 계속 체크하는 방식이나, 시장가로 주문하면 한 번만 주문하면 되기에 주석처리)
@@ -96,5 +98,24 @@ public class BuyTrade implements AutoTrade {
         LOGGER.info("Total BTC Amount : " + myAxisCoinAmount.toString());
         LOGGER.info("Select Satoshi : " + selectSatoshi.toString());
         LOGGER.info("Buy Amount : " + buyAmount.toString());
+    }
+
+    @Override
+    public void orderUpbit(String axisCoin, String buyCoin) throws IOException, ParseException, JOSEException, WebSocketException {
+        Upbit upbit = new Upbit("NzH0lJvdHynCsH61TKf6bSNMdCjF6aKJTgWNcmyP", "gL9xrMTAnj9sQrDF9JU2Yv9NpYzibJMlq2YGXT0q", httpUtils);
+        String streamData = "";
+        Double myAxisAmount = upbit.getAsset(axisCoin);
+
+        // Connect to the echo server.
+        WebSocket upbitWebSocket = upbit.connect(axisCoin, buyCoin);
+        while (upbit.streamData == "") {
+        }
+        streamData = upbit.streamData;
+
+        Double selectAskPrice = upbit.calcBestSellOrderBook(5, new JSONObject(streamData), myAxisAmount);
+        Double buyAmount = (myAxisAmount / selectAskPrice) * (0.9005);
+        upbit.excuteOrder(axisCoin, buyCoin, "bid", buyAmount, selectAskPrice, "limit");
+        LOGGER.info("호가상 선택된 가격 : " + selectAskPrice);
+        LOGGER.info("주문 량(수수료 포함) : " + buyAmount);
     }
 }

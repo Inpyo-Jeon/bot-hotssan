@@ -1,6 +1,8 @@
 package io.coinpeeker.bot_hotssan.scheduler.listed;
 
 import com.google.common.collect.Maps;
+import com.neovisionaries.ws.client.WebSocketException;
+import com.nimbusds.jose.JOSEException;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.scheduler.Listing;
@@ -22,6 +24,7 @@ import redis.clients.jedis.Jedis;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -55,7 +58,7 @@ public class BittrexListedScheduler implements Listing {
 
     @Override
     @Scheduled(initialDelay = 1000 * 10, fixedDelay = 1500 * 1)
-    public void inspectListedCoin() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+    public void inspectListedCoin() throws IOException, InvalidKeyException, NoSuchAlgorithmException, ParseException, JOSEException, WebSocketException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
             return;

@@ -50,81 +50,17 @@ public class BittrexTest {
 
     @Test
     public void AA() throws NoSuchAlgorithmException, InvalidKeyException, IOException {
-        int listingCount = 0;
-        String endPoint = "https://bittrex.com/api/v2.0/pub/currencies/GetWalletHealth";
-        JSONObject jsonObject = httpUtils.getResponseByObject(endPoint);
-        JSONArray list = jsonObject.getJSONArray("result");
-        int redisCount = 0;
+        Bittrex bittrex = new Bittrex("d88cf2bb52c842c9962b6c00ee425fed", "c0f422f5587d48f39204bb3f4af2612e", httpUtils);
 
-        synchronized (jedis) {
-            redisCount = Math.toIntExact(jedis.hlen("L-Bittrex-Health"));
-        }
+        BigDecimal myAxisCoinAmount = new BigDecimal(bittrex.getBalanceOfCoin("BTC")).setScale(8, BigDecimal.ROUND_DOWN);
+        BigDecimal selectSatoshi = bittrex.calcBestSellOrderBook(5, bittrex.getOrderBook("BTC-2GIVE", "sell"), myAxisCoinAmount.doubleValue());
+        BigDecimal buyAmount = new BigDecimal((myAxisCoinAmount.doubleValue() / selectSatoshi.doubleValue()) * 1.0).setScale(2, BigDecimal.ROUND_DOWN);
 
-        if (redisCount != list.length()) {
-            for (int i = 0; i < list.length(); i++) {
+        bittrex.sendOrder("BTC-2GIVE", buyAmount.toString(), selectSatoshi.toString());
 
-                boolean isExist = true;
-
-                synchronized (jedis) {
-                    if (!jedis.hexists("L-Bittrex-Health", list.getJSONObject(i).getJSONObject("Currency").getString("Currency"))) {
-                        isExist = false;
-                    }
-                }
-
-                if (!isExist) {
-                    Map<String, List<String>> marketList = marketInfo.availableMarketList(item);
-//                    tradeAgency.list("Bittrex", item.toUpperCase(), marketList);
-
-                    StringBuilder messageContent = new StringBuilder();
-                    Date nowDate = new Date();
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
-                    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                    messageContent.append(" [ Bittrex ] 상장 정보 ");
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                    messageContent.append("\n");
-                    messageContent.append(simpleDateFormat.format(nowDate));
-                    messageContent.append("\n확인방법 : List");
-                    messageContent.append("\n코인정보 : ");
-
-                    synchronized (jedis) {
-                        messageContent.append(jedis.hget("I-CoinMarketCap", item));
-                    }
-
-                    messageContent.append(" (");
-                    messageContent.append(item);
-                    messageContent.append(")");
-                    messageContent.append("\n구매가능 거래소 : ");
-                    messageContent.append(marketInfo.marketInfo(marketList));
-
-                    String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
-                    messageUtils.sendMessage(url, -300048567L, messageContent.toString());
-                    messageUtils.sendMessage(url, -319177275L, messageContent.toString());
-
-                    LOGGER.info(messageContent.toString());
-
-                    synchronized (jedis) {
-                        jedis.hset("L-Bittrex-Health", item, "1");
-                    }
-                }
-            }
-        }
-
-
-//        Bittrex bittrex = new Bittrex("d88cf2bb52c842c9962b6c00ee425fed", "c0f422f5587d48f39204bb3f4af2612e", httpUtils);
-//
-//        BigDecimal myAxisCoinAmount = new BigDecimal(bittrex.getBalanceOfCoin("BTC")).setScale(8, BigDecimal.ROUND_DOWN);
-//        BigDecimal selectSatoshi = bittrex.calcBestSellOrderBook(5, bittrex.getOrderBook("BTC-2GIVE", "sell"), myAxisCoinAmount.doubleValue());
-//        BigDecimal buyAmount = new BigDecimal((myAxisCoinAmount.doubleValue() / selectSatoshi.doubleValue()) * 1.0).setScale(2, BigDecimal.ROUND_DOWN);
-////
-//        bittrex.sendOrder("BTC-2GIVE", buyAmount.toString(), selectSatoshi.toString());
-//
-//        LOGGER.info("Total BTC Amount : " + myAxisCoinAmount.toString());
-//        LOGGER.info("Select Satoshi : " + selectSatoshi.toString());
-//        LOGGER.info("Buy Amount : " + buyAmount.toString());
+        LOGGER.info("Total BTC Amount : " + myAxisCoinAmount.toString());
+        LOGGER.info("Select Satoshi : " + selectSatoshi.toString());
+        LOGGER.info("Buy Amount : " + buyAmount.toString());
     }
 
     public class Bittrex {

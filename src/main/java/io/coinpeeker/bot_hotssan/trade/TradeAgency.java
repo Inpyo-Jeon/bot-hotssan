@@ -1,5 +1,7 @@
 package io.coinpeeker.bot_hotssan.trade;
 
+import com.neovisionaries.ws.client.WebSocketException;
+import com.nimbusds.jose.JOSEException;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.scheduler.listed.OkexListedScheduler;
 import org.slf4j.Logger;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +24,7 @@ public class TradeAgency {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OkexListedScheduler.class);
 
-    public void list(String exchangeName, String symbol, Map<String, List<String>> market) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public void list(String exchangeName, String symbol, Map<String, List<String>> market) throws NoSuchAlgorithmException, InvalidKeyException, IOException, ParseException, JOSEException, WebSocketException {
 
         if (CommonConstant.autoTrade) {
             if (market.containsKey(exchangeName)) {
@@ -40,6 +43,14 @@ public class TradeAgency {
                 LOGGER.info("-- Bittrex 자동 매수 시작 --");
                 buyTrade.orderBittrex("BTC", symbol);
                 LOGGER.info("-- Bittrex 자동 매수 종료 --");
+            }
+
+            if (market.containsKey("Upbit")) {
+                if (market.get("Upbit").stream().filter(item -> item.contains("/KRW")).count() != 0) {
+                    LOGGER.info("-- Upbit 자동 매수 시작 --");
+                    buyTrade.orderUpbit("KRW", symbol);
+                    LOGGER.info("-- Upbit 자동 매수 종료 --");
+                }
             }
 
             if (market.containsKey("Kucoin")) {

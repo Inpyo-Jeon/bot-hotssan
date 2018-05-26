@@ -50,6 +50,11 @@ dependencies {
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
 
+	dependencies {
+		compile 'com.neovisionaries:nv-websocket-client:2.4'
+	}
+
+
 	// https://mvnrepository.com/artifact/com.github.gfx.util.encrypt/android-encrypt-utils
 
 

@@ -1,6 +1,8 @@
 package io.coinpeeker.bot_hotssan.scheduler.listed;
 
 import com.google.common.collect.Maps;
+import com.neovisionaries.ws.client.WebSocketException;
+import com.nimbusds.jose.JOSEException;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.common.SecretKey;
 import io.coinpeeker.bot_hotssan.feature.MarketInfo;
@@ -27,6 +29,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -229,7 +232,7 @@ public class HuobiListedScheduler implements Listing {
     }
 
     @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 5)
-    public void huobiEngAssetInfo() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+    public void huobiEngAssetInfo() throws IOException, InvalidKeyException, NoSuchAlgorithmException, ParseException, JOSEException, WebSocketException {
         if (!StringUtils.equals("real", env)) {
             return;
         }

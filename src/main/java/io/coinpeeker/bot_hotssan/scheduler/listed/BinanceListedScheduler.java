@@ -1,5 +1,7 @@
 package io.coinpeeker.bot_hotssan.scheduler.listed;
 
+import com.neovisionaries.ws.client.WebSocketException;
+import com.nimbusds.jose.JOSEException;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
 import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.scheduler.Listing;
@@ -24,6 +26,7 @@ import redis.clients.jedis.Jedis;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -57,7 +60,7 @@ public class BinanceListedScheduler implements Listing {
 
     @Override
     @Scheduled(initialDelay = 1000 * 30, fixedDelay = 1)
-    public void inspectListedCoin() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+    public void inspectListedCoin() throws IOException, InvalidKeyException, NoSuchAlgorithmException, ParseException, JOSEException, WebSocketException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
             return;
@@ -157,7 +160,7 @@ public class BinanceListedScheduler implements Listing {
 
 
     @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 1)
-    public void articleCheck() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+    public void articleCheck() throws IOException, InvalidKeyException, NoSuchAlgorithmException, ParseException, JOSEException, WebSocketException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
             return;
@@ -245,7 +248,7 @@ public class BinanceListedScheduler implements Listing {
     }
 
     @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 60)
-    public void articleCheckVer2() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+    public void articleCheckVer2() throws IOException, InvalidKeyException, NoSuchAlgorithmException, ParseException, JOSEException, WebSocketException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
             return;
