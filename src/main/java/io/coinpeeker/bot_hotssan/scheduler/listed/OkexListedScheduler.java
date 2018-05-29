@@ -152,8 +152,8 @@ public class OkexListedScheduler implements Listing {
         }
 
         if (activitiesCount != lastCount) {
-            String type = jsonObject.getJSONArray("activities").getJSONObject(14).getJSONArray("breadcrumbs").getJSONObject(0).getString("name");
-            String title = jsonObject.getJSONArray("activities").getJSONObject(14).getString("title");
+            String type = jsonObject.getJSONArray("activities").getJSONObject(0).getJSONArray("breadcrumbs").getJSONObject(0).getString("name");
+            String title = jsonObject.getJSONArray("activities").getJSONObject(0).getString("title");
 
             if ("New Token".equals(type) && (title.contains("Now Available"))) {
                 int bracketCount = StringUtils.countMatches(title, "(");
