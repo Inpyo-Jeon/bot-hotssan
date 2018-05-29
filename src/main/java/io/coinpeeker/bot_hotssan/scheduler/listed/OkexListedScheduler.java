@@ -58,7 +58,7 @@ public class OkexListedScheduler implements Listing {
     private static final Logger LOGGER = LoggerFactory.getLogger(OkexListedScheduler.class);
 
     @Override
-    @Scheduled(initialDelay = 1000 * 60, fixedDelay = 1000 * 2)
+//    @Scheduled(initialDelay = 1000 * 60, fixedDelay = 1000 * 2)
     public void inspectListedCoin() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
