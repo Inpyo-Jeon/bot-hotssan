@@ -133,7 +133,7 @@ public class OkexListedScheduler implements Listing {
         }
     }
 
-    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 10)
+    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 5)
     public void articleCheck() throws IOException, InvalidKeyException, NoSuchAlgorithmException, ParseException, JOSEException, WebSocketException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -224,7 +224,7 @@ public class OkexListedScheduler implements Listing {
         }
     }
 
-    @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 10)
+    @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 30)
     public void articleCheckVer2() throws IOException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
