@@ -140,7 +140,7 @@ public class OkexListedScheduler implements Listing {
             return;
         }
 
-        String endPoint = "https://support.okex.com/hc/api/internal/recent_activities?locale=en-us&page=1&per_page=100&locale=en-us";
+        String endPoint = "https://support.okex.com/hc/api/internal/recent_activities?locale=en-us&page=1&per_page=1&locale=en-us";
 
         JSONObject jsonObject = httpUtils.getResponseByObject(endPoint);
 
