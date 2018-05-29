@@ -51,11 +51,14 @@ public class RefreshRedis {
         huobiPro();
         bithumb();
         binanceVer2();
+        binanceVer3();
         upbitS3();
         upbitNotice();
         huobiKorAssetInfo();
         huobiEngAssetInfo();
         bittrexHealth();
+        okexVer2();
+        okexVer3();
 
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -370,7 +373,7 @@ public class RefreshRedis {
 
     public void binanceVer2() throws IOException {
         synchronized (jedis) {
-            if (!jedis.exists("L-Binance-InternalAPI")) {
+            if (!jedis.exists("L-Binance-InternalAPI-Articles")) {
                 CloseableHttpResponse response = httpUtils.get("https://support.binance.com/api/v2/help_center/en-us/sections/115000106672/articles.json?page=2&per_page=1");
 
                 if (response.getStatusLine().getStatusCode() == 200) {
@@ -378,7 +381,58 @@ public class RefreshRedis {
                     JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
 
                     synchronized (jedis) {
-                        jedis.hset("L-Binance-InternalAPI", "count", String.valueOf(jsonObject.getInt("count")));
+                        jedis.hset("L-Binance-InternalAPI-Articles", "count", String.valueOf(jsonObject.getInt("count")));
+                    }
+                }
+            }
+        }
+    }
+
+    public void binanceVer3() throws IOException {
+        synchronized (jedis) {
+            if (!jedis.exists("L-Binance-InternalAPI-Activities")) {
+                CloseableHttpResponse response = httpUtils.get("https://support.binance.com/hc/api/internal/recent_activities?locale=en-us&page=1&per_page=1&locale=en-us");
+
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    LOGGER.info("Binance-Internal-OK");
+                    JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+
+                    synchronized (jedis) {
+                        jedis.hset("L-Binance-InternalAPI-Activities", "count", String.valueOf(jsonObject.getInt("count")));
+                    }
+                }
+            }
+        }
+    }
+
+    public void okexVer2() throws IOException {
+        synchronized (jedis) {
+            if (!jedis.exists("L-OKEx-InternalAPI-Articles")) {
+                CloseableHttpResponse response = httpUtils.get("https://support.okex.com/api/v2/help_center/en-us/sections/115000447632/articles.json?page=1&per_page=1");
+
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    LOGGER.info("OKEx-Internal-OK");
+                    JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+
+                    synchronized (jedis) {
+                        jedis.hset("L-OKEx-InternalAPI-Articles", "count", String.valueOf(jsonObject.getInt("count")));
+                    }
+                }
+            }
+        }
+    }
+
+    public void okexVer3() throws IOException {
+        synchronized (jedis) {
+            if (!jedis.exists("L-OKEx-InternalAPI-Activities")) {
+                CloseableHttpResponse response = httpUtils.get("https://support.okex.com/hc/api/internal/recent_activities?locale=en-us&page=1&per_page=1&locale=en-us");
+
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    LOGGER.info("OKEx-Internal-OK");
+                    JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
+
+                    synchronized (jedis) {
+                        jedis.hset("L-OKEx-InternalAPI-Activities", "count", String.valueOf(jsonObject.getInt("count")));
                     }
                 }
             }

@@ -53,8 +53,6 @@ public class BinanceListedScheduler implements Listing {
     @Autowired
     private TradeAgency tradeAgency;
 
-    private int articleCount = 0;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(BinanceListedScheduler.class);
 
 
@@ -171,13 +169,13 @@ public class BinanceListedScheduler implements Listing {
         JSONObject jsonObject = httpUtils.getResponseByObject(endPoint);
 
         int lastCount = jsonObject.getInt("count");
+        int activitiesCount = 0;
 
-        if (articleCount == 0) {
-            LOGGER.info("@#@#@# articleCount is null");
-            articleCount = lastCount;
+        synchronized (jedis) {
+            activitiesCount = Integer.valueOf(jedis.hget("L-Binance-InternalAPI-Activities", "count"));
         }
 
-        if (articleCount != lastCount) {
+        if (activitiesCount != lastCount) {
             String type = jsonObject.getJSONArray("activities").getJSONObject(0).getJSONArray("breadcrumbs").getJSONObject(0).getString("name");
             String title = jsonObject.getJSONArray("activities").getJSONObject(0).getString("title");
 
@@ -201,7 +199,7 @@ public class BinanceListedScheduler implements Listing {
                 if (!isExist) {
 
                     synchronized (jedis) {
-                        jedis.hset("L-Binance", asset, "0");
+                        jedis.hset("L-Binance", asset, "Activities");
                     }
 
                     Map<String, List<String>> marketList = marketInfo.availableMarketList(asset);
@@ -241,10 +239,11 @@ public class BinanceListedScheduler implements Listing {
                     LOGGER.info(messageContent.toString());
                 }
             }
-            articleCount = lastCount;
+
+            synchronized (jedis) {
+                jedis.hset("L-Binance-InternalAPI-Activities", "count", String.valueOf(lastCount));
+            }
         }
-
-
     }
 
     @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 60)
@@ -262,12 +261,13 @@ public class BinanceListedScheduler implements Listing {
             JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
             String title = jsonObject.getJSONArray("articles").getJSONObject(0).getString("title");
             int count = jsonObject.getInt("count");
-            int listingCount = 0;
+            int articlesCount = 0;
+
             synchronized (jedis) {
-                listingCount = Integer.valueOf(jedis.hget("L-Binance-InternalAPI", "count"));
+                articlesCount = Integer.valueOf(jedis.hget("L-Binance-InternalAPI-Articles", "count"));
             }
 
-            if (listingCount != count) {
+            if (articlesCount != count) {
                 if (title.contains("Binance Lists") || title.contains("Binance Will List")) {
                     String asset = "";
                     int begin = title.lastIndexOf("(");
@@ -288,7 +288,7 @@ public class BinanceListedScheduler implements Listing {
                     if (!isExist) {
 
                         synchronized (jedis) {
-                            jedis.hset("L-Binance", asset, "0");
+                            jedis.hset("L-Binance", asset, "Articles");
                         }
 
                         Map<String, List<String>> marketList = marketInfo.availableMarketList(asset);
@@ -330,7 +330,7 @@ public class BinanceListedScheduler implements Listing {
                 }
 
                 synchronized (jedis) {
-                    jedis.hset("L-Binance-InternalAPI", "count", String.valueOf(count));
+                    jedis.hset("L-Binance-InternalAPI-Articles", "count", String.valueOf(count));
                 }
             }
         }
