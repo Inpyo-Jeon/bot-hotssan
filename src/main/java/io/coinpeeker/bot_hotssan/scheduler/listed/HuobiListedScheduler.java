@@ -231,7 +231,7 @@ public class HuobiListedScheduler implements Listing {
         }
     }
 
-    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 5)
+    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 3)
     public void huobiEngAssetInfo() throws IOException, InvalidKeyException, NoSuchAlgorithmException, ParseException, JOSEException, WebSocketException {
         if (!StringUtils.equals("real", env)) {
             return;
@@ -288,6 +288,13 @@ public class HuobiListedScheduler implements Listing {
         messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
         messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
         messageContent.append("\n");
+
+        if ("Huobi(Kor)".equals(exchangeType)) {
+            messageContent.append("- Test 단계 -");
+            messageContent.append("\n");
+            messageContent.append("- 당분간 Huobi(Kor)는 매수 금지 -");
+        }
+
         messageContent.append(simpleDateFormat.format(nowDate));
         messageContent.append("\n코인정보 : ");
 

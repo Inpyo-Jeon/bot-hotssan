@@ -156,7 +156,6 @@ public class BinanceListedScheduler implements Listing {
         }
     }
 
-
     @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 1)
     public void articleCheck() throws IOException, InvalidKeyException, NoSuchAlgorithmException, ParseException, JOSEException, WebSocketException {
         /** env validation check.**/
@@ -337,11 +336,13 @@ public class BinanceListedScheduler implements Listing {
 
 
         if (response.getStatusLine().getStatusCode() == 429) {
+            LOGGER.info("-- Binance Article 429 ERROR --");
             int delay = 0;
             Header[] headers = response.getAllHeaders();
             for (Header header : headers) {
                 if (header.getName().equals("Retry-After")) {
                     delay = Integer.valueOf(header.getValue());
+                    LOGGER.info("-- delay time : " + delay + "--");
                 }
             }
 
@@ -355,6 +356,7 @@ public class BinanceListedScheduler implements Listing {
         }
 
         if (response.getStatusLine().getStatusCode() == 418) {
+            LOGGER.info("-- Binance Article 418 ERROR --");
             try {
                 Thread.sleep(1000 * 60 * 60 * 24);
             } catch (InterruptedException e) {
