@@ -1,42 +1,43 @@
-package io.coinpeeker.bot_hotssan.feature;
+package io.coinpeeker.bot_hotssan.module;
+
 
 import com.google.common.collect.Maps;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import redis.clients.jedis.Jedis;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@Component
-public class MarketInfo {
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class CommonTest {
 
     @Autowired
-    private HttpUtils httpUtils;
+    HttpUtils httpUtils;
 
-    @Autowired
-    private Jedis jedis;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MarketInfo.class);
-
-    public Map<String, Map<String, String>> availableMarketList(String coin) throws IOException {
+    @Test
+    public void test() throws IOException {
         Map<String, Map<String, String>> market = Maps.newHashMap();
         String url = "";
-        synchronized (jedis) {
-             url = "https://coinmarketcap.com/currencies/" + jedis.hget("I-CoinMarketCap-Address", coin) + "#markets";
-        }
+        url = "https://coinmarketcap.com/currencies/ethereum";
+
 
         StringBuilder pair = new StringBuilder();
-        pair.append(coin);
+//        pair.append(coin);
         pair.append("/BTC");
         pair.append(", ");
-        pair.append(coin);
+//        pair.append(coin);
         pair.append("/KRW");
 
         String htmlData = httpUtils.getResponseByHtmlString(url);
@@ -62,28 +63,13 @@ public class MarketInfo {
             }
         } catch (NullPointerException e) {
         } finally {
-            return market;
+
         }
+
+        System.out.println(market.get("Upbit").containsKey("ETH/KRW"));
+        market.get("Upbit").forEach((String pairKey, String volume) -> System.out.println(pairKey + " " + volume));
+        System.out.println(market.toString());
+
     }
 
-    public String marketInfo(Map<String, Map<String, String>> market) {
-        StringBuilder sb = new StringBuilder();
-
-        for (String source : market.keySet()) {
-            sb.append("\n");
-            sb.append("  ");
-            sb.append("- ");
-            sb.append(source);
-
-            for (String pair : market.get(source).keySet()) {
-                sb.append("\n");
-                sb.append("    >> ");
-                sb.append(pair);
-                sb.append("(");
-                sb.append(market.get(source).get(pair));
-                sb.append(")");
-            }
-        }
-        return sb.toString();
-    }
 }

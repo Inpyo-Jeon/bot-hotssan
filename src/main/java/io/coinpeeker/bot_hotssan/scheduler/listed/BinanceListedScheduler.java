@@ -103,7 +103,7 @@ public class BinanceListedScheduler implements Listing {
                         jedis.hset("L-Binance", asset, pic);
                     }
 
-                    Map<String, List<String>> marketList = marketInfo.availableMarketList(asset);
+                    Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(asset);
                     tradeAgency.list("Binance", asset, marketList);
 
                     Date nowDate = new Date();
@@ -201,7 +201,7 @@ public class BinanceListedScheduler implements Listing {
                         jedis.hset("L-Binance", asset, "Activities");
                     }
 
-                    Map<String, List<String>> marketList = marketInfo.availableMarketList(asset);
+                    Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(asset);
                     tradeAgency.list("Binance", asset, marketList);
 
                     Date nowDate = new Date();
@@ -290,7 +290,7 @@ public class BinanceListedScheduler implements Listing {
                             jedis.hset("L-Binance", asset, "Articles");
                         }
 
-                        Map<String, List<String>> marketList = marketInfo.availableMarketList(asset);
+                        Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(asset);
                         tradeAgency.list("Binance", asset, marketList);
 
                         Date nowDate = new Date();

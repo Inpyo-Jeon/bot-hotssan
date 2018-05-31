@@ -89,7 +89,7 @@ public class BittrexListedScheduler implements Listing {
                 }
 
                 if (!isExist) {
-                    Map<String, List<String>> marketList = marketInfo.availableMarketList(item);
+                    Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(item);
                     tradeAgency.list("Bittrex", item.toUpperCase(), marketList);
 
                     StringBuilder messageContent = new StringBuilder();
@@ -160,7 +160,7 @@ public class BittrexListedScheduler implements Listing {
 
                 if (!isExist) {
                     String item = list.getJSONObject(i).getJSONObject("Currency").getString("Currency");
-                    Map<String, List<String>> marketList = marketInfo.availableMarketList(item);
+                    Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(item);
 //                    tradeAgency.list("Bittrex", item.toUpperCase(), marketList);
 
                     StringBuilder messageContent = new StringBuilder();

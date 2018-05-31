@@ -148,7 +148,7 @@ public class HuobiListedScheduler implements Listing {
                 }
 
                 if (!isExist) {
-                    Map<String, List<String>> marketList = marketInfo.availableMarketList(item.toUpperCase());
+                    Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(item.toUpperCase());
 //                    tradeAgency.list("Huobi", item.toUpperCase(), marketList);
 
                     Date nowDate = new Date();
@@ -218,7 +218,7 @@ public class HuobiListedScheduler implements Listing {
 
                 if (!isExist) {
                     String symbol = jsonArray.getJSONObject(i).getString("pageIdentifier").toUpperCase();
-                    Map<String, List<String>> marketList = marketInfo.availableMarketList(symbol);
+                    Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(symbol);
 //                    tradeAgency.list("Huobi", symbol, marketList);
 
                     sendMessage("Huobi(Kor)", symbol, marketList);
@@ -259,7 +259,7 @@ public class HuobiListedScheduler implements Listing {
 
                 if (!isExist) {
                     String symbol = jsonArray.getJSONObject(i).getString("pageIdentifier").toUpperCase();
-                    Map<String, List<String>> marketList = marketInfo.availableMarketList(symbol);
+                    Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(symbol);
                     tradeAgency.list("Huobi", symbol, marketList);
 
                     sendMessage("Huobi(Pro/Hadax)", symbol, marketList);
@@ -273,7 +273,7 @@ public class HuobiListedScheduler implements Listing {
     }
 
 
-    public void sendMessage(String exchangeType, String symbol, Map<String, List<String>> marketList) {
+    public void sendMessage(String exchangeType, String symbol, Map<String, Map<String,String>> marketList) {
         Date nowDate = new Date();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
         StringBuilder messageContent = new StringBuilder();

@@ -24,7 +24,7 @@ public class TradeAgency {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OkexListedScheduler.class);
 
-    public void list(String exchangeName, String symbol, Map<String, List<String>> market) throws NoSuchAlgorithmException, InvalidKeyException, IOException, ParseException, JOSEException, WebSocketException {
+    public void list(String exchangeName, String symbol, Map<String, Map<String, String>> market) throws NoSuchAlgorithmException, InvalidKeyException, IOException, ParseException, JOSEException, WebSocketException {
 
         if (CommonConstant.autoTrade) {
             if (market.containsKey(exchangeName)) {
@@ -46,7 +46,7 @@ public class TradeAgency {
             }
 
             if (market.containsKey("Upbit")) {
-                if (market.get("Upbit").stream().filter(item -> item.contains("/KRW")).count() != 0) {
+                if (market.get("Upbit").containsKey(symbol + "/KRW")) {
                     LOGGER.info("-- Upbit 자동 매수 시작 --");
                     buyTrade.orderUpbit("KRW", symbol);
                     LOGGER.info("-- Upbit 자동 매수 종료 --");

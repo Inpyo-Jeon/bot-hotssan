@@ -118,7 +118,7 @@ public class KucoinListedScheduler implements Listing {
             }
 
             if (jsonObject.has("data") && !jsonObject.get("data").equals("null")) {
-                Map<String, List<String>> marketList = marketInfo.availableMarketList(item);
+                Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(item);
                 tradeAgency.list("Kucoin", item, marketList);
 
                 Date nowDate = new Date();

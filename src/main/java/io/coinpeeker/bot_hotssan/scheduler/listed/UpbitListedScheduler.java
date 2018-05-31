@@ -200,7 +200,7 @@ public class UpbitListedScheduler implements Listing {
                     String pair = jsonArray.getJSONObject(i).getString("pair");
                     String baseCurrencyCode = jsonArray.getJSONObject(i).getString("baseCurrencyCode");
 
-                    Map<String, List<String>> marketList = marketInfo.availableMarketList(baseCurrencyCode);
+                    Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(baseCurrencyCode);
 
                     StringBuilder messageContent = new StringBuilder();
                     Date nowDate = new Date();
@@ -317,7 +317,7 @@ public class UpbitListedScheduler implements Listing {
 
                     if (!isExist.get()) {
                         // 실제 매수 봇
-                        Map<String, List<String>> marketList = marketInfo.availableMarketList(symbol);
+                        Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(symbol);
                         tradeAgency.list("Upbit", symbol, marketList);
                         autoTrade = true;
                     }

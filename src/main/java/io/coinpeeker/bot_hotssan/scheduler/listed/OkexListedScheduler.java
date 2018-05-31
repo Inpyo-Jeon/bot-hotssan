@@ -95,7 +95,7 @@ public class OkexListedScheduler implements Listing {
                 }
 
                 if (!isExist) {
-                    Map<String, List<String>> marketList = marketInfo.availableMarketList(toStringItem.toUpperCase());
+                    Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(toStringItem.toUpperCase());
 //                    tradeAgency.list("OKEx", toStringItem.toUpperCase(), marketList);
 
                     StringBuilder messageContent = new StringBuilder();
@@ -133,7 +133,7 @@ public class OkexListedScheduler implements Listing {
         }
     }
 
-    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 5)
+    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 3)
     public void articleCheck() throws IOException, InvalidKeyException, NoSuchAlgorithmException, ParseException, JOSEException, WebSocketException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -179,8 +179,8 @@ public class OkexListedScheduler implements Listing {
                             jedis.hset("L-OKEx", asset, "Activities");
                         }
 
-                        Map<String, List<String>> marketList = marketInfo.availableMarketList(asset);
-//                        tradeAgency.list("OKEx", asset, marketList);
+                        Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(asset);
+                        tradeAgency.list("OKEx", asset, marketList);
 
                         Date nowDate = new Date();
                         StringBuilder messageContent = new StringBuilder();
@@ -224,8 +224,8 @@ public class OkexListedScheduler implements Listing {
         }
     }
 
-    @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 30)
-    public void articleCheckVer2() throws IOException {
+    @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 15)
+    public void articleCheckVer2() throws IOException, ParseException, WebSocketException, NoSuchAlgorithmException, InvalidKeyException, JOSEException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
             return;
@@ -271,8 +271,8 @@ public class OkexListedScheduler implements Listing {
                                 jedis.hset("L-OKEx", asset, "Articles");
                             }
 
-                            Map<String, List<String>> marketList = marketInfo.availableMarketList(asset);
-//                            tradeAgency.list("OKEx", asset, marketList);
+                            Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(asset);
+                            tradeAgency.list("OKEx", asset, marketList);
 
 
                             Date nowDate = new Date();
