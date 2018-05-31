@@ -293,6 +293,7 @@ public class HuobiListedScheduler implements Listing {
             messageContent.append("- Test 단계 -");
             messageContent.append("\n");
             messageContent.append("- 당분간 Huobi(Kor)는 매수 금지 -");
+            messageContent.append("\n");
         }
 
         messageContent.append(simpleDateFormat.format(nowDate));

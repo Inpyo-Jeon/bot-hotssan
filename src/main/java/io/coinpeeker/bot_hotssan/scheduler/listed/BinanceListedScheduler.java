@@ -245,7 +245,7 @@ public class BinanceListedScheduler implements Listing {
         }
     }
 
-    @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 60)
+    @Scheduled(initialDelay = 1000 * 5, fixedDelay = 1000 * 61)
     public void articleCheckVer2() throws IOException, InvalidKeyException, NoSuchAlgorithmException, ParseException, JOSEException, WebSocketException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {

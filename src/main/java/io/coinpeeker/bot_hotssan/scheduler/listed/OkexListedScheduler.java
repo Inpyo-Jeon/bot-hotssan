@@ -311,7 +311,7 @@ public class OkexListedScheduler implements Listing {
                 }
 
                 synchronized (jedis) {
-                    jedis.hset("L-OKEx-InternalAPI", "count", String.valueOf(count));
+                    jedis.hset("L-OKEx-InternalAPI-Articles", "count", String.valueOf(count));
                 }
             }
         }
