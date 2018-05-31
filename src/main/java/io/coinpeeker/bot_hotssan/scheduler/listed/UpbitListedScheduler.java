@@ -30,6 +30,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 public class UpbitListedScheduler implements Listing {
@@ -275,17 +276,46 @@ public class UpbitListedScheduler implements Listing {
             if ((title.contains("[이벤트]") && title.contains("상장")) || (title.contains("[거래]") && title.contains("원화") && ((title.contains("추가")) || title.contains("상장")))) {
                 int bracketCount = StringUtils.countMatches(title, "(");
                 if (bracketCount == 1) {
-                    boolean isExist = true;
-                    String symbol = title.replaceAll("(\\W)", "").toUpperCase();
+                    int begin = title.indexOf("(");
+                    int end = title.lastIndexOf(")");
+                    String partBracket = "";
+                    String symbol = "";
+                    AtomicBoolean isExist = new AtomicBoolean(true);
+                    List<String> symbolList;
 
-                    synchronized (jedis) {
-                        if (!jedis.hexists("L-Upbit-Notice", symbol)) {
-                            jedis.hset("L-Upbit-Notice", symbol, "0");
-                            isExist = false;
+                    for (int i = begin + 1; i < end; i++) {
+                        partBracket += title.charAt(i);
+                    }
+
+                    if (StringUtils.contains(partBracket, ",")) {
+                        String removeBlank = partBracket.replaceAll(" ", "");
+                        List<String> splitList = Arrays.asList(removeBlank.split(","));
+                        symbolList = new ArrayList<>();
+                        splitList.forEach(item -> symbolList.add(item.replaceAll("(\\W)", "").toUpperCase()));
+
+                        symbol = symbolList.get(0);
+
+                        symbolList.forEach(item -> {
+                            synchronized (jedis) {
+                                if (!jedis.hexists("L-Upbit-Notice", item)) {
+                                    jedis.hset("L-Upbit-Notice", item, "0");
+                                    isExist.set(false);
+                                }
+                            }
+                        });
+
+                    } else {
+                        symbol = partBracket.replaceAll("(\\W)", "").toUpperCase();
+
+                        synchronized (jedis) {
+                            if (!jedis.hexists("L-Upbit-Notice", symbol)) {
+                                jedis.hset("L-Upbit-Notice", symbol, "0");
+                                isExist.set(false);
+                            }
                         }
                     }
 
-                    if (!isExist) {
+                    if (!isExist.get()) {
                         // 실제 매수 봇
                         Map<String, List<String>> marketList = marketInfo.availableMarketList(symbol);
                         tradeAgency.list("Upbit", symbol, marketList);
@@ -310,7 +340,7 @@ public class UpbitListedScheduler implements Listing {
             messageContent.append(title);
 
             if (autoTrade) {
-                messageContent.append("\n-- 봇 자동매수 완료 --");
+                messageContent.append("\n>> 봇 자동매수 완료 <<");
             }
 
             LOGGER.info(messageContent.toString());
