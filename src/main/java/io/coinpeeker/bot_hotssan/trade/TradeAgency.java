@@ -34,15 +34,19 @@ public class TradeAgency {
             }
 
             if (market.containsKey("Binance")) {
-                LOGGER.info("-- Binance 자동 매수 시작 --");
-                buyTrade.orderBinance("BTC", symbol);
-                LOGGER.info("-- Binance 자동 매수 종료 --");
+                if (!"LSK".equals(symbol)) {
+                    LOGGER.info("-- Binance 자동 매수 시작 --");
+                    buyTrade.orderBinance("BTC", symbol);
+                    LOGGER.info("-- Binance 자동 매수 종료 --");
+                }
             }
 
             if (market.containsKey("Bittrex")) {
-                LOGGER.info("-- Bittrex 자동 매수 시작 --");
-                buyTrade.orderBittrex("BTC", symbol);
-                LOGGER.info("-- Bittrex 자동 매수 종료 --");
+                if (!"LSK".equals(symbol)) {
+                    LOGGER.info("-- Bittrex 자동 매수 시작 --");
+                    buyTrade.orderBittrex("BTC", symbol);
+                    LOGGER.info("-- Bittrex 자동 매수 종료 --");
+                }
             }
 
             if (market.containsKey("Upbit")) {
