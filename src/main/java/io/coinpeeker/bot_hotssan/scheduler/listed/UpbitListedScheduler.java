@@ -240,7 +240,7 @@ public class UpbitListedScheduler implements Listing {
         }
     }
 
-    @Scheduled(initialDelay = 1000 * 10, fixedDelay = 1)
+    @Scheduled(initialDelay = 1000 * 10, fixedDelay = 1000)
     public void checkNotice() throws IOException, InvalidKeyException, NoSuchAlgorithmException, ParseException, JOSEException, WebSocketException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -352,14 +352,6 @@ public class UpbitListedScheduler implements Listing {
             synchronized (jedis) {
                 jedis.hset("L-Upbit-Notice", "totalCount", String.valueOf(currentNoticeCount));
             }
-        }
-
-        try {
-            Random random = new Random();
-            int randomDelayTime = random.nextInt(2) + 1;
-            Thread.sleep(1000 * randomDelayTime);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 }

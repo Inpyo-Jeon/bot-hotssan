@@ -57,7 +57,7 @@ public class BinanceListedScheduler implements Listing {
 
 
     @Override
-    @Scheduled(initialDelay = 1000 * 30, fixedDelay = 1)
+    @Scheduled(initialDelay = 1000 * 30, fixedDelay = 1000 * 1)
     public void inspectListedCoin() throws IOException, InvalidKeyException, NoSuchAlgorithmException, ParseException, JOSEException, WebSocketException {
         /** env validation check.**/
         if (!StringUtils.equals("real", env)) {
@@ -86,28 +86,15 @@ public class BinanceListedScheduler implements Listing {
 
                 if (!isExist) {
                     String asset = jsonArray.getJSONObject(i).getString("asset");
-                    String pic = "-";
-
-                    if (jsonArray.getJSONObject(i).has("pic")) {
-                        pic = jsonArray.getJSONObject(i).getString("pic");
-                    }
-
-                    int fileNameIndex = pic.lastIndexOf("/");
-                    StringBuilder fileName = new StringBuilder();
-
-                    for (int index = fileNameIndex + 1; index < pic.length(); index++) {
-                        fileName.append(pic.charAt(index));
-                    }
 
                     synchronized (jedis) {
-                        jedis.hset("L-Binance", asset, pic);
+                        jedis.hset("L-Binance", asset, "Pictures");
                     }
 
                     Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(asset);
                     tradeAgency.list("Binance", asset, marketList);
 
                     Date nowDate = new Date();
-                    Date imageTimeStamp = new Date(Long.valueOf(fileName.toString().replaceAll("\\D", "")));
                     StringBuilder messageContent = new StringBuilder();
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
                     simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
@@ -119,7 +106,7 @@ public class BinanceListedScheduler implements Listing {
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append("\n");
                     messageContent.append(simpleDateFormat.format(nowDate));
-                    messageContent.append("\n확인방법 : Image");
+                    messageContent.append("\n확인방법 : Pictures");
                     messageContent.append("\n코인정보 : ");
 
                     synchronized (jedis) {
@@ -129,10 +116,6 @@ public class BinanceListedScheduler implements Listing {
                     messageContent.append(" (");
                     messageContent.append(asset);
                     messageContent.append(")");
-                    messageContent.append("\n이미지주소 : ");
-                    messageContent.append(pic);
-                    messageContent.append("\n변환시간 : ");
-                    messageContent.append(simpleDateFormat.format(imageTimeStamp));
                     messageContent.append("\n구매가능 거래소 : ");
                     messageContent.append(marketInfo.marketInfo(marketList));
 
@@ -141,18 +124,9 @@ public class BinanceListedScheduler implements Listing {
                     messageUtils.sendMessage(url, -300048567L, messageContent.toString());
                     messageUtils.sendMessage(url, -319177275L, messageContent.toString());
 
-                    LOGGER.info("Binance 상장(Image) : " + asset + " (" + simpleDateFormat.format(nowDate) + ")");
-                    LOGGER.info("이미지상 상장시간 : " + asset + " (" + simpleDateFormat.format(imageTimeStamp) + ")");
+                    LOGGER.info("Binance 상장(Pictures) : " + asset + " (" + simpleDateFormat.format(nowDate) + ")");
                 }
             }
-        }
-
-        try {
-            Random random = new Random();
-            int randomDelayTime = random.nextInt(2) + 1;
-            Thread.sleep(1000 * randomDelayTime);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 

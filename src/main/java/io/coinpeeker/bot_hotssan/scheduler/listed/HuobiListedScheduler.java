@@ -231,7 +231,7 @@ public class HuobiListedScheduler implements Listing {
         }
     }
 
-    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 3)
+    @Scheduled(initialDelay = 1000 * 20, fixedDelay = 1000 * 2)
     public void huobiEngAssetInfo() throws IOException, InvalidKeyException, NoSuchAlgorithmException, ParseException, JOSEException, WebSocketException {
         if (!StringUtils.equals("real", env)) {
             return;
