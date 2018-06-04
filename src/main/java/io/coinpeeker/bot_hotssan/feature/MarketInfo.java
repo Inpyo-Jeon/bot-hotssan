@@ -79,7 +79,7 @@ public class MarketInfo {
                 sb.append("\n");
                 sb.append("    >> ");
                 sb.append(pair);
-                sb.append("(");
+                sb.append(" (");
                 sb.append(market.get(source).get(pair));
                 sb.append(")");
             }
