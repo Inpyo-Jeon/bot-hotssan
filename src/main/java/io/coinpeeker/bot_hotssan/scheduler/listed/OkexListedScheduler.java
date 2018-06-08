@@ -180,7 +180,7 @@ public class OkexListedScheduler implements Listing {
                         }
 
                         Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(asset);
-                        tradeAgency.list("OKEx", asset, marketList);
+//                        tradeAgency.list("OKEx", asset, marketList);
 
                         Date nowDate = new Date();
                         StringBuilder messageContent = new StringBuilder();
@@ -272,7 +272,7 @@ public class OkexListedScheduler implements Listing {
                             }
 
                             Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(asset);
-                            tradeAgency.list("OKEx", asset, marketList);
+//                            tradeAgency.list("OKEx", asset, marketList);
 
 
                             Date nowDate = new Date();
