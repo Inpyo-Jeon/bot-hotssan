@@ -66,9 +66,6 @@ public class UpbitTest {
 
     @Test
     public void AA() throws ParseException, JOSEException, IOException, URISyntaxException, WebSocketException, InterruptedException {
-        Map<String, List<String>> marketList = marketInfo.availableMarketList("SRN");
-        System.out.println(marketList.toString());
-        System.out.println(marketList.get("Upbit").stream().filter(item -> item.contains("/KRW")).count());
 //        Upbit upbit = new Upbit("NzH0lJvdHynCsH61TKf6bSNMdCjF6aKJTgWNcmyP", "gL9xrMTAnj9sQrDF9JU2Yv9NpYzibJMlq2YGXT0q", httpUtils);
 //        String streamData = "";
 //        Double myAxisAmount = upbit.getAsset("KRW");

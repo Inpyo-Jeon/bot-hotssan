@@ -315,12 +315,12 @@ public class UpbitListedScheduler implements Listing {
                         }
                     }
 
-                    if (!isExist.get()) {
-                        // 실제 매수 봇
-                        Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(symbol);
-                        tradeAgency.list("Upbit", symbol, marketList);
-                        autoTrade = true;
-                    }
+//                    if (!isExist.get()) {
+//                        // 실제 매수 봇
+//                        Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(symbol);
+//                        tradeAgency.list("Upbit", symbol, marketList);
+//                        autoTrade = true;
+//                    }
                 }
             }
 

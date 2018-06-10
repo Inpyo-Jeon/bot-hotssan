@@ -180,7 +180,7 @@ public class OkexListedScheduler implements Listing {
                         }
 
                         Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(asset);
-//                        tradeAgency.list("OKEx", asset, marketList);
+                        tradeAgency.list("OKEx", asset, marketList);
 
                         Date nowDate = new Date();
                         StringBuilder messageContent = new StringBuilder();
@@ -216,6 +216,69 @@ public class OkexListedScheduler implements Listing {
                         LOGGER.info(messageContent.toString());
                     }
                 }
+            } else if ("Cryptocurrency Intro".equals(type)) {
+                int bracketCount = StringUtils.countMatches(title, "(");
+                if (bracketCount == 1) {
+                    String asset = "";
+                    int begin = title.lastIndexOf("(");
+                    int end = title.indexOf(")");
+
+                    for (int idx = begin + 1; idx < end; idx++) {
+                        asset += title.charAt(idx);
+                    }
+
+                    boolean isExist = true;
+                    synchronized (jedis) {
+                        if (!jedis.hexists("L-OKEx", asset)) {
+                            isExist = false;
+                        }
+                    }
+
+                    if (!isExist) {
+
+                        synchronized (jedis) {
+                            jedis.hset("L-OKEx", asset, "Activities");
+                        }
+
+                        Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(asset);
+                        tradeAgency.list("OKEx", asset, marketList);
+
+                        Date nowDate = new Date();
+                        StringBuilder messageContent = new StringBuilder();
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
+                        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+
+                        messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                        messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                        messageContent.append(" [ OKEx ] 상장 정보 ");
+                        messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                        messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
+                        messageContent.append("\n");
+                        messageContent.append(simpleDateFormat.format(nowDate));
+                        messageContent.append("\n확인방법 : InternalAPI(Intro)");
+                        messageContent.append("\n코인정보 : ");
+
+                        synchronized (jedis) {
+                            messageContent.append(jedis.hget("I-CoinMarketCap", asset));
+                        }
+
+                        messageContent.append(" (");
+                        messageContent.append(asset);
+                        messageContent.append(")");
+                        messageContent.append("\n구매가능 거래소 : ");
+                        messageContent.append(marketInfo.marketInfo(marketList));
+
+
+                        String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
+                        messageUtils.sendMessage(url, -300048567L, messageContent.toString());
+                        messageUtils.sendMessage(url, -319177275L, messageContent.toString());
+
+                        LOGGER.info("OKEx 상장(Intro) : " + asset + " (" + simpleDateFormat.format(nowDate) + ")");
+                        LOGGER.info(messageContent.toString());
+                    }
+                }
+
+
             }
 
             synchronized (jedis) {
@@ -272,7 +335,7 @@ public class OkexListedScheduler implements Listing {
                             }
 
                             Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(asset);
-//                            tradeAgency.list("OKEx", asset, marketList);
+                            tradeAgency.list("OKEx", asset, marketList);
 
 
                             Date nowDate = new Date();
