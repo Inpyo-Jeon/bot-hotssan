@@ -157,9 +157,7 @@ public class HuobiListedScheduler implements Listing {
 
                     StringBuilder messageContent = new StringBuilder();
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(" [ Huobi-Pro ] 상장 정보 ");
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append("\n");
                     messageContent.append(simpleDateFormat.format(nowDate));
@@ -280,12 +278,10 @@ public class HuobiListedScheduler implements Listing {
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
 
         messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-        messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
         messageContent.append("[ ");
         messageContent.append(exchangeType);
         messageContent.append(" ] ");
         messageContent.append("상장정보");
-        messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
         messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
         messageContent.append("\n");
 

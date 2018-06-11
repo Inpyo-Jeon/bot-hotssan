@@ -115,9 +115,7 @@ public class UpbitListedScheduler implements Listing {
 //                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
 //
 //                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-//                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
 //                messageContent.append(" [ Upbit ] 상장 정보 ");
-//                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
 //                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
 //                messageContent.append("\n");
 //                messageContent.append(simpleDateFormat.format(nowDate));
@@ -208,9 +206,7 @@ public class UpbitListedScheduler implements Listing {
                     simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
 
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(" [ Upbit ] 상장 정보 ");
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append("\n");
                     messageContent.append(simpleDateFormat.format(nowDate));
@@ -330,9 +326,7 @@ public class UpbitListedScheduler implements Listing {
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
 
             messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\udce3"));
-            messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\udce3"));
             messageContent.append(" [ Upbit ] 공지사항 ");
-            messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\udce3"));
             messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\udce3"));
             messageContent.append("\n");
             messageContent.append(simpleDateFormat.format(nowDate));

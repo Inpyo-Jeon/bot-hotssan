@@ -100,9 +100,7 @@ public class OkexListedScheduler implements Listing {
 
                     StringBuilder messageContent = new StringBuilder();
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(" [ OKEx ] 상장 정보 ");
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append("\n");
                     messageContent.append(simpleDateFormat.format(nowDate));
@@ -188,9 +186,7 @@ public class OkexListedScheduler implements Listing {
                         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
 
                         messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                        messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                         messageContent.append(" [ OKEx ] 상장 정보 ");
-                        messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                         messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                         messageContent.append("\n");
                         messageContent.append(simpleDateFormat.format(nowDate));
@@ -250,9 +246,7 @@ public class OkexListedScheduler implements Listing {
                         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
 
                         messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                        messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                         messageContent.append(" [ OKEx ] 상장 정보 ");
-                        messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                         messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                         messageContent.append("\n");
                         messageContent.append(simpleDateFormat.format(nowDate));
@@ -346,9 +340,7 @@ public class OkexListedScheduler implements Listing {
                             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
 
                             messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                            messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                             messageContent.append(" [ OKEx ] 상장 정보 ");
-                            messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                             messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                             messageContent.append("\n");
                             messageContent.append(simpleDateFormat.format(nowDate));

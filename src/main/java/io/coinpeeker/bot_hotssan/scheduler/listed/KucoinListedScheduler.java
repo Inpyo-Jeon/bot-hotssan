@@ -127,9 +127,7 @@ public class KucoinListedScheduler implements Listing {
                 StringBuilder messageContent = new StringBuilder();
 
                 messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                 messageContent.append(" [ Kucoin ] 상장 정보 ");
-                messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                 messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                 messageContent.append("\n");
                 messageContent.append(simpleDateFormat.format(nowDate));

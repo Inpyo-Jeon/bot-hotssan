@@ -98,9 +98,7 @@ public class BittrexListedScheduler implements Listing {
                     simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
 
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(" [ Bittrex ] 상장 정보 ");
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append("\n");
                     messageContent.append(simpleDateFormat.format(nowDate));
@@ -170,9 +168,7 @@ public class BittrexListedScheduler implements Listing {
                     simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
 
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(" [ Bittrex ] 상장 정보 ");
-                    messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append(StringEscapeUtils.unescapeJava("\\ud83d\\ude80"));
                     messageContent.append("\n");
                     messageContent.append(simpleDateFormat.format(nowDate));
