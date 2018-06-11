@@ -92,7 +92,7 @@ public class BinanceListedScheduler implements Listing {
                     }
 
                     Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(asset);
-                    tradeAgency.list("Binance", asset, marketList);
+                    String orderResult = tradeAgency.list("Binance", asset, marketList);
 
                     Date nowDate = new Date();
                     StringBuilder messageContent = new StringBuilder();
@@ -118,6 +118,7 @@ public class BinanceListedScheduler implements Listing {
                     messageContent.append(")");
                     messageContent.append("\n구매가능 거래소 : ");
                     messageContent.append(marketInfo.marketInfo(marketList));
+                    messageContent.append(orderResult);
 
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
@@ -176,7 +177,7 @@ public class BinanceListedScheduler implements Listing {
                     }
 
                     Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(asset);
-                    tradeAgency.list("Binance", asset, marketList);
+                    String orderResult = tradeAgency.list("Binance", asset, marketList);
 
                     Date nowDate = new Date();
                     StringBuilder messageContent = new StringBuilder();
@@ -202,6 +203,7 @@ public class BinanceListedScheduler implements Listing {
                     messageContent.append(")");
                     messageContent.append("\n구매가능 거래소 : ");
                     messageContent.append(marketInfo.marketInfo(marketList));
+                    messageContent.append(orderResult);
 
 
                     String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
@@ -265,7 +267,7 @@ public class BinanceListedScheduler implements Listing {
                         }
 
                         Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(asset);
-                        tradeAgency.list("Binance", asset, marketList);
+                        String orderResult = tradeAgency.list("Binance", asset, marketList);
 
                         Date nowDate = new Date();
                         StringBuilder messageContent = new StringBuilder();
@@ -291,6 +293,7 @@ public class BinanceListedScheduler implements Listing {
                         messageContent.append(")");
                         messageContent.append("\n구매가능 거래소 : ");
                         messageContent.append(marketInfo.marketInfo(marketList));
+                        messageContent.append(orderResult);
 
 
                         String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;

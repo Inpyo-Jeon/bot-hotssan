@@ -10,11 +10,11 @@ import java.text.ParseException;
 
 public interface AutoTrade {
 
-    void orderBinance(String axisCoin, String buyCoin) throws NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException;
+    String orderBinance(String axisCoin, String buyCoin) throws NoSuchAlgorithmException, InvalidKeyException, IOException, InterruptedException;
 
     void orderKucoin(String axisCoin, String buyCoin) throws NoSuchAlgorithmException, InvalidKeyException, IOException;
 
-    void orderBittrex(String axisCoin, String buyCoin) throws NoSuchAlgorithmException, InvalidKeyException, IOException;
+    String orderBittrex(String axisCoin, String buyCoin) throws NoSuchAlgorithmException, InvalidKeyException, IOException;
 
-    void orderUpbit(String axisCoin, String buyCoin) throws IOException, ParseException, JOSEException, WebSocketException;
+    String orderUpbit(String axisCoin, String buyCoin) throws IOException, ParseException, JOSEException, WebSocketException;
 }

@@ -100,7 +100,7 @@ public class Upbit {
         LOGGER.info(EntityUtils.toString(httpUtils.get(this.standardUrl + endPoint + queryString, header).getEntity(), "UTF-8"));
     }
 
-    public void excuteOrder(String axisSymbol, String buySymbol, String side, Double volume, Double price, String ord_type) throws ParseException, JOSEException, IOException {
+    public String excuteOrder(String axisSymbol, String buySymbol, String side, Double volume, Double price, String ord_type) throws ParseException, JOSEException, IOException {
         String endPoint = "/v1/orders?";
         String market = axisSymbol + "-" + buySymbol;
         String queryString = "market=" + market + "&side=" + side + "&volume=" + volume + "&price=" + price + "&ord_type=" + ord_type;
@@ -109,7 +109,8 @@ public class Upbit {
         List<NameValuePair> header = new ArrayList<>();
         header.add(new BasicNameValuePair("Authorization", "Bearer " + signature(queryString)));
 
-        LOGGER.info(EntityUtils.toString(httpUtils.post(this.standardUrl + endPoint + queryString, header, "upbitTrade").getEntity(), "UTF-8"));
+        String orderResult = EntityUtils.toString(httpUtils.post(this.standardUrl + endPoint + queryString, header, "upbitTrade").getEntity(), "UTF-8");
+        return orderResult;
     }
 
     public Double calcBestSellOrderBook(int sequence, JSONObject streamData, Double myAxisCoinAmount) {

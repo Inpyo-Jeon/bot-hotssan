@@ -29,7 +29,7 @@ public class BuyTrade implements AutoTrade {
     private static final Logger LOGGER = LoggerFactory.getLogger(BuyTrade.class);
 
     @Override
-    public void orderBinance(String axisCoin, String buyCoin) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public String orderBinance(String axisCoin, String buyCoin) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         Binance binance = new Binance("m6yQuY6E1BscKqlxIHMhqzkSEa7l9vMKWEQTusyzN9Ozslq3k023x3ou6wxWlJGk", "ZR80HbvYPlckwsbEiyMHNT6nu5SHmLZU3TF95n2uqxloLUmSAz4Rd1yEIooPIbXF", httpUtils);
         String buyCoinSymbol = buyCoin + axisCoin;
 //        int loopCount = 1;
@@ -39,11 +39,8 @@ public class BuyTrade implements AutoTrade {
         BigDecimal buyCoinMarketPrice = new BigDecimal(Double.valueOf(binance.getCurrentCoinMarketPrice(buyCoinSymbol))).setScale(8, BigDecimal.ROUND_DOWN);
         BigDecimal buyAmount = new BigDecimal((myAxisCoinAmount.doubleValue() / buyCoinMarketPrice.doubleValue()) * 0.9).setScale(2, BigDecimal.ROUND_DOWN);
 
-        binance.sendOrder(buyCoinSymbol, "BUY", "MARKET", String.valueOf(buyAmount.intValue()));
-
-        LOGGER.info("Total BTC Amount : " + myAxisCoinAmount.toString());
-        LOGGER.info("Select Satoshi : " + buyCoinMarketPrice.toString());
-        LOGGER.info("Buy Amount : " + buyAmount.intValue());
+        String orderResult = binance.sendOrder(buyCoinSymbol, "BUY", "MARKET", String.valueOf(buyAmount.intValue()));
+        return orderResult;
 
 
 //        //이전 로직, 혹시 몰라 남겨둠 (갯수를 계속 체크하는 방식이나, 시장가로 주문하면 한 번만 주문하면 되기에 주석처리)
@@ -85,28 +82,24 @@ public class BuyTrade implements AutoTrade {
     }
 
     @Override
-    public void orderBittrex(String axisCoin, String buyCoin) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public String orderBittrex(String axisCoin, String buyCoin) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         Bittrex bittrex = new Bittrex("d88cf2bb52c842c9962b6c00ee425fed", "c0f422f5587d48f39204bb3f4af2612e", httpUtils);
         String buyCoinSymbol = axisCoin + "-" + buyCoin;
 
         BigDecimal myAxisCoinAmount = new BigDecimal(Double.valueOf(bittrex.getBalanceOfCoin(axisCoin))).setScale(8, BigDecimal.ROUND_DOWN);
-        BigDecimal selectSatoshi = bittrex.calcBestSellOrderBook(3, bittrex.getOrderBook(buyCoinSymbol, "sell"), myAxisCoinAmount.doubleValue());
+        BigDecimal selectSatoshi = bittrex.calcBestSellOrderBook(5, bittrex.getOrderBook(buyCoinSymbol, "sell"), myAxisCoinAmount.doubleValue());
         BigDecimal buyAmount = new BigDecimal((myAxisCoinAmount.doubleValue() / selectSatoshi.doubleValue()) * 0.9).setScale(2, BigDecimal.ROUND_DOWN);
 
-        bittrex.sendOrder(buyCoinSymbol, String.valueOf(buyAmount.intValue()), selectSatoshi.toString());
-
-        LOGGER.info("Total BTC Amount : " + myAxisCoinAmount.toString());
-        LOGGER.info("Select Satoshi : " + selectSatoshi.toString());
-        LOGGER.info("Buy Amount : " + buyAmount.toString());
+        String orderResult = bittrex.sendOrder(buyCoinSymbol, String.valueOf(buyAmount.intValue()), selectSatoshi.toString());
+        return orderResult;
     }
 
     @Override
-    public void orderUpbit(String axisCoin, String buyCoin) throws IOException, ParseException, JOSEException, WebSocketException {
+    public String orderUpbit(String axisCoin, String buyCoin) throws IOException, ParseException, JOSEException, WebSocketException {
         Upbit upbit = new Upbit("NzH0lJvdHynCsH61TKf6bSNMdCjF6aKJTgWNcmyP", "gL9xrMTAnj9sQrDF9JU2Yv9NpYzibJMlq2YGXT0q", httpUtils);
         String streamData = "";
         Double myAxisAmount = upbit.getAsset(axisCoin);
 
-        // Connect to the echo server.
         WebSocket upbitWebSocket = upbit.connect(axisCoin, buyCoin);
         while (upbit.streamData == "") {
         }
@@ -114,8 +107,8 @@ public class BuyTrade implements AutoTrade {
 
         Double selectAskPrice = upbit.calcBestSellOrderBook(5, new JSONObject(streamData), myAxisAmount);
         Double buyAmount = (myAxisAmount / selectAskPrice) * (0.9005);
-        upbit.excuteOrder(axisCoin, buyCoin, "bid", buyAmount, selectAskPrice, "limit");
-        LOGGER.info("호가상 선택된 가격 : " + selectAskPrice);
-        LOGGER.info("주문 량(수수료 포함) : " + buyAmount);
+
+        String orderResult = upbit.excuteOrder(axisCoin, buyCoin, "bid", buyAmount, selectAskPrice, "limit");
+        return orderResult;
     }
 }

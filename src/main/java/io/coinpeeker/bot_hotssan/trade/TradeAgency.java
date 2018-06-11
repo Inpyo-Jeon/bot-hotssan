@@ -24,40 +24,56 @@ public class TradeAgency {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OkexListedScheduler.class);
 
-    public void list(String exchangeName, String symbol, Map<String, Map<String, String>> market) throws NoSuchAlgorithmException, InvalidKeyException, IOException, ParseException, JOSEException, WebSocketException {
+    public String list(String exchangeName, String symbol, Map<String, Map<String, String>> market) throws NoSuchAlgorithmException, InvalidKeyException, IOException, ParseException, JOSEException, WebSocketException {
+
+        StringBuilder result = new StringBuilder();
 
         if (CommonConstant.autoTrade) {
             if (market.containsKey(exchangeName)) {
                 if (!exchangeName.equals("Upbit")) {
-                    return;
+                    return "";
                 }
             }
 
             if (market.containsKey("Binance")) {
                 LOGGER.info("-- Binance 자동 매수 시작 --");
-                buyTrade.orderBinance("BTC", symbol);
+                String resultBinance = buyTrade.orderBinance("BTC", symbol);
+                result.append("\n-- Binance 자동 매수 시작 --");
+                result.append("\n");
+                result.append(resultBinance);
+                result.append("\n-- Binance 자동 매수 종료 --");
                 LOGGER.info("-- Binance 자동 매수 종료 --");
             }
 
             if (market.containsKey("Bittrex")) {
                 LOGGER.info("-- Bittrex 자동 매수 시작 --");
-                buyTrade.orderBittrex("BTC", symbol);
+                String resultBittrex = buyTrade.orderBittrex("BTC", symbol);
+                result.append("\n-- Bittrex 자동 매수 시작 --");
+                result.append("\n");
+                result.append(resultBittrex);
+                result.append("\n-- Bittrex 자동 매수 종료 --");
                 LOGGER.info("-- Bittrex 자동 매수 종료 --");
             }
 
             if (market.containsKey("Upbit")) {
                 if (market.get("Upbit").containsKey(symbol + "/KRW")) {
                     LOGGER.info("-- Upbit 자동 매수 시작 --");
-                    buyTrade.orderUpbit("KRW", symbol);
+                    String resultUpbit = buyTrade.orderUpbit("KRW", symbol);
+                    result.append("\n-- Upbit 자동 매수 시작 --");
+                    result.append("\n");
+                    result.append(resultUpbit);
+                    result.append("\n-- Upbit 자동 매수 종료 --");
                     LOGGER.info("-- Upbit 자동 매수 종료 --");
                 }
             }
 
-            if (market.containsKey("Kucoin")) {
-                LOGGER.info("-- Kucoin 자동 매수 시작 --");
-                buyTrade.orderKucoin("BTC", symbol);
-                LOGGER.info("-- Kucoin 자동 매수 종료 --");
-            }
+//            if (market.containsKey("Kucoin")) {
+//                LOGGER.info("-- Kucoin 자동 매수 시작 --");
+//                buyTrade.orderKucoin("BTC", symbol);
+//                LOGGER.info("-- Kucoin 자동 매수 종료 --");
+//            }
         }
+
+        return result.toString();
     }
 }

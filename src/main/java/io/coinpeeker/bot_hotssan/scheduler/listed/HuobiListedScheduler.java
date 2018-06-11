@@ -221,7 +221,7 @@ public class HuobiListedScheduler implements Listing {
                     Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(symbol);
 //                    tradeAgency.list("Huobi", symbol, marketList);
 
-                    sendMessage("Huobi(Kor)", symbol, marketList);
+                    sendMessage("Huobi(Kor)", symbol, marketList, "");
 
                     synchronized (jedis) {
                         jedis.hset("L-Huobi-Kor-Asset", jsonArray.getJSONObject(i).getString("pageIdentifier"), jsonArray.getJSONObject(i).getString("title"));
@@ -260,9 +260,9 @@ public class HuobiListedScheduler implements Listing {
                 if (!isExist) {
                     String symbol = jsonArray.getJSONObject(i).getString("pageIdentifier").toUpperCase();
                     Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(symbol);
-                    tradeAgency.list("Huobi", symbol, marketList);
+                    String orderResult = tradeAgency.list("Huobi", symbol, marketList);
 
-                    sendMessage("Huobi(Pro/Hadax)", symbol, marketList);
+                    sendMessage("Huobi(Pro/Hadax)", symbol, marketList, orderResult);
 
                     synchronized (jedis) {
                         jedis.hset("L-Huobi-Eng-Asset", jsonArray.getJSONObject(i).getString("pageIdentifier"), jsonArray.getJSONObject(i).getString("title"));
@@ -273,7 +273,7 @@ public class HuobiListedScheduler implements Listing {
     }
 
 
-    public void sendMessage(String exchangeType, String symbol, Map<String, Map<String,String>> marketList) {
+    public void sendMessage(String exchangeType, String symbol, Map<String, Map<String,String>> marketList, String orderResult) {
         Date nowDate = new Date();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
         StringBuilder messageContent = new StringBuilder();
@@ -308,6 +308,7 @@ public class HuobiListedScheduler implements Listing {
         messageContent.append(")");
         messageContent.append("\n구매가능 거래소 : ");
         messageContent.append(marketInfo.marketInfo(marketList));
+        messageContent.append(orderResult);
 
         LOGGER.info(messageContent.toString());
 

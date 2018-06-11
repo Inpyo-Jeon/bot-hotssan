@@ -89,7 +89,7 @@ public class Binance {
         return minQuantity;
     }
 
-    public void sendOrder(String symbol, String side, String type, String quantity) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public String sendOrder(String symbol, String side, String type, String quantity) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         StringBuilder sb = new StringBuilder();
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         sb.append("symbol=");
@@ -105,7 +105,8 @@ public class Binance {
         sb.append("&timestamp=");
         sb.append(timestamp.getTime());
 
-        postRequest("/api/v3/order", sb.toString());
+        String orderResult = postRequest("/api/v3/order", sb.toString()).toString();
+        return orderResult;
     }
 
     public JSONObject postRequest(String endPoint, String queryString) throws InvalidKeyException, NoSuchAlgorithmException, IOException {

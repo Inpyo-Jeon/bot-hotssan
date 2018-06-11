@@ -35,7 +35,7 @@ public class Bittrex {
         this.secretKey = secretKey;
     }
 
-    public void sendOrder(String symbol, String quantity, String rate) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public String sendOrder(String symbol, String quantity, String rate) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         StringBuilder sb = new StringBuilder();
         sb.append("?apikey=");
         sb.append(this.apiKey);
@@ -48,8 +48,9 @@ public class Bittrex {
         sb.append("&nonce=");
         sb.append(generateNonce());
 
-
-        LOGGER.info(getPrivateRequest("/market/buylimit", sb.toString()).toString());
+        String resultOrder = getPrivateRequest("/market/buylimit", sb.toString()).toString();
+        LOGGER.info(resultOrder);
+        return resultOrder;
     }
 
     public BigDecimal calcBestSellOrderBook(int sequence, JSONObject sellOrderBook, Double myAxisCoinAmount) {

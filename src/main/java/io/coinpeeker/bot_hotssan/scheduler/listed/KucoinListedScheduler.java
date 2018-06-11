@@ -119,7 +119,7 @@ public class KucoinListedScheduler implements Listing {
 
             if (jsonObject.has("data") && !jsonObject.get("data").equals("null")) {
                 Map<String, Map<String, String>> marketList = marketInfo.availableMarketList(item);
-                tradeAgency.list("Kucoin", item, marketList);
+                String orderResult = tradeAgency.list("Kucoin", item, marketList);
 
                 Date nowDate = new Date();
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z Z)");
@@ -145,6 +145,7 @@ public class KucoinListedScheduler implements Listing {
                 messageContent.append(")");
                 messageContent.append("\n구매가능 거래소 : ");
                 messageContent.append(marketInfo.marketInfo(marketList));
+                messageContent.append(orderResult);
 
 
                 String url = CommonConstant.URL_TELEGRAM_BASE + apiKey + CommonConstant.METHOD_TELEGRAM_SENDMESSAGE;
