@@ -73,6 +73,12 @@ public class TradeAgency {
 //                LOGGER.info("-- Kucoin 자동 매수 종료 --");
 //            }
         } else if (CommonConstant.inpyoTrade) {
+            if (market.containsKey(exchangeName)) {
+                if (!exchangeName.equals("Upbit")) {
+                    return "";
+                }
+            }
+
             if (market.containsKey("Upbit")) {
                 if (market.get("Upbit").containsKey(symbol + "/KRW")) {
                     LOGGER.info("-- Upbit 자동 매수 시작 --");
