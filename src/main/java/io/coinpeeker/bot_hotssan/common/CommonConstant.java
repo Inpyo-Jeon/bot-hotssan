@@ -31,5 +31,6 @@ public class CommonConstant {
     public static synchronized List<String> getCapList(){ return capList; }
 
     public static boolean autoTrade = true;
+    public static boolean inpyoTrade = true;
 
 }

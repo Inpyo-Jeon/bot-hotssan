@@ -101,17 +101,24 @@ public class HotssanService implements HotssanUpdateHandler {
             } else {
                 if ("/Auto_Start".equals(instruction) || "/Auto_Stop".equals(instruction) || "/Auto_Status".equals(instruction)) {
                     if ("/Auto_Status".equals(instruction)) {
-                        message.append("-- 현재 자동 매수기능 : " + CommonConstant.autoTrade);
+                        message.append("모임 자동 매수기능 : " + CommonConstant.autoTrade);
+                        message.append("개인 자동 매수기능 : " + CommonConstant.inpyoTrade);
                     } else {
                         if (!authUtils.isAutoAuthenticated(chatId)) {
                             message.append("- 권한이 없으니 관리자 헬프 -");
                         } else {
                             if ("/Auto_Start".equals(instruction)) {
                                 CommonConstant.autoTrade = true;
-                                message.append("자동 매수기능 ON(" + CommonConstant.autoTrade + ")");
-                            } else {
+                                message.append("모임 자동 매수기능 ON(" + CommonConstant.autoTrade + ")");
+                            } else if("/Auto_Stop".equals(instruction)){
                                 CommonConstant.autoTrade = false;
-                                message.append("자동 매수기능 OFF(" + CommonConstant.autoTrade + ")");
+                                message.append("모임 자동 매수기능 OFF(" + CommonConstant.autoTrade + ")");
+                            } else if("/Auto_J_Start".equals(instruction)){
+                                CommonConstant.inpyoTrade = true;
+                                message.append("개인 자동 매수기능 ON(" + CommonConstant.inpyoTrade + ")");
+                            } else if("/Auto_J_Stop".equals(instruction)){
+                                CommonConstant.inpyoTrade = false;
+                                message.append("개인 자동 매수기능 OFF(" + CommonConstant.inpyoTrade + ")");
                             }
                             LOGGER.info("-- 자동 매수기능 : " + CommonConstant.autoTrade + " --");
                         }
