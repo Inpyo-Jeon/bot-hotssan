@@ -99,7 +99,7 @@ public class HotssanService implements HotssanUpdateHandler {
                 message.append("등록되지 않은 사용자입니다.\n사용자 아이디 등록을 요청하세요 : ");
                 message.append(chatId);
             } else {
-                if ("/auto_start".equals(instruction) || "/auto_stop".equals(instruction) || "/auto_status".equals(instruction) || "auto_j_start".equals(instruction) || "auto_j_stop".equals(instruction)) {
+                if ("/auto_start".equals(instruction) || "/auto_stop".equals(instruction) || "/auto_status".equals(instruction) || "/auto_j_start".equals(instruction) || "/auto_j_stop".equals(instruction)) {
                     if ("/auto_status".equals(instruction)) {
                         message.append("모임 자동 매수기능 : " + CommonConstant.autoTrade);
                         message.append("\n");
