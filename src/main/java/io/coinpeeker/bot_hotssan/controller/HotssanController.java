@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.telegram.telegrambots.api.objects.Update;
 
+import java.io.IOException;
+
 @RestController
 public class HotssanController {
 
@@ -12,7 +14,7 @@ public class HotssanController {
     private HotssanService hotssanService;
 
     @PostMapping("/webhook")
-    public void webHook(@RequestBody Update update) {
+    public void webHook(@RequestBody Update update) throws IOException {
         hotssanService.updateHandler(update);
     }
 

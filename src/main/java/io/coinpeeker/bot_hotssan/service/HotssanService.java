@@ -71,7 +71,7 @@ public class HotssanService implements HotssanUpdateHandler {
     }
 
     @Override
-    public void updateHandler(Update update) {
+    public void updateHandler(Update update) throws IOException {
 
         // validation check
         if (update == null) {

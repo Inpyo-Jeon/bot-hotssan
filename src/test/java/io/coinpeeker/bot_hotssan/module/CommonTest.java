@@ -3,6 +3,7 @@ package io.coinpeeker.bot_hotssan.module;
 
 import com.google.common.collect.Maps;
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
+import io.coinpeeker.bot_hotssan.feature.MarketInfo;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +16,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -34,6 +37,8 @@ public class CommonTest {
     @Autowired
     private Jedis jedis;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommonTest.class);
+
     @Test
     // 비트렉스 삭제된 코인이 있을 경우 확인
     public void checkBittrexDuplication() throws IOException {
@@ -51,7 +56,7 @@ public class CommonTest {
         Map<String, String> getRedis = jedis.hgetAll("L-Bittrex");
 
         getRedis.keySet().stream().forEach(item -> {
-            if(!deDuplicationMap.containsKey(item)){
+            if (!deDuplicationMap.containsKey(item)) {
                 System.out.println(item);
             }
         });

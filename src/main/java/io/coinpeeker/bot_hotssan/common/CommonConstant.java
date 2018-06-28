@@ -26,6 +26,8 @@ public class CommonConstant {
     public static final String API_BITFINEX_URL = "https://api.bitfinex.com";
     public static final String API_OKEX_URL = "https://www.okex.com/api/v1/ticker.do";
 
+    public static final String EOS_INFO_URL = "https://www.feexplorer.io/EOS_RAM_price";
+
     private static List<String> capList = new ArrayList<>();
 
     public static synchronized List<String> getCapList(){ return capList; }

@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.coinpeeker.bot_hotssan.external.ApiClient;
 import io.coinpeeker.bot_hotssan.external.bank.HanaBankApiClient;
+import io.coinpeeker.bot_hotssan.external.etc.EosRamApiClient;
 import io.coinpeeker.bot_hotssan.external.etc.XgoxApiClient;
 import io.coinpeeker.bot_hotssan.feature.KoreaPremium;
 import io.coinpeeker.bot_hotssan.model.CoinPrice;
@@ -84,6 +85,9 @@ public class Commander {
     @Autowired
     KoreaPremium koreaPremium;
 
+    @Autowired
+    EosRamApiClient eosRamApiClient;
+
 
     private Map<CoinType, List<ApiClient>> tradeInfoMap = Maps.newHashMap();
     private Map<CoinType, List<ApiClient>> premiumExchangeMap = Maps.newHashMap();
@@ -146,7 +150,7 @@ public class Commander {
     }
 
 
-    public String execute(String instruction) {
+    public String execute(String instruction) throws IOException {
         init();
         premiumInit();
 
@@ -203,7 +207,8 @@ public class Commander {
                 e.printStackTrace();
                 result.append("오류");
             }
-
+        } else if("EOSINFO".equals(coinSymbol)){
+            result.append(eosRamApiClient.lastPrice());
         } else {
             result.append("등록 되어있지 않은 명령어 혹은 심볼입니다.");
         }
