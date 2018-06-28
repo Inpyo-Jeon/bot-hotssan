@@ -30,11 +30,11 @@ import java.util.List;
 
 public class Upbit {
 
-    private static final String SERVER = "wss://api-beta.upbit.com/websocket/v1";
+    private static final String SERVER = "wss://api.upbit.com/websocket/v1";
     private static final int TIMEOUT = 1000 * 5;
     private final Logger LOGGER = LoggerFactory.getLogger(Upbit.class);
 
-    String standardUrl = "https://api-beta.upbit.com";
+    String standardUrl = "https://api.upbit.com";
     String accessKey = "";
     String secretKey = "";
     HttpUtils httpUtils;

@@ -99,19 +99,27 @@ public class HotssanService implements HotssanUpdateHandler {
                 message.append("등록되지 않은 사용자입니다.\n사용자 아이디 등록을 요청하세요 : ");
                 message.append(chatId);
             } else {
-                if ("/Auto_Start".equals(instruction) || "/Auto_Stop".equals(instruction) || "/Auto_Status".equals(instruction)) {
-                    if ("/Auto_Status".equals(instruction)) {
-                        message.append("-- 현재 자동 매수기능 : " + CommonConstant.autoTrade);
+                if ("/auto_start".equals(instruction) || "/auto_stop".equals(instruction) || "/auto_status".equals(instruction) || "/auto_j_start".equals(instruction) || "/auto_j_stop".equals(instruction)) {
+                    if ("/auto_status".equals(instruction)) {
+                        message.append("모임 자동 매수기능 : " + CommonConstant.autoTrade);
+                        message.append("\n");
+                        message.append("개인 자동 매수기능 : " + CommonConstant.inpyoTrade);
                     } else {
                         if (!authUtils.isAutoAuthenticated(chatId)) {
                             message.append("- 권한이 없으니 관리자 헬프 -");
                         } else {
-                            if ("/Auto_Start".equals(instruction)) {
+                            if ("/auto_start".equals(instruction)) {
                                 CommonConstant.autoTrade = true;
-                                message.append("자동 매수기능 ON(" + CommonConstant.autoTrade + ")");
-                            } else {
+                                message.append("모임 자동 매수기능 ON(" + CommonConstant.autoTrade + ")");
+                            } else if("/auto_stop".equals(instruction)){
                                 CommonConstant.autoTrade = false;
-                                message.append("자동 매수기능 OFF(" + CommonConstant.autoTrade + ")");
+                                message.append("모임 자동 매수기능 OFF(" + CommonConstant.autoTrade + ")");
+                            } else if("/auto_j_start".equals(instruction)){
+                                CommonConstant.inpyoTrade = true;
+                                message.append("개인 자동 매수기능 ON(" + CommonConstant.inpyoTrade + ")");
+                            } else if("/auto_j_stop".equals(instruction)){
+                                CommonConstant.inpyoTrade = false;
+                                message.append("개인 자동 매수기능 OFF(" + CommonConstant.inpyoTrade + ")");
                             }
                             LOGGER.info("-- 자동 매수기능 : " + CommonConstant.autoTrade + " --");
                         }
