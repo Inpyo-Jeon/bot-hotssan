@@ -30,7 +30,7 @@ public class BuyTrade implements AutoTrade {
 
     @Override
     public String orderBinance(String axisCoin, String buyCoin) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
-        Binance binance = new Binance("m6yQuY6E1BscKqlxIHMhqzkSEa7l9vMKWEQTusyzN9Ozslq3k023x3ou6wxWlJGk", "ZR80HbvYPlckwsbEiyMHNT6nu5SHmLZU3TF95n2uqxloLUmSAz4Rd1yEIooPIbXF", httpUtils);
+        Binance binance = new Binance("YRDfvImkwVuyNN5eJQQLgkQTC2vBGPZwL40qt7XKiC2YCd02ShxxK3VXWRr0q5Br", "1MA1zA2FtJ0BisG6omL9uzVacJoklE46skCypkfNWRAMGBlqjnV8xuykRs3jKggo", httpUtils);
         String buyCoinSymbol = buyCoin + axisCoin;
 //        int loopCount = 1;
 //        Boolean check = true;
