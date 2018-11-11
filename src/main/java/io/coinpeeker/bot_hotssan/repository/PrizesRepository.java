@@ -1,8 +1,10 @@
 package io.coinpeeker.bot_hotssan.repository;
 
 import io.coinpeeker.bot_hotssan.model.Prizes;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
 
 /**
@@ -12,6 +14,7 @@ import org.springframework.data.repository.CrudRepository;
  * @description :
  */
 
+@Repository
 public interface PrizesRepository extends CrudRepository<Prizes, Long> {
     Iterable<Prizes> findAll(Pageable request);
 
