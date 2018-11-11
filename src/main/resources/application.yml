@@ -1,0 +1,14 @@
+data:
+  targetUrl: http://www.nlotto.co.kr/common.do?method=main
+  pageDivisionNum: 5
+  displayPostNum: 10
+
+
+spring:
+  datasource:
+    url: jdbc:mariadb://49.236.136.242:3306/commondb
+    username: lotto
+    password: lotto1!
+  jpa:
+    hibernate:
+      ddl-auto: update

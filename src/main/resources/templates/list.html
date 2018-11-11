@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".wantPage").on("click", function () {
+                var page = $(this).attr("value"),
+                    queryString = "find?currentPageNum=" + page;
+
+                $(location).attr('href', "./" + queryString);
+            });
+        });
+    </script>
+
+    <title>Hello Thymeleaf</title></head>
+<body>
+
+<div id="table">
+    <table>
+        <tr th:each="item : ${prizesStringList}">
+            <td th:text="${item}"></td>
+        </tr>
+    </table>
+</div>
+
+<div>
+    <span class="wantPage" style="cursor: pointer;" th:if="${isPre}" th:value="${pageStart - 1}"> Pre </span>
+    <span class="wantPage" style="cursor: pointer;" th:each="page : ${#numbers.sequence(pageStart, pageEnd)}"
+          th:text="${page}" th:value="${page}">　</span>
+    <span class="wantPage" style="cursor: pointer;" th:if="${isNext}" th:value="${pageEnd + 1}"> Next </span>
+</div>
+
+</body>
+</html>

@@ -24,40 +24,43 @@ repositories {
 
 
 dependencies {
-	compile('org.springframework.boot:spring-boot-starter-web')
-	compile('org.springframework.boot:spring-boot-starter-data-redis')
+    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
 
-	// apache httpclient
-	compile('org.apache.httpcomponents:httpcore:4.4.1')
-	compile('org.apache.httpcomponents:httpclient:4.5')
-	compile('org.apache.httpcomponents:httpasyncclient:4.1.3')
+    compile group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.3.0'
 
-	// apache StringUtils-lang3
-	compile('org.apache.commons:commons-lang3:3.0')
+    compile('org.projectlombok:lombok:1.18.2')
 
-	// telegram api
-	compile('org.telegram:telegrambots:3.5')
+//    compile group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf', version: '2.0.4.RELEASE'
 
-	// jsoup
-	compile('org.jsoup:jsoup:1.8.3')
+    compile("org.springframework.boot:spring-boot-starter-thymeleaf")
 
-	// json parser
-	compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-data-redis')
 
-	// jwt auth
-	compile group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '5.7'
+    // apache httpclient
+    compile('org.apache.httpcomponents:httpcore:4.4.1')
+    compile('org.apache.httpcomponents:httpclient:4.5')
+    compile('org.apache.httpcomponents:httpasyncclient:4.1.3')
 
-	testCompile('org.springframework.boot:spring-boot-starter-test')
-	compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
+    // apache StringUtils-lang3
+    compile('org.apache.commons:commons-lang3:3.0')
 
-	dependencies {
-		compile 'com.neovisionaries:nv-websocket-client:2.4'
-	}
+    // telegram api
+    compile('org.telegram:telegrambots:3.5')
 
+    // jsoup
+    compile('org.jsoup:jsoup:1.8.3')
 
-	// https://mvnrepository.com/artifact/com.github.gfx.util.encrypt/android-encrypt-utils
+    // json parser
+    compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
 
+    // jwt auth
+    compile group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '5.7'
 
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
 
-
+    dependencies {
+        compile 'com.neovisionaries:nv-websocket-client:2.4'
+    }
 }
