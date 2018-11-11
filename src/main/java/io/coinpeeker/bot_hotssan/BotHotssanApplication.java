@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-@EnableJpaRepositories("io.coinpeeker.bot_hotssan.repository")
+@EnableJpaRepositories(basePackages = {"io.coinpeeker.bot_hotssan.repository"})
 public class BotHotssanApplication {
 
     public static void main(String[] args) {
