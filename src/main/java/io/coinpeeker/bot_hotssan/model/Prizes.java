@@ -17,7 +17,7 @@ import java.sql.Timestamp;
 
 
 @Entity
-@Table(name = "price")
+@Table(name = "LOTTO_PRICE")
 @Getter
 public class Prizes implements Serializable {
     private static final long serialVersionUID = -3009157732242241606L;
