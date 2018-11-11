@@ -14,7 +14,6 @@ import org.springframework.stereotype.Repository;
  * @description :
  */
 
-@Repository
 public interface PrizesRepository extends CrudRepository<Prizes, Long> {
     Iterable<Prizes> findAll(Pageable request);
 
