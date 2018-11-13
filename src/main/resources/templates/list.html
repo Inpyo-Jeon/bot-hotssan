@@ -7,7 +7,7 @@
         $(document).ready(function () {
             $(".wantPage").on("click", function () {
                 var page = $(this).attr("value"),
-                    queryString = "find?currentPageNum=" + page;
+                    queryString = "lotto?currentPageNum=" + page;
 
                 $(location).attr('href', "./" + queryString);
             });
@@ -22,15 +22,21 @@
         <tr th:each="item : ${prizesStringList}">
             <td th:text="${item}"></td>
         </tr>
+        <tr>
+            <td style="vertical-align: middle; text-align: center">
+                <div>
+                    <span class="wantPage" style="cursor: pointer;" th:if="${isPre}" th:value="${pageStart - 1}"> Pre </span>
+                    <span class="wantPage" style="cursor: pointer;" th:each="page : ${#numbers.sequence(pageStart, pageEnd)}"
+                          th:text="${page}" th:value="${page}">　</span>
+                    <span class="wantPage" style="cursor: pointer;" th:if="${isNext}" th:value="${pageEnd + 1}"> Next </span>
+                </div>
+            </td>
+
+        </tr>
     </table>
 </div>
 
-<div>
-    <span class="wantPage" style="cursor: pointer;" th:if="${isPre}" th:value="${pageStart - 1}"> Pre </span>
-    <span class="wantPage" style="cursor: pointer;" th:each="page : ${#numbers.sequence(pageStart, pageEnd)}"
-          th:text="${page}" th:value="${page}">　</span>
-    <span class="wantPage" style="cursor: pointer;" th:if="${isNext}" th:value="${pageEnd + 1}"> Next </span>
-</div>
+
 
 </body>
 </html>

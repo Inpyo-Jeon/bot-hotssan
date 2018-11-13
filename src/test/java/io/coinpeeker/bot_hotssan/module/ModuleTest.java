@@ -25,10 +25,10 @@ import java.util.*;
 public class ModuleTest {
 
 
-    @Value("${property.hotssan_id}")
+    @Value("${hotssan_id}")
     private String apiKey;
 
-    @Value("${property.env}")
+    @Value("${spring.profiles.active}")
     private String env;
 
     String standardUrl = "https://api.binance.com";
@@ -67,10 +67,10 @@ public class ModuleTest {
 
     public class Binance {
 
-        @Value("${property.hotssan_id}")
+        @Value("${hotssan_id}")
         private String apiKey;
 
-        @Value("${property.env}")
+        @Value("${spring.profiles.active}")
         private String env;
 
         String standardUrl = "https://api.binance.com";

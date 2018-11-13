@@ -1,7 +1,6 @@
 package io.coinpeeker.bot_hotssan.scheduler;
 
 import io.coinpeeker.bot_hotssan.common.CommonConstant;
-import io.coinpeeker.bot_hotssan.common.CustomJedis;
 import io.coinpeeker.bot_hotssan.common.SecretKey;
 import io.coinpeeker.bot_hotssan.utils.HttpUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +33,7 @@ public class RefreshRedis {
     @Autowired
     private Jedis jedis;
 
-    @Value("${property.env}")
+    @Value("${spring.profiles.active}")
     String env;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RefreshRedis.class);

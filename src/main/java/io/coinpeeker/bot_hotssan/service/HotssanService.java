@@ -27,7 +27,7 @@ public class HotssanService implements HotssanUpdateHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HotssanService.class);
 
-    @Value("${property.hotssan_id}")
+    @Value("${hotssan_id}")
     private String apiKey;
 
     @Autowired

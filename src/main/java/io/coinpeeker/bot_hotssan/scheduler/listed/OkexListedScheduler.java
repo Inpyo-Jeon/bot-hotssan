@@ -46,10 +46,10 @@ public class OkexListedScheduler implements Listing {
     @Autowired
     Jedis jedis;
 
-    @Value("${property.hotssan_id}")
+    @Value("${hotssan_id}")
     private String apiKey;
 
-    @Value("${property.env}")
+    @Value("${spring.profiles.active}")
     private String env;
 
     @Autowired

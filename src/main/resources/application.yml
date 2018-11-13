@@ -5,6 +5,8 @@ data:
 
 
 spring:
+  profiles:
+    active: local
   datasource:
     url: jdbc:mariadb://49.236.136.242:3306/commondb
     username: lotto
@@ -12,3 +14,36 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  redis:
+    host: 52.78.137.205
+    password: 253D204562FAC035675A8A938A38BAE2F97255F96A9A206EE320C6DAF42D164A
+    port: 13409
+
+server:
+  port: 8443
+
+hotssan_id: 457099605:AAESNWNFQj1Aarbuvm-ds3RgGPNzRcukFUE
+
+---
+spring:
+  profiles:
+    active: dev
+  redis:
+    host: 127.0.0.1
+
+server:
+  port: 8088
+
+hotssan_id: 541098487:AAGLR6VXrTIUoKcxn8R8axIcvvBlruI9kuc
+
+---
+spring:
+  profiles:
+    active: real
+  redis:
+    host: 127.0.0.1
+
+server:
+  port: 8443
+
+hotssan_id: 521000708:AAF7iOiQNOahYlMrK6xWn1__6FAfK0rkFXo

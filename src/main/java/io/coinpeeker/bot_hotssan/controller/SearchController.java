@@ -4,6 +4,7 @@ import io.coinpeeker.bot_hotssan.model.Prizes;
 import io.coinpeeker.bot_hotssan.repository.PrizesRepository;
 import io.coinpeeker.bot_hotssan.service.lotto.PriceProcess;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +14,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -32,10 +32,8 @@ import java.util.List;
 public class SearchController {
 
     @Autowired
+    @Qualifier("prizesRepository")
     PrizesRepository prizesRepository;
-
-    @Autowired
-    PriceProcess priceProcess;
 
     @Value("${data.pageDivisionNum}")
     int pageDivisionNum;

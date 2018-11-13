@@ -41,10 +41,10 @@ public class BinanceListedScheduler implements Listing {
     @Autowired
     MessageUtils messageUtils;
 
-    @Value("${property.hotssan_id}")
+    @Value("${hotssan_id}")
     private String apiKey;
 
-    @Value("${property.env}")
+    @Value("${spring.profiles.active}")
     private String env;
 
     @Autowired

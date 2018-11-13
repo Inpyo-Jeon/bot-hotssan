@@ -14,11 +14,11 @@ import redis.clients.jedis.JedisPoolConfig;
 @Component
 public class CustomJedis {
 
-    @Value("${spring.redis.host}")
-    private String redisHost;
-
-    @Value("${spring.redis.port}")
-    private int redisPort;
+//    @Value("${spring.redis.host}")
+//    private String redisHost;
+//
+//    @Value("${spring.redis.port}")
+//    private int redisPort;
 
 //
 //    private JedisPool jedisPool;
