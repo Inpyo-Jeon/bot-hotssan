@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * @author : Jeon
@@ -81,7 +82,11 @@ public class SearchController {
     private String convertTime(long time) {
         Date date = new Date();
         date.setTime(time);
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm").format(date);
+        TimeZone timeZone = TimeZone.getTimeZone("Asia/Seoul");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        simpleDateFormat.setTimeZone(timeZone);
+
+        return simpleDateFormat.format(date);
     }
 
     private String convertUnit(long money) {
