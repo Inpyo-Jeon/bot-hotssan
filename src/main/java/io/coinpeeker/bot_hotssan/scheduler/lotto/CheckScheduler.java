@@ -20,7 +20,7 @@ public class CheckScheduler {
     @Autowired
     PriceProcess priceProcess;
 
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 0 0/1 * * ?")
     public void run() throws IOException {
         priceProcess.executePrice();
         System.out.println("완료");
