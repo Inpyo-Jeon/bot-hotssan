@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class PriceProcess {
@@ -29,20 +30,21 @@ public class PriceProcess {
 
     public void executePrice() throws IOException {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        Elements pTags = siteParser.execute();
-        long estimatedPrizes = 0;
-        long cumulativeSales = 0;
+        Elements result = siteParser.execute();
+        AtomicLong estimatedPrizes = new AtomicLong();
+        AtomicLong cumulativeSales = new AtomicLong();
 
-        for (Element item : pTags) {
-            if (item.className().equals("fl")) {
-                estimatedPrizes = Long.parseLong(item.getElementsByClass("money").text().replaceAll("\\D", ""));
-            } else if (item.className().equals("fr")) {
-                cumulativeSales = Long.parseLong(item.getElementsByClass("money").text().replaceAll("\\D", ""));
-            } else {
 
+        result.forEach(item -> {
+            String kind = item.getElementsByTag("strong").text();
+            switch (kind) {
+                case "예상당첨금":
+                    estimatedPrizes.set(Long.parseLong(item.text().replaceAll("\\D", ""))); break;
+                case "누적판매금":
+                    cumulativeSales.set(Long.parseLong(item.text().replaceAll("\\D", ""))); break;
             }
-        }
+        });
 
-        prizesRepository.save(new Prizes(estimatedPrizes, cumulativeSales, timestamp));
+        prizesRepository.save(new Prizes(estimatedPrizes.get(), cumulativeSales.get(), timestamp));
     }
 }

@@ -1,5 +1,5 @@
 data:
-  targetUrl: http://www.nlotto.co.kr/common.do?method=main
+  targetUrl: https://www.nlotto.co.kr/common.do?method=main
   pageDivisionNum: 5
   displayPostNum: 10
 
